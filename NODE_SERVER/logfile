@@ -1,0 +1,18 @@
+2026-09-30 17:49:06.955 WIT [4890] FATAL:  lock file "postmaster.pid" already exists
+2026-09-30 17:49:06.955 WIT [4890] HINT:  Is another postmaster (PID 30522) running in data directory "/data/data/com.termux/files/usr/var/lib/postgresql"?
+2026-09-30 17:54:54.687 WIT [6096] LOG:  starting PostgreSQL 18.6 on arm-unknown-linux-androideabi, compiled by Android (16134705, +pgo, +bolt, +lto, +mlgo, based on r574158c) clang version 21.0.0 (https://android.googlesource.com/toolchain/llvm-project 9f872551d3c681d06fd303b36f16ed5c274735eb), 32-bit
+2026-09-30 17:54:54.691 WIT [6096] LOG:  listening on IPv4 address "127.0.0.1", port 5432
+2026-09-30 17:54:54.693 WIT [6096] LOG:  listening on Unix socket "/data/data/com.termux/files/usr/tmp/.s.PGSQL.5432"
+2026-09-30 17:54:54.714 WIT [6105] LOG:  database system was shut down at 2026-09-30 17:53:51 WIT
+2026-09-30 17:54:54.729 WIT [6096] LOG:  database system is ready to accept connections
+2026-09-30 17:58:01.492 WIT [7007] ERROR:  database "mydb" already exists
+2026-09-30 17:58:01.492 WIT [7007] STATEMENT:  CREATE DATABASE mydb;
+2026-09-30 17:59:54.812 WIT [6103] LOG:  checkpoint starting: time
+2026-09-30 18:01:33.946 WIT [6103] LOG:  checkpoint complete: wrote 977 buffers (6.0%), wrote 3 SLRU buffers; 1 WAL file(s) added, 0 removed, 0 recycled; write=98.766 s, sync=0.177 s, total=99.135 s; sync files=316, longest=0.005 s, average=0.001 s; distance=4617 kB, estimate=4617 kB; lsn=0/1C217F0, redo lsn=0/1BE7EC0
+2026-09-30 18:26:09.296 WIT [6096] LOG:  received fast shutdown request
+2026-09-30 18:26:09.300 WIT [6096] LOG:  aborting any active transactions
+2026-09-30 18:26:09.319 WIT [6096] LOG:  background worker "logical replication launcher" (PID 6108) exited with exit code 1
+2026-09-30 18:26:09.327 WIT [6103] LOG:  shutting down
+2026-09-30 18:26:09.330 WIT [6103] LOG:  checkpoint starting: shutdown immediate
+2026-09-30 18:26:09.397 WIT [6103] LOG:  checkpoint complete: wrote 48 buffers (0.3%), wrote 1 SLRU buffers; 0 WAL file(s) added, 0 removed, 0 recycled; write=0.033 s, sync=0.013 s, total=0.070 s; sync files=37, longest=0.001 s, average=0.001 s; distance=230 kB, estimate=4178 kB; lsn=0/1C218A0, redo lsn=0/1C218A0
+2026-09-30 18:26:09.451 WIT [6096] LOG:  database system is shut down

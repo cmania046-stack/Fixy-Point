@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login or Signup</title>
+</head>
+
+<style>
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  font-family: 'Inter', sans-serif;
+  background: linear-gradient(180deg, #f5f7fa, #e4ecf3);
+  color: #1E2629;
+  line-height: 1.45;
+}
+
+.container {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: rgba(0,0,0,0.12);
+  backdrop-filter: blur(4px);
+}
+
+.login-form {
+  width: 100%;
+  max-width: 360px;
+  max-height: 100%;
+  background: #FFFFFF;
+  border-radius: 16px;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 12px 28px rgba(0,0,0,0.18);
+  overflow: hidden;
+}
+
+.kiri {
+  background: linear-gradient(135deg, #72D8EA, #3DA6BE);
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  padding: 24px;
+  justify-content: center;
+  align-items: center;
+  border-radius: 0 0 40px 40px;
+  box-shadow: 0 6px 14px rgba(0,0,0,0.1);
+}
+
+#salam {
+  color: #1E2629;
+  font-weight: 700;
+  font-size: 1.7rem;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  animation: slideDown 0.5s ease forwards;
+}
+
+#konfirmasi {
+  color: #FFFFFF;
+  font-size: 0.9rem;
+  margin: 10px;
+  animation: slideDown 0.5s ease forwards;
+}
+
+#register {
+  padding: 10px 50px;
+  background: #2F5F68;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-weight: 550;
+  transition: all 0.2s ease;
+  animation: slideDown 0.5s ease forwards;
+}
+
+#register:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 14px rgba(0,0,0,0.15);
+}
+
+#register:active {
+  transform: scale(0.96);
+}
+
+.kanan {
+  width: 100%;
+  gap: 12px;
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  overflow-y: auto;
+}
+
+#judul {
+  font-size: 1.3rem;
+  color: #1E2629;
+  font-weight: 600;
+  text-align: center;
+  animation: slideDown 0.5s ease forwards;
+}
+
+#lupa {
+  font-size: 0.9rem;
+  color: #1E2629;
+  text-align: center;
+  opacity: 0.7;
+  animation: slideDown 0.5s ease forwards;
+}
+
+#lupa:active {
+  transform: scale(0.96);
+}
+
+#login {
+  font-size: 1rem;
+  padding: 12px;
+  border: none;
+  border-radius: 10px;
+  background: #3DA6BE;
+  font-weight: 600;
+  color: white;
+  transition: all 0.2s ease;
+  animation: slideDown 0.5s ease forwards;
+}
+
+#login:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 14px rgba(0,0,0,0.15);
+}
+
+#login:active {
+  transform: scale(0.96);
+}
+.hidden {
+	display: none!important;
+}
+.form {
+	position: relative;
+  border: 1px solid rgba(0,0,0,0.1);
+  border-radius: 12px;
+  padding: 20px;
+  gap: 10px;
+  max-height: 300;
+  overflow: auto;
+  background: white;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  transition: box-shadow 0.3s ease, transform 0.3s ease;
+}
+
+.lc {
+  position: fixed;
+  inset: 0;
+  z-index: 250;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: rgba(0, 0, 0, 0.25);
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
+}
+
+.lc-content {
+  width: 100%;
+  max-width: 340px;
+  padding: 22px 20px;
+  border-radius: 18px;
+  background: linear-gradient(135deg, #4E8FC1, #8FBADB);
+  box-shadow: 0 12px 30px rgba(0,0,0,0.2);
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  animation: slideDown 0.5s ease forwards;
+}
+
+.title {
+	color: white;
+  font-size: 1rem;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+#pesan {
+  font-size: 0.95rem;
+  color: rgba(255,255,255,0.9);
+}
+
+.lc-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+#yes {
+  padding: 10px 16px;
+  border-radius: 10px;
+  border: none;
+  background: linear-gradient(135deg, #6ED0E0, #4FB8C8);
+  color: white;
+  font-weight: 500;
+  margin: 0 10px;
+}
+
+#no {
+  padding: 10px 16px;
+  border-radius: 10px;
+  border: none;
+  background: #E5E5E5;
+  color: #333;
+  font-weight: 500;
+  margin: 0 10px;
+}
+
+.dropdown {
+	display: none;
+	position: absolute;
+	background: white;
+	min-width: 160px;
+	box-shadow: 0 8px 16px rgba(0,0,0,0.15);
+	border-radius: 4px;
+	z-index: 300;
+}
+
+.btn-dropdown {
+	padding: 7px;
+	border: 1px solid #04729d;
+	border-radius: 5px;
+	background: transparent;
+	font-size: 0.97rem;
+	font-weight: 450;
+	transition: all 0.5s ease;
+	animation: slideDown 0.5s ease forwards;
+}
+.btn-dropdown:hover {
+	background: black;
+	color: white;
+}
+.dropbtn {
+	padding: 10px;
+	margin: 5px;
+	background: transparent;
+	color: black;
+	border: none;
+	border-radius: 5px;
+	font-size: 1rem;
+	font-weight: 450;
+}
+
+.form:hover {
+  box-shadow: 0 8px 20px rgba(0,0,0,0.12);
+  transform: translateY(-2px);
+}
+
+.info-label {
+  color: #1F1D1D;
+  margin-top: 10px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  opacity: 0.7;
+  letter-spacing: 0.03em;
+  animation: slideDown 0.5s ease forwards;
+}
+
+.entry {
+	position: relative;
+  padding: 10px 12px;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  width: 100%;
+  font-size: 0.95rem;
+  background: #fafafa;
+  transition: all 0.2s ease;
+}
+
+.entry:focus {
+  outline: none;
+  border-color: #3DA6BE;
+  background: white;
+  box-shadow: 0 0 0 3px rgba(61,166,190,0.15);
+}
+
+.entry:focus-visible {
+  animation: pulse 0.4s ease;
+}
+
+.badge {
+	position: absolute;
+	right: 28px;
+	top: 117px;
+	border-radius: 5px;
+	transition: all 0.5s ease;
+}
+.badge:active {
+	background: black;
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.02); }
+  100% { transform: scale(1); }
+}
+
+@keyframes slideDown {
+  0% {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (min-width: 600px) {
+  .login-form {
+    max-width: 650px;
+    flex-direction: row;
+  }
+
+  .kiri {
+    border-radius: 0 40px 40px 0;
+  }
+}
+</style>
+
+<body>
+	<div class="lc hidden">
+		<div class="lc-content">
+			<label id="title" class="title"></label>
+			<label id="pesan"></label>
+			<div style="background: transparent; display: flex; justify-content: flex-end;">
+				<button id="yes">Oke</button>
+				<button id="no">Batal</button>
+			</div>
+		</div>
+	</div>
+	<div class="container">
+		<div class="login-form">
+			<div class="kiri">
+				<label id="salam"></label>
+				<label id="konfirmasi"></label>
+				<button id="register"></button>
+			</div>
+			<div class="kanan">
+				<label id="judul"></label>
+				<div class="form"></div>
+				<label id="lupa"></label>
+				<button id="login"></button>
+			</div>
+		</div>
+	</div>
+</body>
+
+<script>
+	const url = "http://127.0.0.1:5000/";
+	let idDevice = null;
+	
+	function generateId() {
+    const id = "dev_" + Date.now() + "_" + Math.random().toString(36).substring(2, 10);
+    return id;
+  }
+  
+  async function getDt(endpoint) {
+    try {
+      const response = await fetch(url + endpoint);
+      const data = await response.json();
+      return data;
+    } catch (e) {
+      await modalShow(error, e);
+      return null
+    }
+  }
+  
+	async function getData(data) {
+		try {
+			const res = await fetch(url + "lihat_data/" + data);
+			const dt = await res.json();
+			return dt;
+		} catch (e) {
+			alert(e);
+			return [];
+		}
+	}
+	
+	async function postDataKedua(endpoint, data) {
+    try {
+      const res = await fetch(url + "post_data/" + endpoint, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data)
+      });
+      const d = await res.json();
+      return d;
+    } catch (error) {
+      await modalShow(gagal, "Gagal upload data ke server");
+      return null;
+    };
+  }
+  
+	function pembuatForm(parent, items) {
+		let entries = {};
+		for (const item of items) {
+			const [key, judul, placeholder, kelasTeks, kelasInput, tipeInput] = item;
+			const jdl = document.createElement("p");
+			const inp = document.createElement("input");
+			jdl.className = kelasTeks;
+			jdl.textContent = judul;
+			
+			inp.placeholder = placeholder;
+			inp.className = kelasInput;
+			inp.type = tipeInput;
+			for (const elemen of [jdl, inp]) {
+				parent.appendChild(elemen);
+			}
+			entries[key] = inp;
+		}
+		return entries;
+	}
+	
+	function popup(judul, pesan) {
+    return new Promise((resolve) => {
+        const pop = document.querySelector(".lc");
+        pop.classList.remove("hidden");
+        document.getElementById("title").textContent = judul;
+        document.getElementById("pesan").textContent = pesan;
+        const ok = document.getElementById("yes");
+        const no = document.getElementById("no");
+        ok.onclick = () => {
+            pop.classList.add("hidden");
+            resolve(true);
+        }
+        no.onclick = () => {
+            pop.classList.add("hidden");
+            resolve(false);
+        }
+    });
+	}
+	
+	class Login {
+		constructor() {
+			this.pengguna = null;
+		}
+		async signInValidation() {
+			const data = Object.fromEntries(Object.entries(this.entries).map(([key, val]) => [key, val.value.trim()]));
+			data["id"] = idDevice;
+			const d = await postDataKedua("validasi_login", data);
+			if (d.stat.toLowerCase() === "berhasil") {
+				document.querySelector(".title").style.color = "lightgreen";
+			} else {
+				document.querySelector(".title").style.color = "red";
+			}
+			await popup(d.stat, d.pesan);
+			if (d.stat.toLowerCase() === "berhasil") {
+				validasiLogin();
+			}
+		}
+		give(teks) {
+			this.entryReg["status"].value = teks;
+			this.div.style.display = "none";
+		}
+		
+		makeButtonsDropdown() {
+			const atributButton = [
+				["Owner", () => this.give("Owner")],
+				["Admin", () => this.give("Admin")],
+				["Kasir", () => this.give("Kasir")]
+			]
+			for (const item of atributButton) {
+				const [teks, command] = item;
+				const btn = document.createElement("button");
+				btn.className = "dropbtn";
+				btn.textContent = teks;
+				btn.onclick = command;
+				this.div.appendChild(btn);
+			}
+		}
+		
+		async doSignUp() {
+			const title = document.querySelector(".title");
+			const data = Object.fromEntries(Object.entries(this.entryReg).map(([key, val]) => [key, val.value.trim()]));
+			if (![data.nama, data["status"], data.password, data.konf, data.question, data.answer].every(Boolean)) {
+				title.style.color = "red";
+				await popup("Gagal", "Nama, status, kata sandi, konfirmasi kata sandi dan pertanyaan harus diisi");
+				return;
+			}
+			if (data.password !== data.konf) {
+				await popup("Gagal", "Kata sandi dan konfirmasi kata sandi harus sama");
+				return;
+			}
+			const upload = await postDataKedua("validasi_signup", data);
+			await popup(upload.stat, upload.pesan);
+		}
+		
+		setupSignUp() {
+			const wadah = document.querySelector(".form");
+			wadah.innerHTML = "";
+			const judul = document.getElementById("judul");
+			const lupa = document.getElementById("lupa");
+			const btnLogin = document.getElementById("login");
+			const welcome = document.getElementById("salam");
+			const tanya = document.getElementById("konfirmasi");
+			const daftar = document.getElementById("register");
+			
+			judul.textContent = "SignUp Akun";
+			btnLogin.textContent = "Register";
+			lupa.textContent = "";
+			welcome.textContent = "Selamat datang...";
+			tanya.textContent = "Sudah punya akun? login sekarang!";
+			daftar.textContent = "Login";
+			
+			const dropdownBtn = document.createElement("button");
+			dropdownBtn.textContent = "Pilih Status ▼";
+			dropdownBtn.className = "btn-dropdown";
+			
+			this.div = document.createElement("div");
+			this.div.className = "dropdown";
+			
+			for (const p of [dropdownBtn, this.div]) {
+				wadah.appendChild(p);
+			}
+			btnLogin.onclick = () => {
+				setTimeout(() => this.doSignUp(), 500);
+			}
+			daftar.onclick = () => {
+				setTimeout(() => this.setupLogin(), 500);
+			}
+			
+			const infoReg = [
+				["nama", "Nama", "Masukkan nama...", "info-label", "entry", "text"],
+				["status", "Status", "Masukkan status...", "info-label", "entry", "text"],
+				["password", "Kata Sandi", "Masukkan kata sandi...", "info-label", "entry", "password"],
+				["konf", "Konfirmasi kata sandi", "Konfirmasi kata sandi...", "info-label", "entry", "password"],
+				["question", "Pertanyaan keamanan", "Tuliskan pertanyaan keamanan...", "info-label", "entry", "text"],
+				["answer", "Jawaban", "Masukkan jawaban...", "info-label", "entry", "text"]
+			]
+			this.entryReg = pembuatForm(wadah, infoReg);
+			this.makeButtonsDropdown();
+			dropdownBtn.onclick = () => {
+				this.div.style.display = "flex";
+				this.div.style.flexDirection = "column";
+				this.div.style.background = "white";
+			}
+		}
+		setupLogin() {
+			const wadah = document.querySelector(".form");
+			wadah.innerHTML = "";
+			const judul = document.getElementById("judul");
+			const lupa = document.getElementById("lupa");
+			const btnLogin = document.getElementById("login");
+			const welcome = document.getElementById("salam");
+			const tanya = document.getElementById("konfirmasi");
+			const daftar = document.getElementById("register");
+			
+			judul.textContent = "Login Akun";
+			btnLogin.textContent = "Login";
+			lupa.textContent = "Lupa kata sandi?";
+			welcome.textContent = "Selamat datang kembali...";
+			tanya.textContent = "Belum punya akun? daftar sekarang!";
+			daftar.textContent = "Sign Up";
+			
+			daftar.onclick = () => {
+				setTimeout(() => this.setupSignUp(), 500);
+			}
+			btnLogin.onclick = () => {
+				setTimeout(() => this.signInValidation(), 500);
+			}
+			
+			const infoEntry = [
+				["username", "Nama pengguna", "👤 Inisial code atau nama...", "info-label", "entry", "text"],
+				["password", "Kata sandi", "🔒 Kata sandi...", "info-label", "entry", "password"]
+			]
+			this.entries = pembuatForm(wadah, infoEntry);
+			const badge = document.createElement("span");
+			badge.textContent = "👀";
+			badge.className = "badge";
+			badge.onclick = () => {
+				if (this.entries.password.type === "password") {
+					this.entries.password.type = "text";
+				} else {
+					this.entries.password.type = "password";
+				}
+			}
+			this.entries.password.insertAdjacentElement("afterend", badge);
+		}
+	}
+	async function getWallpaper() {
+		try {
+			const wal = await fetch(url + "get_file", {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json",
+				},
+				body: JSON.stringify({
+					path_file: "/storage/emulated/0/Proyekku/SERVER_AND_HTML/Atributs/log-wall.png"
+				})
+			});
+			const blob = await wal.blob();
+			const gambar = URL.createObjectURL(blob);
+			const elemen = document.querySelector(".container");
+			elemen.style.backgroundImage = `url(${gambar})`;
+		} catch (e) {
+			await popup("Error", e);
+		}
+	}
+	
+	function getId() {
+		const idev = localStorage.getItem("idDevice");
+		if (!idev) {
+			const newId = generateId();
+			localStorage.setItem("idDevice", newId);
+			idDevice = newId;
+		} else {
+			idDevice = idev;
+		}
+	}
+	
+	async function validasiLogin() {
+		const user = await getDt("lihat_validasi_login");
+		const cek = user.find(p => p.idDevice === idDevice && p.login === 1) ?? null;
+		if (!cek) {
+			login.setupLogin();
+		} else {
+			const params = {
+				user: cek.pengguna,
+				id: cek.inisial_code,
+				idev: cek.idDevice
+			}
+			window.location.href = url + "dashboard_admin?" + new URLSearchParams(params).toString();
+		}
+	}
+	
+	login = new Login();
+	window.onload = function() {
+		getId()
+		getWallpaper();
+		validasiLogin()
+	}
+</script>

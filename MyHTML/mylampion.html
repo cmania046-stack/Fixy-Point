@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tes</title>
+<style>
+body {
+    font-family: sans-serif;
+    padding: 0;
+    margin: 0;
+    text-align: center;
+    background: #111;
+    color: #eee;
+  }
+.sky {
+	background: linear-gradient(180deg, #111111, #122148, #273849, #3C6B97);
+	flex: 1;
+	width: 100%;
+	height: 100dvh;
+	position: relative;
+	display: flex;
+	justify-content: center;
+}
+.star {
+	color: white;
+	position: absolute;
+}
+.moon {
+	position: absolute;
+	width: 100px;
+	height: 100px;
+	border-radius: 50%;
+	background: white;
+	box-shadow: 0 4px 30px white;
+	z-index: 100;
+	transition: all 1s linear;
+}
+.lampion {
+	border-radius: 3px;
+	box-shadow: 0 4px 10px #FFFFFF6E;
+	position: absolute;
+	z-index: 200;
+	transition: all 1s linear;
+}
+.land {
+	position: fixed;
+	width: 100%;
+	height: 50px;	
+	background: linear-gradient(180deg, #3D6433, #1E4614);
+	display: flex;
+	bottom: 0;
+	left: 0;
+	z-index: 300;
+	border-radius: 30% 30% 0 0;
+}
+
+.btn {
+	padding: 10px;
+	color: black;
+	background: white;
+	border-radius: 10px;
+	margin: 10px;
+	font-size: 1rem;
+	border: none;
+}
+
+.rad {
+	transition: all 1s linear;
+}
+
+#jam {
+	position: absolute;
+	top: 20px;
+	left: 20px;
+	color: black;
+	font-weight: 600;
+	font-size: 5rem;
+	z-index: 500
+}
+
+.mercon {
+	position: absolute;
+	z-index: 500;
+}
+
+</style>
+</head>
+
+<body>
+<div class="sky" id="sky"></div>
+<div class="land" id="land"></div>
+
+<script>
+const langit = document.getElementById("sky");
+		
+function addStars() {
+	for (let i = 0; i < 100; i++){
+		const ukuran = Math.floor(Math.random() * 10);
+		const top = Math.floor(Math.random() * 100);
+		const left = Math.floor(Math.random() * 100);
+		
+		const bintang = document.createElement("label");
+		bintang.className = "star";
+		bintang.style.left = `${left}%`;
+		bintang.style.top = `${top}%`;
+		bintang.style.fontSize = `${ukuran}px`;
+		bintang.textContent = "•";
+		langit.appendChild(bintang);
+	}	
+}
+
+function addMoon() {
+	const moon = document.createElement("div");
+	moon.className = "moon";
+	moon.id = "moon";
+	langit.appendChild(moon);
+}
+
+function makeLampion() {
+	const lampions = document.querySelectorAll(".lampion");
+	if (lampions.length >= 100) return;
+	
+	const warnaLampion = [
+		"red", "green", "blue", "lightblue", "yellow",
+		"lightgreen", "purple", "skyblue", "darkblue", "darkred"
+	];
+	for (let i = 0;i<5;i++){
+		const lamp = document.createElement("div");
+		lamp.className = "lampion";
+		
+		const warna = warnaLampion[Math.floor(Math.random() * warnaLampion.length)];
+		lamp.style.background = `linear-gradient(180deg, ${warna}, white)`;
+		lamp.style.bottom = "0";
+		const tambahan = size[Math.floor(Math.random() * 10)];
+		
+		lamp.style.width = `${lebarLamp + tambahan}px`;
+		lamp.style.height = `${tinggiLamp + tambahan}px`;
+		
+		lamp.style.left = `${Math.floor(Math.random() * sky.offsetWidth)}px`;
+		langit.appendChild(lamp);
+	}
+}
+
+const size = [-7,-5,-3,0,1]
+const lebarLamp = 13;
+const tinggiLamp = 18;
+
+setInterval(() => {
+	const arah = [-5,-4,-3,-2,-1,1,2,3,4,5];
+	
+	const lampions = document.querySelectorAll(".lampion");
+	lampions.forEach(lamp => {
+		const bottomNow = parseInt(lamp.style.bottom);
+		if (bottomNow >= langit.offsetHeight - 100) { lamp.remove(); return; }
+		if (bottomNow >= langit.offsetHeight - 250) { lamp.style.boxShadow = "none"; }
+		lamp.style.bottom = `${bottomNow + 10}px`;
+		const idx = Math.floor(Math.random() * arah.length);
+		const leftNow = parseInt(lamp.style.left) + arah[idx];
+
+		if (leftNow <= 0 || leftNow >= langit.offsetWidth - lamp.offsetWidth) {
+			lamp.remove();
+			return;
+		}	
+		lamp.style.left = `${leftNow}px`;
+	});
+}, 1000);
+
+function addRoadLamp() {
+	const pond = document.createElement("div");
+	pond.style.width = "30px";
+	pond.style.height = "30px";
+	pond.style.bottom = "0px";
+	pond.style.left = "15px";
+	pond.style.borderRadius = "5px 5px 0 0";
+	pond.style.background = "#313030";
+	
+	const tiang = document.createElement("div");
+	tiang.id = "tiang";
+	tiang.className = "rad";
+	tiang.style.width = "15px";
+	tiang.style.height = "100px";
+	tiang.style.bottom = "29px";
+	tiang.style.left = "22px";
+	tiang.style.background = "linear-gradient(180deg, #878787, #ffffff, #878787)";
+	
+	const atap = document.createElement("div");
+	atap.style.width = "67px";
+	atap.style.height = "8px";
+	atap.style.left = "10px";
+	atap.style.bottom = "128px";
+	atap.style.background = "#292929";
+	
+	const tali = document.createElement("label");
+	tali.textContent = "|";
+	tali.style.color = "#714B4B";
+	tali.style.left = "60px";
+	tali.style.bottom = "115px";
+	tali.style.fontWeight = "500";
+	
+	const lampu = document.createElement("div");
+	lampu.id = "lampu";
+	lampu.style.background = "white";
+	lampu.style.boxShadow = "0 4px 10px white";
+	lampu.style.left = "55px";
+	lampu.style.bottom = "100px";
+	lampu.style.width = "15px";
+	lampu.style.height = "20px";
+	lampu.style.borderRadius = "3px";
+	lampu.className = "rad";
+	
+	const kucing = document.createElement("label");
+	kucing.textContent = "🐈‍⬛";
+	kucing.style.width = "10px";
+	kucing.style.height = "10px";
+	kucing.style.bottom = "50px";
+	kucing.style.right = "250px";
+	
+	const kitty = document.createElement("label");
+	kitty.textContent = "🐈";
+	kitty.style.width = "7px";
+	kitty.style.height = "7px";
+	kitty.style.bottom = "50px";
+	kitty.style.right = "248px";
+	
+	const owl = document.createElement("label");
+	owl.textContent = "🦉";
+	owl.style.width = "7px";
+	owl.style.height = "7px";
+	owl.style.bottom = "147px";
+	owl.style.left = "50px";
+	
+	for(const item of [pond, tiang, atap, tali, lampu, kucing, kitty, owl]){ 
+		item.style.position = "absolute";
+		item.style.zIndex = "400";
+		langit.appendChild(item);
+	}
+}
+
+function addTree() {
+  const batang = document.createElement("div");
+  batang.style.position = "absolute"; // taruh di atas!
+  batang.style.width = "20px";
+  batang.style.height = "100px";
+  batang.style.background = "linear-gradient(180deg, #564119, #3D2B08)";
+  batang.style.bottom = "30px";
+  batang.style.right = "150px";
+  batang.style.zIndex = "500";
+  langit.appendChild(batang);
+
+  let lebarDaun = 200;
+  let posBottom = 30 + 100;
+
+  for (let i = lebarDaun; i > 0; i -= 25){
+    const daun = document.createElement("div");
+    daun.style.position = "absolute";
+    daun.style.zIndex = "500";
+    daun.style.width = `${i}px`;
+    daun.style.height = "20px";
+    daun.style.background = "green";
+    daun.style.borderRadius = "50%";
+    
+    daun.style.right = `${150 - i/2 + 10}px`; 
+    daun.style.bottom = `${posBottom}px`;
+    
+    langit.appendChild(daun);
+    posBottom += 20;
+  }
+}
+
+function makeBtn(parent, teks, command) {
+	const btn = document.createElement("button");
+	btn.className = "btn";
+	btn.textContent = teks;
+	btn.onclick = command;
+	parent.appendChild(btn);	
+}
+
+function addOpt() {
+	const wadah = document.createElement("div");
+	wadah.style.background = "#FFFFFF43";
+	wadah.style.borderRadius = "10px";
+	wadah.style.top = "20px";
+	wadah.style.right = "20px";
+	wadah.style.position = "absolute";
+	wadah.style.width = "100px";
+	wadah.style.height = "fit-content";
+	wadah.style.display = "flex";
+	wadah.style.flexDirection = "column";
+	langit.appendChild(wadah);
+	
+	makeBtn(wadah, "Lunar eclipse", () => lunarEclipse());
+	makeBtn(wadah, "Malam", null);
+}
+
+function lunarEclipse() {
+	document.querySelectorAll(".lampion").forEach(lamp => {
+		lamp.remove();
+	});
+	
+}
+
+function addClock() {
+	const now = new Date();
+
+	const jam = now.getHours();
+	const menit = now.getMinutes();
+
+	const waktu = `${String(jam).padStart(2, '0')}.${String(menit).padStart(2, '0')}`;
+
+	const labelJam = document.createElement("h1");
+	labelJam.id = "jam";
+	labelJam.textContent = waktu;
+	langit.appendChild(labelJam);
+}
+
+function runTime() {
+	try {
+	const now = new Date();
+	const jam = now.getHours();
+	const menit = now.getMinutes();
+	const detik = now.getSeconds();
+	
+	const totalDetik = jam * 3600 + menit * 60 + detik;
+	const pagi = 6 * 3600;
+	const siang = 12 * 3600;
+	const sore = 18 * 3600;
+	const malam = 24 * 3600;
+	
+	const matahari = document.querySelector("#moon");
+	const clock = document.getElementById("jam");
+	const tiang = document.getElementById("tiang");
+	const lampu = document.getElementById("lampu");
+	clock.textContent = `${String(jam).padStart(2, '0')}.${String(menit).padStart(2, '0')}`;
+	
+	const tinggiLangit = langit.offsetHeight;
+	
+	const pagiBg = "linear-gradient(to bottom, #FFB56B, #FFD97D, #AEE1F9)";
+	const siangBg = "linear-gradient(to bottom, #4DA0E0, #87CEEB, #CFF0FF)";
+	const soreBg = "linear-gradient(to bottom, #2B1B4D, #FF6B6B, #FFA94D)";
+	const malamBg = "linear-gradient(to bottom, #020111, #0B1C3D, #1B2A4A)";
+	const sunrise = "linear-gradient(to bottom, #1B2A4A, #FF8C69, #FFD97D, #FFF4B8)";
+	const sunset = "linear-gradient(to bottom, #1B1035, #6B2C5F, #FF6B6B, #FFA94D)";
+
+	let posisi = "top";
+	let pMatahari;
+	let bg;
+	if (totalDetik >= 0 && totalDetik < pagi){
+		pMatahari = totalDetik / pagi * tinggiLangit;
+	} else if (totalDetik >= pagi && totalDetik < siang){
+		pMatahari = (totalDetik - pagi) / (siang - pagi) * tinggiLangit;
+		posisi = "bottom";
+	} else if (totalDetik >= siang && totalDetik < sore){
+		pMatahari = (totalDetik - siang) / (sore - siang) * tinggiLangit;
+	} else if (totalDetik >= sore && totalDetik < malam){
+		pMatahari = (totalDetik - sore) / (malam - sore) * tinggiLangit;
+		posisi = "bottom";
+	}
+		
+	if (posisi === "top"){
+		matahari.style.top = `${pMatahari}px`;
+	} else {
+		matahari.style.bottom = `${pMatahari}px`;
+	}
+	
+	if (totalDetik >= 21100 && totalDetik < 22100) {
+		langit.style.background = sunrise;
+		clock.style.color = "white";
+		tiang.style.background = "linear-gradient(to bottom, grey, white, grey)";
+		lampu.style.background = "white";
+		lampu.style.boxShadow = "0 4px 10px white";
+		
+	} else if (totalDetik >= 22100 && totalDetik < 36000){
+		langit.style.background = pagiBg;
+		clock.style.color = "black";
+		tiang.style.background = "grey";
+		lampu.style.background = "grey";
+		lampu.style.boxShadow = "none";
+		
+	} else if (totalDetik >= 36000 && totalDetik < 54000){
+		langit.style.background = siangBg;
+		clock.style.color = "black";
+		tiang.style.background = "grey";
+		lampu.style.background = "grey";
+		lampu.style.boxShadow = "none";
+		
+	} else if (totalDetik >= 54000 && totalDetik < 64300){
+		langit.style.background = soreBg;
+		clock.style.color = "white";
+		tiang.style.background = "linear-gradient(180deg, grey, white, grey)";
+		lampu.style.background = "white";
+		lampu.style.boxShadow = "none";
+		
+	} else if (totalDetik >= 64300 && totalDetik < 65300){
+		langit.style.background = sunset;
+		clock.style.color = "white";
+		tiang.style.background = "linear-gradient(180deg, grey, white, grey)";
+		lampu.style.background = "white";
+		lampu.style.boxShadow = "0 4px 10px white";
+		
+	} else {
+		langit.style.background = malamBg;
+		clock.style.color = "white";
+		tiang.style.background = "linear-gradient(180deg, grey, white, grey)";
+		lampu.style.background = "white";
+		lampu.style.boxShadow = "0 4px 10px white";
+	}
+	} catch (er) {
+		alert(er);
+	}
+}
+
+let runtime = setInterval(runTime, 30000);
+let lampMaker = setInterval(makeLampion, 5000);
+		
+let jamMula = 06;
+let menitMula = 00;
+let detikMula = 00;
+
+window.onload = function() {
+	addStars();
+	addMoon();
+	addRoadLamp();
+	addTree();
+	addOpt();
+	addClock();
+	runTime();
+}
+
+</script>
+</body>
+</html>

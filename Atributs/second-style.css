@@ -1,0 +1,1113 @@
+@import url('https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@600;700&display=swap');
+
+:root {
+  --primary: #0E5FA8;
+  --primary-hover: #0A4C87;
+  --primary-soft: #DEEBF9;
+  --accent: #FFB020;
+  --accent-hover: #E89900;
+  --accent-ink: #7A4A00;
+  --success: #1E9E5A;
+  --success-soft: #E1F7EA;
+  --danger: #E4572E;
+  --danger-soft: #FDE6DF;
+  --danger-hover: #C7431E;
+  --warning: #F5A623;
+  --warning-soft: #FFF2D9;
+  --bg: #F5F9FC;
+  --surface: #FFFFFF;
+  --surface-alt: #EEF5FB;
+  --header-bg: #ffffff;
+  --footer-bg: #ffffff;
+  --text: #2E4248;
+  --white-text: #0C1A22;
+  --text-on-primary: #FFFFFF;
+  --text-muted: #5C7488;
+  --border: #D7E6F0;
+  --radius-sm: 10px;
+  --radius: 10px;
+  --radius-lg: 10px;
+  --shadow-sm: 0 2px 8px rgba(14, 40, 60, .07);
+  --shadow: 0 12px 28px rgba(14, 40, 60, .14);
+  --font: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-display: 'Sora', 'Inter', sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, "Courier New", monospace;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  font-size: 100%;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+body {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  font-family: var(--font);
+  background: var(--bg);
+  background-image:
+    radial-gradient(circle at 100% 0%, rgba(255, 176, 32, .10) 0%, transparent 40%),
+    radial-gradient(circle at 0% 100%, rgba(14, 124, 102, .08) 0%, transparent 45%);
+  background-attachment: fixed;
+  color: var(--text);
+  line-height: 1.45;
+}
+
+button, input, select {
+  font-family: inherit;
+  font-size: 1rem;
+}
+
+input:hover, select:hover {
+  border-color: var(--primary);
+}
+
+input:focus, select:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 4px rgba(14, 124, 102, .16);
+}
+
+input:active, select:active {
+  border-color: var(--primary-hover);
+}
+
+.hidden {
+  display: none !important;
+}
+
+.chart-wrap {
+  position: relative;
+  height: 260px;
+  width: 100%;
+}
+/* ===== Header & footer bar (mobile-first: header ringkas, footer jadi tab bar melayang) ===== */
+.atas {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  background: var(--header-bg);
+  padding: 14px 16px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  border-radius: 0 0 20px 20px;
+  gap: 6px;
+  border-bottom: 1px solid var(--border);
+  box-shadow: var(--shadow-sm);
+}
+
+.atas-tengah {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  background: var(--header-bg);
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 6px;
+  border-bottom: 1px solid var(--border);
+  box-shadow: var(--shadow-sm);
+}
+
+.tt {
+  cursor: pointer;
+  color: var(--primary);
+  background: var(--primary-soft);
+  font-size: 1.2rem;
+  line-height: 1;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-sm);
+  user-select: none;
+  transition: background .15s ease, transform .1s ease;
+}
+
+.tt:hover {
+  background: var(--accent);
+  color: var(--accent-ink);
+}
+
+.tt:active {
+  transform: scale(.94);
+}
+
+.greet {
+  color: var(--text-muted);
+  font-size: .9rem;
+  font-weight: 500;
+  opacity: 1;
+  white-space: nowrap;
+}
+
+#jdl {
+  margin-left: auto;
+  color: var(--text);
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  font-weight: 700;
+  letter-spacing: .1px;
+  white-space: nowrap;
+}
+
+.judul {
+  font-family: var(--font-display);
+  font-size: 1rem;
+  font-weight: 400;
+  margin-bottom: 2px;
+}
+
+.bawah {
+  position: sticky;
+  bottom: 0;
+  z-index: 50;
+  background: var(--footer-bg);
+  border-top: 1px solid var(--border);
+  padding: 8px 10px calc(8px + env(safe-area-inset-bottom));
+  width: 100%;
+  margin: 0 auto;
+  display: flex;
+  overflow: auto;
+  flex-wrap: nowrap;
+  align-items: center;
+  border-radius: 20px 20px 0 0;
+  gap: 4px;
+  box-shadow: 0 -8px 20px rgba(14, 60, 50, .08);
+}
+
+.bawah button {
+  font-size: .85rem;
+  padding: 10px 12px;
+  background: transparent;
+  color: var(--text-muted);
+  font-weight: 600;
+  border: none;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background .15s ease, color .15s ease;
+}
+
+.bawah button:hover {
+  background: var(--primary-soft);
+  color: var(--primary);
+}
+
+.bawah button:active {
+  background: var(--accent);
+  color: var(--accent-ink);
+}
+
+/* ===== Popup menu (hamburger) ===== */
+.file-field {
+	position: absolute;
+	top: 50%;
+	right: 0;
+	gap: 10px;
+	overflow: auto;
+	z-index: 350;
+	display: flex;
+	flex-direction: column;
+	padding: 10px;
+	background: var(--surface);
+	border: 1px solid var(--border);
+	box-shadow: var(--shadow);
+	border-radius: var(--radius);
+	animation: fromBottom 0.5s ease forwards;
+	cursor: grab;
+}
+.popupMenu {
+  position: absolute;
+  top: 66px;
+  left: 16px;
+  z-index: 350;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 8px;
+  min-width: 200px;
+  animation: fromBottom .35s ease forwards;
+}
+
+.popupMenu .btn {
+  width: 100%;
+  justify-content: flex-start;
+  background: transparent;
+  color: var(--text);
+  box-shadow: none;
+  font-weight: 600;
+}
+
+.popupMenu .btn:hover {
+  background: var(--primary-soft);
+  color: var(--primary);
+}
+
+.popupMenu .btn:active {
+  background: var(--accent);
+  color: var(--accent-ink);
+}
+
+/* ===== Buttons ===== */
+.btn {
+  position: relative;
+  appearance: none;
+  border: none;
+  cursor: pointer;
+  background: var(--primary);
+  color: var(--text-on-primary);
+  font-weight: 600;
+  font-size: .95rem;
+  padding: 12px 20px;
+  min-height: 44px;
+  border-radius: var(--radius-sm);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  margin: 5px;
+  box-shadow: var(--shadow-sm);
+  transition: background .15s ease, transform .1s ease;
+}
+
+.btn:hover {
+  background: var(--primary-hover);
+}
+
+.btn:active {
+  transform: translateY(1px) scale(.98);
+  background: var(--primary-hover);
+}
+
+.btn:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.btn-cancel {
+  background: var(--primary-soft);
+  color: var(--primary);
+  padding: 12px;
+  box-shadow: none;
+  border: 1px double var(--border);
+}
+
+.btn-cancel:hover {
+  background: var(--primary-soft);
+  border-color: var(--primary);
+}
+
+.btn-cancel:active {
+  background: var(--primary);
+  color: var(--text-on-primary);
+}
+
+.btn-row {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.btns {
+  background: var(--surface);
+  padding: 10px;
+  font-size: .85rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  margin: 0 5px;
+  cursor: pointer;
+  color: var(--text);
+  transition: background .15s ease, border-color .15s ease;
+}
+
+.btns2 {
+  background: var(--surface);
+  padding: 5px;
+  border: none;
+  margin: 0 5px;
+  cursor: pointer;
+  font-size: .85rem;
+  color: var(--text-muted);
+  transition: all 0.3s ease;
+}
+.btns2:active {
+	color: #ffffff;
+	background: #000000;
+	border: none;
+	border-radius: 2px;
+}
+
+.btns:hover {
+  background: var(--surface-alt);
+  border-color: var(--primary);
+}
+
+.btns:active {
+  background: var(--primary-soft);
+}
+
+.btn-khusus-popup {
+  font-size: 1rem;
+  background: transparent;
+  padding: 6px;
+  margin: 5px 10px;
+  border: none;
+  color: var(--text-on-primary);
+  cursor: pointer;
+  border-radius: var(--radius-sm);
+  transition: background .15s ease, color .15s ease;
+}
+
+.btn-khusus-popup:hover {
+  background: var(--accent);
+  color: var(--accent-ink);
+}
+
+.btn-khusus-popup:active {
+  background: var(--surface-alt);
+  color: var(--text);
+}
+.invisible-input {
+	background: transparent;
+	border: none;
+	font-size: 1rem;
+	font-weight: 500;
+	color: var(--text-muted);
+}
+.invisible-btn {
+	position: relative;
+  background: transparent;
+  font-size: 1rem;
+  border: none;
+  padding: 12px;
+  cursor: pointer;
+  width: 100%;
+  color: var(--text);
+  text-align: left;
+  border-radius: var(--radius-sm);
+  transition: background .15s ease;
+}
+
+.invisible-btn:hover {
+  background: var(--primary-soft);
+}
+
+.invisible-btn:active {
+  background: var(--accent);
+}
+
+/* Total / kembalian — signature "digital till readout" */
+.total {
+  color: var(--primary-hover);
+  font-family: var(--font-display);
+  font-size: 2rem;
+  font-weight: 700;
+  margin: 0;
+  padding: 16px;
+  background: transparent;
+  border-radius: var(--radius);
+  border: none;
+  cursor: default;
+  width: 100%;
+  text-align: center;
+  letter-spacing: .5px;
+}
+
+.tot, .change {
+	color: var(--accent-ink);
+	font-size: 1.85rem;
+	font-weight: 700;
+	font-family: var(--font-display);
+	padding: 16px;
+	background: var(--surface);
+	border: none;
+	border-radius: var(--radius-sm);
+}
+
+.badge {
+  position: absolute;
+  z-index: 200;
+  top: -6px;
+  right: -6px;
+  padding: 4px 6px;
+  min-width: 18px;
+  border: 2px solid var(--surface);
+  border-radius: 20px;
+  background: var(--danger);
+  color: white;
+  font-size: .75rem;
+  font-weight: 700;
+  line-height: 1;
+  text-align: center;
+}
+
+/* ===== Base page layout ===== */
+.tengah {
+  position: relative;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 10px;
+  padding: 12px;
+  width: 100%;
+  max-width: 1400px;
+  margin: 0 auto;
+  overflow: auto;
+}
+
+/* ===== Split layout (sidebar + main) — dipakai di Transaksi, Pemilik, Produk ===== */
+.big-container {
+  background: transparent;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  flex: 1;
+  gap: 14px;
+  width: 100%;
+}
+
+.profil-container {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  overflow: auto;
+  max-width: 600px;
+  gap: 10px;
+  height: fit-content;
+  animation: fromBottom .4s ease forwards;
+}
+
+.checkout-container {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 100%;
+  gap: 10px;
+  height: 100%;
+}
+
+.right-container {
+  background: transparent;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.field {
+	position: relative;
+	display: flex;
+	background: var(--surface);
+	flex-direction: column;
+	gap: 10px;
+	padding: 10px;
+	padding-top: 20px;
+	margin: 10px 0;
+	border: 2px double var(--border);
+	border-radius: var(--radius-sm);
+	animation: fromBottom 0.5s ease forwards;
+}
+
+/* ===== Kartu generik (produk, user, pembayaran, dll) ===== */
+.container {
+  position: relative;
+  background: var(--surface);
+  border-radius: var(--radius);
+  border: none;
+  display: flex;
+  gap: 10px;
+  padding: 10px;
+  width: 100%;
+  flex-direction: column;
+  overflow: auto;
+}
+
+.container-horizontal {
+  position: relative;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  display: flex;
+  gap: 10px;
+  padding: 12px;
+  width: 100%;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  box-shadow: var(--shadow-sm);
+  transition: box-shadow .15s ease, border-color .15s ease;
+}
+
+.editor {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.produk-card {
+  box-shadow: var(--shadow);
+  max-width: 100%;
+}
+
+.produk-card.stok-kritis {
+  background: var(--danger-soft);
+  border-color: var(--danger);
+}
+
+.produk-card.stok-pas {
+  background: var(--warning-soft);
+  border-color: var(--warning);
+}
+
+/* Bungkus serbaguna dari pembuatFrame() — kartu besar maupun baris kecil (mis. stepper qty) */
+.value-frame {
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+  gap: 8px;
+}
+
+.value-frame {
+  width: 100%;
+  min-width: 0;
+}
+
+.image {
+  width: 100%;
+  height: 100%;
+  border-radius: var(--radius);
+  border: none;
+  margin-bottom: 14px;
+  align-self: center;
+  object-fit: cover;
+  animation: fromBottom .4s ease forwards;
+}
+
+.input-title {
+	font-size: .8rem;
+	font-weight: 550;
+}
+
+.gambar-profil {
+  width: 80%;
+  height: 80%;
+  align-self: center;
+  border: 3px solid var(--primary-soft);
+  border-radius: 999px;
+  animation: fromBottom .4s ease forwards;
+}
+
+.nama {
+  position: relative;
+  background-color: var(--primary-soft);
+  font-size: 1rem;
+  font-weight: 700;
+  width: 100%;
+  color: var(--primary);
+  padding: 12px;
+  align-self: center;
+  margin: 0;
+  border: none;
+  border-radius: var(--radius-sm);
+}
+
+.nama-toko {
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+  color: var(--text);
+  padding: 8px 20px;
+  text-align: center;
+  margin: 10px;
+  font-weight: 700;
+  border: 1px dashed var(--border);
+  border-radius: var(--radius);
+}
+
+/* checkbox (mis. "Termasuk pajak", "Cetak QR/Barcode") */
+.label-data {
+  position: relative;
+  font-size: .95rem;
+  font-weight: 500;
+  color: var(--text);
+  white-space: pre-line;
+  padding: 10px 42px 10px 14px;
+  background: var(--surface-alt);
+  border-radius: var(--radius-sm);
+  border-left: 4px solid var(--primary);
+  border-right: none;
+  animation: fromBottom 0.8s ease forwards;
+}
+
+.cek {
+  position: absolute;
+  right: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  cursor: pointer;
+  accent-color: var(--primary);
+  width: 18px;
+  height: 18px;
+}
+
+.daftar {
+	background: transparent;
+	font-size: .85rem;
+	color: var(--text-muted);
+	padding: 5px;
+	border-bottom: 1px solid var(--border);
+	transition: all 0.3s ease;
+}
+.daftar:active {
+	transform: translateY(-10px);
+	color: blue;
+	font-weight: 500;
+	font-size: 1rem;
+}
+.biasa {
+  background-color: transparent;
+  font-size: .85rem;
+  white-space: pre-line;
+  color: var(--text-muted);
+  animation: fromBottom 0.8s ease forwards; 
+}
+
+.font-biasa {
+  background-color: transparent;
+  font-size: 1rem;
+  display: flex;
+  color: var(--text-muted);
+}
+
+.teks {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--text);
+  padding: 5px;
+  text-align: left;
+}
+
+.jdl {
+  font-family: var(--font-display);
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text);
+  padding: 4px 0;
+  animation: fromBottom 0.8s ease forwards;
+}
+
+/* ===== Grid dan daftar (mobile-first: 1 kolom, melebar di layar besar) ===== */
+.frame, .frame-khusus-produk {
+  width: 100%;
+  background: transparent;
+  padding: 0;
+  gap: 12px;
+  overflow: visible;
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 16px;
+}
+
+.frame-khusus-produk {
+  display: flex;
+  flex-direction: column;
+}
+
+.prt {
+  background: transparent;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 12px;
+  padding: 15px;
+  border-radius: var(--radius);
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  box-shadow: var(--shadow-sm);
+}
+
+/* dropdown metode pembayaran — panel biasa, bukan overlay */
+.dropdown-overlay {
+	display: none;
+	position: absolute;
+	background: white;
+	min-width: 160px;
+	box-shadow: 0 8px 16px rgba(0,0,0,0.15);
+	border-radius: 4px;
+	z-index: 300;
+	padding: 10px;
+	gap: 5px;
+}
+
+.dropdown {
+  display: none;
+  background: var(--primary-soft);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 8px;
+  gap: 6px;
+  height: fit-content;
+  box-shadow: none;
+  animation: fromBottom 0.5s ease forwards;
+}
+
+.menu-titik-tiga {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  display: none;
+  background: var(--text);
+  color: white;
+  padding: 6px;
+  border-radius: var(--radius-sm);
+  z-index: 10;
+  box-shadow: var(--shadow);
+}
+
+.menu-titik-tiga.tampil {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: stretch;
+}
+
+/* ===== Form fields ===== */
+.entry, .combo {
+  min-width: 50%;
+  font-size: .85rem;
+  padding: 10px;
+  margin-bottom: 5px;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  color: var(--text);
+  transition: border-color .15s ease, box-shadow .15s ease;
+}
+
+.entry::placeholder {
+  color: var(--text-muted);
+}
+
+/* ===== Table — mobile: scroll horizontal ===== */
+
+.table-produk {
+	width: 100%;
+  margin-top: 10px;
+  border-collapse: separate;
+  border-spacing: 0;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  font-size: .9rem;
+  animation: fromBottom 0.5s ease forwards;
+}
+
+.table-produk thead {
+  background: var(--primary);
+}
+
+.table-produk thead th {
+  text-align: center;
+  color: var(--text-on-primary);
+  font-weight: 600;
+  padding: 12px 14px;
+  font-size: .9rem;
+  letter-spacing: .2px;
+}
+
+.table-produk tbody tr {
+  cursor: pointer;
+  border-top: 1px solid var(--border);
+}
+
+.table-produk tbody tr:nth-child(even) {
+  background: var(--surface-alt);
+}
+.table-produk tbody tr:nth-child(odd) {
+  background: var(--surface);
+}
+
+.table-produk tbody tr:hover {
+  background: var(--primary-soft);
+  color: var(--primary);
+}
+
+.table-produk td {
+  padding: 10px 12px;
+  color: var(--text);
+  font-size: .9rem;
+}
+
+.table-produk .btn, .table-produk .btn-cancel {
+  padding: 8px 10px;
+  margin: 2px;
+  min-height: unset;
+}
+
+/* ===== Login screen ===== */
+.lc {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: rgba(14, 124, 102, .12);
+}
+
+.produk-pop {
+	position: fixed;
+	z-index: 200;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	padding: 20px;
+	overflow: auto;
+	background: var(--header-bg);
+}
+
+.lc-content {
+  width: 100%;
+  min-width: 30vh;
+  max-height: 70vh;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow);
+  padding: 28px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  overflow: auto;
+  animation: fromBottom .4s ease forwards;
+}
+
+.lc-content h3 {
+  font-family: var(--font-display);
+  text-align: center;
+  font-size: 1.2rem;
+  margin-bottom: 4px;
+  color: var(--primary);
+}
+
+.lc-content input {
+  font-size: 1rem;
+  padding: 12px;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  transition: border-color .15s ease, box-shadow .15s ease;
+}
+
+/* ===== Modal ===== */
+.custom-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 300;
+  background: rgba(12, 30, 34, .5);
+  display: flex;
+  align-items: center;
+  backdrop-filter: blur(6px);
+  justify-content: center;
+  padding: 20px;
+}
+
+.custom-modal-content {
+  width: 100%;
+  max-width: 380px;
+  background: var(--header-bg);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow);
+  padding: 22px 22px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  animation: fromBottom .35s ease forwards;
+}
+
+.custom-modal-content input {
+  font-size: 1rem;
+  padding: 12px;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  transition: border-color .15s ease, box-shadow .15s ease;
+}
+
+#modalTitle {
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--text);
+}
+
+#modalMessage {
+  font-size: .95rem;
+  color: var(--text-muted);
+  white-space: pre-line;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 6px;
+}
+
+/* ===== Loading overlay ===== */
+.load-container {
+  position: fixed;
+  z-index: 500;
+  width: 100%;
+  height: 100%;
+  background: transparent;
+  align-items: center;
+  justify-content: center;
+  display: flex;
+  backdrop-filter: blur(1px);
+  flex-direction: column;
+}
+
+.laptop {
+  font-size: 3rem;
+  padding: 5px;
+  color: var(--primary);
+  animation: happy 3s ease infinite;
+}
+
+.proses {
+  font-family: var(--font-mono);
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--primary);
+  background: var(--primary-soft);
+  border-radius: var(--radius-sm);
+  padding: 8px 24px;
+}
+
+@keyframes happy {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+@keyframes fromBottom {
+  0% { transform: translateY(10px); opacity: 0; }
+  100% { transform: translateY(0); opacity: 1; }
+}
+
+/* ===== Struk (nota cetak) — tetap monospace agar rapi di printer thermal ===== */
+#struk {
+  font-family: "Courier New", Courier, monospace;
+  font-size: .8rem;
+  color: #000;
+  width: 80mm;
+}
+
+@media (min-width: 600px) {
+  .big-container {
+    display: flex;
+    flex-direction: row;
+    gap: 20px;
+    padding: 10px;
+  }
+  .atas-tengah {
+  	display: flex;
+  	flex-direction: row;
+  	gap: 20px;
+  }
+  .tengah {
+  	width: 100%;
+  	display: flex;
+  	flex-direction: column;
+  	justify-content: flex-start;
+  	align-items: flex-start;
+  }
+  .profil-container {
+  	width: fit-content;
+  	min-width: 300px;
+  	height: fit-content;
+  }
+  .editor {
+    gap: 20px;
+    display: grid;
+    grid-template-columns: repeat(2,1fr);
+  }
+  .right-container {
+  	flex: 1;
+  }
+  .frame-khusus-produk {
+    display: grid;
+    grid-template-columns: repeat(2,1fr);
+  }
+  .frame {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+  }
+  .container {
+    height: fit-content;
+    overflow: auto;
+  }
+  .image {
+    width: 100%;
+    height: 100%;
+  }
+  .checkout-container {
+    height: 100vh;
+    width: fit-content;
+  }
+  .lc-content {
+    padding: 24px;
+    max-width: fit-content;
+    width: 100%;
+  }
+  .container-horizontal {
+  	display: flex;
+  	flex-direction: row;
+  }
+  .combo {
+  	min-width: 0;
+  }
+}
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  #struk, #struk * {
+    visibility: visible;
+  }
+  #struk {
+    display: block !important;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 80mm;
+  }
+}
+
+@page {
+  size: 80mm auto;
+  margin: 0;
+}

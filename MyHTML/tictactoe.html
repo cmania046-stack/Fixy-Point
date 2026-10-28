@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Tic Tac Toe</title>
+	
+	<style>
+		* {
+			margin: 0;
+			padding: 0;
+			box-sizing: border-box;
+			scrollbar-width: thin;
+			scrollbar-color: transparent;
+		}
+		html {
+			font-size: 100%;
+			-webkit-text-size-adjust: 100%;
+			text-size-adjust: 100%;
+			color-scheme: light dark;		
+		}
+		body {
+			display: flex;
+			flex-direction: column;
+			min-height: 100vh;
+			min-height: 100dvh;
+			line-height: 1.5;
+			background: white;
+			-webkit-font-smoothing: antialiased;
+		}
+		.hidden {
+			display: none!important;
+		}
+		.custom-modal {
+			position: fixed;
+			inset: 0;
+			z-index: 500;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			padding: 16px;
+			background: rgba(9,24,44,.52);
+		}
+		.cmc {
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+			justify-content: center;
+			gap: 10px;
+			background: #FFFFFF;
+			padding: 20px;
+			border-radius: 15px;
+		}
+		.cmc > * {
+			margin: 10px;
+			padding: 10px;
+			font-size: 1.3rem;
+			border-radius: 15px;
+			font-family: Arial;
+		}
+		.cmc button {
+			background: #9AEDAD;
+			border: none;
+			padding: 20px;
+			width: 80%;
+		}
+		.cmc #exit {
+			background: black;
+			font-weight: 500;
+			color: white;
+		}
+		.utama {
+			flex: 1;
+			display: flex;
+			flex-direction: column;
+			width: 100%;
+			min-width: 0;
+			justify-content: center;
+			align-items: center;
+			gap: 15px;
+			padding: 20px;
+			background: white;
+		}
+		
+		.utama > * {
+			width: 100%;
+			border-radius: 15px;
+		}
+		
+		.atas, .bawah {
+			background: #A6D0F6;
+			height: 100px;
+			display: flex;
+			justify-content: center;
+			align-items: center;
+			gap: 10px;
+			padding: 20px;
+			flex: 0;
+		}
+		
+		.tengah {
+			border: 1.1px solid black;
+			background: white;
+			display: grid;
+			grid-template-columns: repeat(3,1fr);
+			flex: 1;
+			gap: 10px;
+			padding: 20px;
+			height: fit-content;
+		}
+		.tengah button {
+			border: 2px solid blue;
+			display: flex;
+			justify-content: center;
+			align-items: center;
+			border-radius: 15px;
+			background: transparent;
+			font-size: 5rem;
+			height: 150px;
+		}
+		.teks {
+			font-family: monospace;
+			font-size: 2rem;
+		}
+		
+		.nama {
+			font-family: Arial;
+			font-size: 2rem;
+			font-weight: 500;
+		}
+	</style>
+</head>
+
+<body>
+	<div class="custom-modal hidden" id="opsi">
+		<div class="cmc" id="opsi-parent">
+			<h3>Pilih mode permainan</h3>
+			<button>Single player</button>
+			<button>Multi player</button>
+			<button id="exit">Back</button>
+		</div>
+	</div>		
+	<div class="utama">
+		<div class="atas">
+			<h3 class="teks" id="teks-a">o</h3>
+			<h4 id="a" class="nama">Player A</h4>
+		</div>
+		<div class="tengah"></div>
+		<div class="bawah">
+			<h4 id="b" class="nama">Player B</h4>
+			<h3 class="teks" id="teks-b">x</h3>
+		</div>
+	</div>
+	
+<script>
+	let gameMode = "single-player";
+	let giliran;
+	let teksTerakhir;
+	let x = "X";
+	let o = "O";
+	
+function giveTeks(btn) {
+	if (teksTerakhir === "X") {
+		btn.textContent = o;
+		teksTerakhir = o;
+		btn.style.color = "green";
+	} else {
+		btn.textContent = x;
+		teksTerakhir = x;
+		btn.style.color = "red";
+	}
+}
+
+function setTengahButtons() {
+	const p = document.querySelector(".tengah");
+	
+	for (let i = 0; i < 9; i++) {
+		const btn = document.createElement("button");
+		btn.onclick = () => giveTeks(btn);
+		p.appendChild(btn);
+	}
+}
+	
+window.onload = function() {
+	setTengahButtons();
+}
+
+</script>
+</body>
+</html>

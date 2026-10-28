@@ -1,0 +1,2031 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard pos</title>
+</head>
+
+
+
+<style>
+
+:root {
+  --bg: #ffffff;
+  --surface: #f2f2f2;
+  --surface-alt: #f1f3f5;
+  --border: #d1d1d1;
+  --text: #111111;
+  --text-muted: #6b7280;
+  --primary: #2563eb;
+  --primary-hover: #1d4ed8;
+  --primary-soft: #e8efff;
+  --danger: #dc2626;
+  --danger-soft: #fde8e8;
+  --success: #16a34a;
+  --radius: 8px;
+  --radius-sm: 5px;
+  --shadow: 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.06);
+  --font: "Segoe UI", -apple-system, BlinkMacSystemFont, Roboto, Helvetica, Arial, sans-serif;
+}
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font);
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  margin: 0 0 8px;
+  font-weight: 600;
+}
+
+p {
+  margin: 0 0 6px;
+}
+
+img {
+  max-width: 100%;
+  display: block;
+}
+.atas {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  background: #405B78;
+  border-bottom: 1px solid var(--border);
+  padding: 12px 16px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 5px;
+}
+
+.atas br {
+  display: none;
+}
+
+.tt {
+  background-color: transparent;
+  border: none;
+  padding: 5px;
+  border-radius: var(--radius-sm);
+  font-size: 30px;
+  font-weight: 700;
+  color: var(--surface);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  position: relative;
+  transition: all 0.5s ease;
+}
+.tt:hover {
+  background: var(--surface);
+  border-color: var(--text);
+  color: var(--text);
+  transform: scale(1.1) translateX(-5px) translateY(-5px);
+}
+
+#krj {
+  overflow: visible;
+}
+
+.badge {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  background: var(--surface);
+  color: var(--danger);
+  font-size: 15px;
+  font-weight: 600;
+  min-width: 18px;
+  height: 18px;
+  border-radius: 999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 4px;
+}
+
+.cari {
+  flex: 1;
+  min-width: 160px;
+  padding: 10px 14px;
+  border: none;
+  border-radius: 20px;
+  background-color: var(--surface);
+  font-size: 14px;
+  outline: none;
+  color: var(--text);
+  transition: all 0.5s ease;
+}
+.cari:focus {
+  background-color: var(--surface-alt);
+  border-color: var(--primary);
+  transform: scale(1.1) translateY(-5px) translateX(-5px);
+}
+.popupMenu {
+  position: absolute;
+  top: 70px;
+  left: 5px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-md);
+  padding: 16px;
+  width: 260px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  animation: slideRight 0.5s ease forwards;
+}
+
+.popupMenu p#sapaan {
+  font-size: 13.5px;
+  color: var(--text-muted);
+  margin-bottom: 8px;
+}
+
+.popupMenu .haloBang {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.popupMenu .login {
+  display: flex;
+  gap: 8px;
+  flex-direction: column;
+  margin-bottom: 6px;
+}
+
+.popupMenu .login button {
+  flex: 1;
+}
+
+.popupMenu button {
+  width: 100%;
+  text-align: left;
+  padding: 9px 12px;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  font-size: 14px;
+  color: var(--text);
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.popupMenu button:hover {
+  background: var(--surface-alt);
+}
+
+.popupMenu .login button {
+  text-align: center;
+  background: var(--primary);
+  color: #fff;
+  border: none;
+  font-weight: 500;
+}
+
+.popupMenu .login button:hover {
+  background: var(--primary-hover);
+}
+
+.sapaEmoji {
+  margin-right: 4px;
+}
+
+/* =========================================================
+   Main content (.tengah) & footer (.bawah)
+========================================================= */
+
+.tengah {
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 20px 16px 40px;
+  min-height: 50vh;
+  overflow: auto;
+}
+.bawah {
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+  padding: 24px 16px 32px;
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 13.5px;
+  border-radius: 10px 10px 0 0;
+}
+
+.bawah h3 {
+  color: var(--text);
+  font-size: 15px;
+  margin-bottom: 10px;
+},
+.login {
+  background-color: var(--surface);
+  padding: 10px;
+  border-radius: 10px;
+  margin-bottom: 10px;
+  border: 1px solid var(--surface);
+}
+.toko {
+  font-size: 22px;
+  color: var(--text);
+  animation: slideDown 0.5s ease forwards;
+}
+
+.wise {
+  font-size: 16px;
+  color: var(--text-muted);
+  max-width: 640px;
+  margin-bottom: 18px;
+  animation: slideDown 0.5s ease forwards;
+}
+
+.shopping {
+  background: var(--primary);
+  color: #fff;
+  border: none;
+  padding: 11px 22px;
+  border-radius: var(--radius);
+  font-size: 14.5px;
+  font-weight: 600;
+  cursor: pointer;
+  margin-bottom: 28px;
+  animation: slideDown 0.5s ease forwards;
+}
+
+.shopping:hover {
+  background: var(--primary-hover);
+}
+
+.container {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+}
+.container2 {
+  display: grid;
+  grid-template-columns: repeat(1, 1fr);
+  gap: 16px;
+}
+.wdh {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px;
+  box-shadow: var(--shadow);
+  display: flex;
+  flex-direction: column;
+  transition: box-shadow 0.15s ease, transform 0.15s ease;
+}
+
+.wdh:hover {
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
+}
+
+.wdh .image {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  object-fit: cover;
+  border-radius: var(--radius-sm);
+  margin-bottom: 10px;
+  cursor: pointer;
+  background: var(--surface-alt);
+}
+
+.namaBeranda {
+  font-size: 13.5px;
+  color: var(--text);
+}
+
+.namaBeranda:first-of-type {
+  font-weight: 600;
+  min-height: 36px;
+}
+
+.btns {
+  margin-top: auto;
+  background: var(--primary-soft);
+  color: var(--primary);
+  border: 1px solid var(--primary-soft);
+  padding: 8px 10px;
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.btns:hover {
+  background: var(--primary);
+  color: #fff;
+}
+.frame {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 18px;
+  flex-wrap: wrap;
+}
+
+.wdh2 {
+  display: grid;
+  grid-template-columns: repeat(1, 1fr);
+  gap: 16px;
+}
+.frp {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 14px;
+  display: flex;
+  flex-direction: row;
+  gap: 14px;
+  margin-bottom: 5px;
+  animation: slideDown 0.5s ease forwards;
+}
+
+.frp > div:first-child {
+  flex: 0 0 110px;
+}
+
+.frp > div:last-child {
+  flex: 1;
+  min-width: 0;
+}
+
+.pict {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  object-fit: cover;
+  border-radius: var(--radius-sm);
+  background: var(--surface-alt);
+  margin-top: 6px;
+  animation: slideDown 0.5s ease forwards;
+}
+
+.nama {
+  font-size: 13px;
+  margin-top: 10px;
+  font-weight: 600;
+  color: var(--text);
+  animation: slideDown 0.5s ease forwards;
+}
+.namaa {
+  font-size: 13.5px;
+  color: var(--text-muted);
+  animation: slideDown 0.5s ease forwards;
+}
+.combo {
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  font-size: 13.5px;
+  margin: 6px 0;
+  color: var(--text);
+  animation: slideDown 0.5s ease forwards;
+}
+.combox {
+  width: 50%;
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  font-size: 13.5px;
+  margin: 6px 0;
+  color: var(--text);
+  animation: slideDown 0.5s ease forwards;
+}
+.entry {
+  width: 100%;
+  padding: 9px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  font-size: 14px;
+  margin-bottom: 10px;
+  color: var(--text);
+  outline: none;
+  transition: border-color 0.15s ease;
+}
+
+.entry:focus {
+  border-color: var(--primary);
+}
+.btn {
+  padding: 9px 16px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  color: var(--text);
+  font-size: 13.5px;
+  font-weight: 500;
+  cursor: pointer;
+  margin: 5px 0;
+  animation: slideDown 0.5s ease forwards;
+  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+.btn:hover {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: #fff;
+}
+
+.btn-cancel {
+  background: var(--surface);
+  color: var(--text-muted);
+}
+
+.btn-cancel:hover {
+  background: var(--danger-soft);
+  border-color: var(--danger);
+  color: var(--danger);
+}
+.wadahUtama {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr;
+  gap: 20px;
+  align-items: start;
+}
+
+@media (max-width: 720px) {
+  .wadahUtama {
+    grid-template-columns: 1fr;
+  }
+}
+
+.kiri {
+  display: grid;
+  grid-template-columns: repeat(1, 1fr);
+  gap: 10px;
+}
+.kanan {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 18px;
+  box-shadow: var(--shadow);
+  position: sticky;
+  top: 90px;
+}
+
+.judul {
+  font-size: 16px;
+  margin-bottom: 4px;
+  text-align: left;
+  margin-right: auto;
+}
+
+.label {
+  font-size: 16px;
+  color: var(--primary);
+  margin-right: auto;
+}
+
+.biasa {
+  font-size: 12.5px;
+  color: var(--text-muted);
+  background: var(--surface-alt);
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+  margin-top: 8px;
+}
+
+.fr2 {
+  display: flex;
+  gap: 5px;
+  flex-wrap: wrap;
+  margin-top: 10px;
+}
+
+.fr2 .btn {
+  flex: 1;
+  min-width: 50px;
+}
+
+.table-produk {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+  font-size: 12px;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  animation: slideUp 0.5s ease;
+}
+.table-produk th {
+  background-color: #405B78;
+  color: white;
+  padding: 12px 10px;
+  text-align: left;
+  font-weight: 600;
+  font-size: 12px;
+}
+.table-produk td {
+  padding: 12px 10px;
+  border-bottom: 1px solid #e5e7eb;
+  background-color: white;
+  font-size: 12px;
+}
+.table-produk tr:hover td {
+  background-color: #f1f9ff;
+}
+.table-produk td:first-child {
+  font-weight: 600;
+  color: #0b3b5c;
+}
+  
+.upload {
+  display: block;
+  margin: 14px 0 10px;
+  font-size: 13.5px;
+}
+.image {
+  max-width: 350px;
+  border-radius: var(--radius);
+  border: none;
+  margin-bottom: 14px;
+  box-shadow: var(--shadow);
+  animation: slideDown 0.5s ease forwards;
+}
+.lblwarning {
+  font-size: 12.5px;
+  color: var(--primary);
+  background: var(--primary-soft);
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  margin-bottom: 14px;
+  animation: slideDown 0.5s ease forwards;
+}
+.custom-modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 20, 30, 0.45);
+  z-index: 100;
+  align-items: center;
+  justify-content: center;
+}
+.custom-modal-content {
+  background: var(--surface);
+  border-radius: var(--radius);
+  padding: 24px;
+  width: min(90vw, 380px);
+  box-shadow: var(--shadow-md);
+}
+.custom-modal-content h3 {
+  font-size: 17px;
+  margin-bottom: 8px;
+}
+
+.custom-modal-content p {
+  font-size: 14px;
+  color: var(--text-muted);
+  margin-bottom: 16px;
+}
+
+.custom-modal-content input {
+  width: 100%;
+  padding: 9px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  margin-bottom: 16px;
+  font-size: 14px;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
+.modal-actions .btn {
+  min-width: 90px;
+}
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg);
+}
+
+::-webkit-scrollbar-thumb {
+  background: #cfd4dc;
+  border-radius: 999px;
+}
+.logpop {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 20, 30, 0.45);
+  z-index: 100;
+  align-items: center;
+  justify-content: center;
+}
+.loginPop {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: white;
+  border-radius: 10px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  width: min(90vw, 380px);
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+  animation: logstyle 0.5s ease forwards;
+}
+.loginPop h3 {
+  font-size: 18px;
+  color: blue;
+  text-align: center;
+}
+.loginPop input {
+  padding: 10px;
+  margin: 5px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+.loginPop button {
+  padding: 10px;
+  margin: 5px;
+  border: none;
+  color: var(--surface);
+  font-weight: 700;
+  border-radius: var(--radius);
+  background-color: var(--primary);
+}
+@keyframes logstyle {
+  0% {
+    opacity: 0;
+    transform: translate(0);
+  }
+  100% {
+    opacity: 1;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+  }
+}
+@keyframes slideRight {
+  0% {
+    opacity: 0;
+    transform: translateX(-10px);
+  }
+  50% {
+    opacity: 1;
+    transform: translateX(5px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+@keyframes loginAnim {
+  0% {
+    opacity: 0;
+    transform: translateY(50px);
+  }
+  100% {
+    opacity: 1;
+    top: 50%; left: 50%;
+    transform: translate(-50px, -50px);
+  }
+}
+@keyframes slideDown {
+  0% {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  50% {
+    opacity: 1;
+    transform: translateY(5px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+</style>
+
+<body>
+  <div class="atas" id="atas">
+    <div class="logpop" style="display: none;">
+      <div class="loginPop"></div>
+    </div>
+    <div class="popupMenu" id="popup" style="display: none;">
+      <p id="sapaan">Ingin menjadi pelanggan tetap kami? Daftar disini 👇</p>
+      <div class="login" id=login>
+        <button id="log-in">Login</button>
+        <button id="sign">SignUp</button>
+      </div>
+      <button onclick="beranda()" id="beranda">🌐 Dashboard</button>
+      <button onclick="belanjaNow()">📦 Daftar produk</button>
+      <button onclick="belanjaanku()">📃 Riwayat pesanan</button>
+      <button onclick="riwayatPesanan()">📝 Pesanan saya</button>
+      <button onclick="goDashboardAdmin()">➡️ Masuk</button>
+    </div>
+    <button onclick="showPopup()" class="tt">&#x2630;</button>
+    <button onclick="showCheckout()" id="krj" class="tt">🛒<span class="badge" id="bad">0</span></button>
+    <br><br>
+    <button onclick="openSearch()" id="cr" class="tt">🔎</button>
+    <input oninput="openSearch()" placeholder="🔍 Cari..." id="cari" class="cari">
+  </div>
+  <div class="tengah" id="tengah"></div>
+  <div class="bawah" id="bawah"></div>
+  <div id="customModal" class="custom-modal" style="display:none;">
+    <div class="custom-modal-content">
+        <h3 id="modalTitle">Judul</h3>
+        <p id="modalMessage">Pesan</p>
+        <input type="text" id="modalInput" placeholder="Masukkan sesuatu..." style="display:none;">
+        <div class="modal-actions">
+            <button id="modalBtnOK" class="btn">OK</button>
+            <button id="modalBtnCancel" class="btn btn-cancel">Batal</button>
+        </div>
+    </div>
+  </div>
+</body>
+
+<script>
+  let cariState = "close";
+  formatUang = ["Rp", "kiri", ".", ",", "2"];
+
+  let keranjang = [];
+  const url = "http://127.0.0.1:5000/";
+  
+  let produkData = [];
+  let persen = 0;
+  let aktif = 0;
+  let nomorPesanan = "";
+  
+  function showPopup() {
+    const pop = document.getElementById("popup");
+    const visible = pop.style.display;
+    if (visible === "none") {
+      pop.style.display = "block";
+    } else {
+      pop.style.display = "none";
+    }
+  }
+  function hitungPajak(nilai) {
+    if (aktif === 1) {
+      return Math.round(nilai * (1 + persen / 100));
+    } else {
+      return nilai;
+    }
+  }
+  
+  async function ambilProduk() {
+    produkData = await getData("produk");
+  }
+  
+  function formatMataUang(uang) {
+    if (formatUang[1] === "kiri") {
+      return formatUang[0] + uang.toString().replace(/\B(?=(\d{3})+(?!\d))/g, formatUang[2]);
+    } else {
+      return uang.toString().replace(/\B(?=(\d{3})+(?!\d))/g, formatUang[2]) + formatUang[0];
+    }
+  }
+  
+  async function resetPop() {
+    document.getElementById("popup").style.display = "none";
+  }
+  
+  async function Popup() {
+    const pop = document.getElementById("popup");
+    if (pop.style.display === "none") {
+      pop.style.display = "flex";
+    } else {
+      pop.style.display = "none";
+    }
+  }
+  
+  async function lihatTransaksi(data, status, id, namaFile) {
+    const wadah = document.querySelector("#tengah");
+    wadah.innerHTML = "";
+    
+    const container = makeParent("container2");
+    for (const p of data) {
+      const gambar = await getPicture(p.nama, "get_katalog");
+      const parent = makeParent("frp");
+      const kiri = document.createElement("div");
+      const kanan = document.createElement("div");
+      
+      const nama = makeLabel("p", p.nama, "nama");
+      const pict = document.createElement("img");
+      pict.src = gambar;
+      pict.loading = "lazy";
+      pict.className = "pict";
+      
+      let harga = 0;
+      let qty = 0;
+      if (status.toLowerCase() === "ditangguhkan") {
+        harga = p.harga;
+        qty = p.qty;
+      } else if (status.toLowerCase() === "diproses" || status.toLowerCase() === "sudah dibayar" || status.toLowerCase() === "sedang diantar") {
+        harga = p.harga_jual;
+        qty = p.qty_asli;
+      }
+      const subtotal = harga * qty;
+      const info = [
+        "Barcode: " + p.barcode,
+        "Qty: " + p.qty + " unit",
+        "Harga: " + formatMataUang(Math.round(harga)),
+        "Subtotal: " + formatMataUang(Math.round(subtotal))
+      ]
+      for (const k of info) {
+        const lbl = makeLabel("p", k, "namaa");
+        kanan.appendChild(lbl);
+      }
+      for (const k of [nama, pict]) {
+        kiri.appendChild(k);
+      }
+      for (const k of [kiri, kanan]) {
+        parent.appendChild(k);
+      }
+      container.appendChild(parent);
+    }
+    const upload = document.createElement("input");
+    upload.type = "file";
+    upload.className = "upload";
+    const preview = document.createElement("img");
+    preview.className = "image";
+    
+    async function uploadBuktiPembayaran() {
+      const file = upload.files[0]
+      const form = new FormData();
+      form.append("file", file);
+      const konfirmasi = await modalShow("Konfirmasi", "Upload bukti pembayaran Anda?", false);
+      if (konfirmasi) {
+        try {
+          const res = await fetch(url + "upload_bukti_bayar/" + namaFile, {
+            method: "POST",
+            body: form
+          });
+          const r = await res.json()
+          await modalShow(r.stat, r.pesan);
+        } catch (error) {
+          await modalShow("Error", error);
+        }
+        try {
+          const ubah = await postData("ubah_status_sudah_dibayar", {id: id});
+          await modalShow(ubah.stat, ubah.pesan);
+        } catch (error) {
+          await modalShow("Error", error);
+        }
+      }
+    }
+    
+    const btn = makeButton("Konfirmasi sudah bayar");
+    btn.onclick = uploadBuktiPembayaran;
+    upload.onchange = function(e) {
+      const file = e.target.files[0];
+      if (file) {
+        const url = URL.createObjectURL(file);
+        preview.src = url;
+        preview.style.display = "block";
+      }
+    }
+    for (const k of [container, upload, preview, btn]) {
+      wadah.appendChild(k);
+    }
+  }
+  
+  async function riwayatPesanan() {
+    resetPop();
+    const wadah = document.getElementById("tengah");
+    wadah.innerHTML = "";
+    const idUser = localStorage.getItem("idUser");
+    if (!idUser) {
+      await modalShow("Perlu login", "Silahkan login terlebih dahulu untuk melihat pesanan");
+      return;
+    }
+    const riwayatPesanan = await getData("permintaan");
+    const dataRiwayat = []
+    for (const k of riwayatPesanan) {
+      if (!k.oleh || k.oleh !== idUser) {
+        continue;
+      } else {
+        dataRiwayat.push(k);
+      }
+    }
+    for (const k of dataRiwayat) {
+      const tm = makeLabel("p", k.waktu + " || " + k["status"], "nama");
+      const dt = JSON.parse(k.data);
+      const namaFile = "Nota_" + dt.nama + "_" + k.id
+      const head = `
+      <tr>
+        <th>Nama</th>
+        <th>Alamat</th>
+        <th>Kontak</th>
+        <th>Total pesanan</th>
+        <th>Jumlah pesanan</th>
+      </tr>
+      `
+      const table = makeTable(head);
+      const tr = document.createElement("tr");
+      let jumlah = 0;
+      let total = 0;
+      if (k["status"].toLowerCase() === "ditangguhkan") {
+        jumlah = dt.belanjaan.reduce((sum, item) => sum + item.qty, 0);
+        total = Math.round(dt.belanjaan.reduce((sum, item) => sum + item.harga, 0));
+      } else if (k["status"].toLowerCase() === "diproses" || k["status"].toLowerCase() === "sudah dibayar" || k["status"].toLowerCase() === "sedang diantar") {
+        jumlah = dt.belanjaan.reduce((sum, item) => sum + item.qty_asli, 0);
+        total = Math.round(dt.belanjaan.reduce((sum, item) => sum + item.harga_jual, 0));
+      }
+      tr.innerHTML = `
+        <td>${dt.nama}</td>
+        <td>${dt.alamat}</td>
+        <td>${dt.kontak}</td>
+        <td>${formatMataUang(total)}</td>
+        <td>${jumlah + " unit"}</td>
+      `
+      tr.onclick = () => lihatTransaksi(dt.belanjaan, k["status"], k.id, namaFile);
+      table.appendChild(tr);
+      for (const x of [tm, table]) {
+        wadah.appendChild(x);
+      }
+    }
+  }
+  
+  function makeTable(head) {
+    const table = document.createElement("table");
+    table.style.width = "100%";
+    table.style.borderCollapse = "collapse";
+    table.style.marginTop = "10px";
+    table.className = "table-produk";
+    const thead = document.createElement("thead");
+    thead.innerHTML = head;
+    table.appendChild(thead);
+    return table;
+  }
+  
+  async function lihatDetailPesanan(status, data, nomor) {
+    if (status.toLowerCase() === "pending") {
+      keranjang = [];
+      resetBadge();
+      for (const p of data) {
+        keranjang.push(p);
+      }
+      const tt = keranjang.reduce((sum, item) => sum + item.qty, 0);
+      document.getElementById("bad").innerHTML = tt;
+      nomorPesanan = nomor;
+      showCheckout();
+    } else if (status.toLowerCase() === "terkirim") {
+      const wadah = document.getElementById("tengah");
+      wadah.innerHTML = "";
+      let total = 0;
+      const labelTotal = makeLabel("h6", "", "judul");
+      wadah.appendChild(labelTotal);
+      
+      for (const p of data) {
+        const container = makeParent("frp");
+        const kiri = document.createElement("div");
+        const kanan = document.createElement("div");
+        const gambar = await getPicture(p.nama, "get_katalog");
+        const image = document.createElement("img");
+        image.src = gambar;
+        image.loading = "lazy";
+        image.className = "pict";
+        const nama = makeLabel("p", p.nama, "nama");
+        const harga = makeLabel("p", "Harga: " + formatMataUang(p.harga), "namaa");
+        const qty = makeLabel("p", "Jumlah: " + p.qty + " unit", "namaa");
+        const sub = p.harga * p.qty;
+        total += sub;
+        const subtotal = makeLabel("p", "Subtotal: " + formatMataUang(sub), "namaa");
+        for (const k of [harga, qty, subtotal]) {
+          kanan.appendChild(k);
+        }
+        for (const q of [nama, image]) {
+          kiri.appendChild(q);
+        }
+        for (const r of [kiri, kanan]) {
+          container.appendChild(r);
+        }
+        wadah.appendChild(container);
+      }
+      labelTotal.textContent = "Total: " + formatMataUang(total);
+    }
+  }
+  async function belanjaanku() {
+    resetPop();
+    let status = null;
+    let no = null;
+    let item = null;
+    const wadah = document.getElementById("tengah");
+    wadah.innerHTML = "";
+    const data = localStorage.getItem("belanja");
+    const dataSimpan = data ? JSON.parse(data) : [];
+    if (dataSimpan && dataSimpan.length > 0) {
+      const head = `
+        <tr>
+          <th>No</th>
+          <th>Pengenal</th>
+          <th>Total</th>
+          <th>Status</th>
+        </tr>
+      `
+      const table = makeTable(head);
+      for (const p of dataSimpan) {
+        let total = 0;
+        for (const i of p.item) {
+          const subtotal = i.qty * i.harga;
+          total += subtotal;
+        }
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${p.no}</td>
+          <td>${p.nama}</td>
+          <td>${formatMataUang(total)}</td>
+          <td>${p["status"]}</td>
+        `
+        tr.onclick = async function() {
+          status = p["status"];
+          no = p.no,
+          item = p.item || [];
+        }
+        table.appendChild(tr);
+      }
+      wadah.appendChild(table);
+    } else {
+      await modalShow("Kosong", "Anda belum memiliki data pesanan");
+    }
+    const fr = makeParent("frame");
+    const btnDetail = makeButton("Lihat detail");
+    const btnHapus = makeButton("Hapus");
+    for (const p of [btnDetail, btnHapus]) {
+      fr.appendChild(p);
+    }
+    btnDetail.onclick = () => lihatDetailPesanan(status, item, no);
+    btnHapus.onclick = () => hapusTransaksi(no);
+    wadah.appendChild(fr);
+  }
+ 
+ function hapusTransaksi(no) {
+   console.log(no);
+   const belanja = localStorage.getItem("belanja");
+   const parsed = belanja ? JSON.parse(belanja) : [];
+   const filter = parsed.filter(p => p.no !== no);
+   localStorage.setItem("belanja", JSON.stringify(filter));
+   belanjaanku();
+ } 
+  function modalShow(title, message, showInput = false) {
+    return new Promise((resolve) => {
+        const modal = document.getElementById("customModal");
+        document.getElementById("modalTitle").textContent = title;
+        document.getElementById("modalMessage").textContent = message;
+
+        const input = document.getElementById("modalInput");
+        input.style.display = showInput ? "block" : "none";
+        input.value = "";
+
+        const btnOK = document.getElementById("modalBtnOK");
+        const btnCancel = document.getElementById("modalBtnCancel");
+
+        const newOK = btnOK.cloneNode(true);
+        const newCancel = btnCancel.cloneNode(true);
+        btnOK.replaceWith(newOK);
+        btnCancel.replaceWith(newCancel);
+
+        modal.style.display = "flex";
+
+        newOK.onclick = function() {
+            modal.style.display = "none";
+            if (showInput) {
+                resolve(input.value || "");
+            } else {
+                resolve(true);
+            }
+        };
+
+        newCancel.onclick = function() {
+            modal.style.display = "none";
+            resolve(null);
+        };
+
+        input.onkeydown = function(e) {
+            if (e.key === "Enter") {
+                newOK.click();
+            }
+        };
+    });
+  }
+  
+  async function postData2(endpoint, data) {
+    try {
+      const res = await fetch(url + "post_data/" + endpoint, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data)
+      });
+      const d = await res.json();
+      return d;
+    } catch (error) {
+      await modalShow("Gagal", "Gagal upload data ke server");
+      return null;
+    }
+  }
+  
+  async function postData(endpoint, data) {
+    try {
+      const res = await fetch(url + endpoint, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data)
+      });
+      const d = await res.json();
+      return d;
+    } catch (error) {
+      await modalShow("Gagal", "Gagal upload data ke server");
+      return null;
+    };
+  }
+  
+  async function getData(endpoint) {
+    try {
+      const res = await fetch(url + "lihat_data/" + endpoint);
+      const dt = await res.json();
+      return dt;
+    } catch (error) {
+      await modalShow("Gagal", error);
+      return null;
+    }
+  }
+  function makeParent(kelas) {
+    const pr = document.createElement("div");
+    pr.className = kelas;
+    return pr;
+  }
+  function makeLabel(jenis, teks, kelas) {
+    const lbl = document.createElement(jenis);
+    lbl.className = kelas;
+    lbl.textContent = teks;
+    return lbl;
+  }
+  
+  
+  async function getPicture(name, end) {
+    try {
+      const res = await fetch(url + end, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ "nama": name })
+      });
+      if (!res.ok) {
+        throw new Error(`HTTP error! status: ${res.status}`);
+      }
+      const contentType = res.headers.get("content-type");
+      if (!contentType || !contentType.includes("image")) {
+        throw new Error("Response bukan gambar");
+      }
+      const blob = await res.blob();
+      const pict = URL.createObjectURL(blob);
+      return pict;
+    } catch (error) {
+      console.error("Gagal mengambil gambar:", error);
+      return null;
+      throw error;
+    }
+  }
+  
+  async function editQty(id) {
+    const produk = await getData("produk");
+    const edit = await modalShow("Qty baru", "Silahkan masukkan qty baru...", true);
+    const angka = Number(edit);
+    const jumlah = produk.find(p => p.id_produk === id)?.jumlah || 0;
+    if (jumlah < angka) {
+      await modalShow("Gagal", "Jumlah stok produk tidak mencukupi!");
+      return;
+    }
+    for (const k of keranjang) {
+      if (k.id === id) {
+        k.qty = angka;
+        break;
+      }
+    }
+    resetBadge();
+    showCheckout();
+  }
+  
+  async function hapusProduk(id) {
+    const konfirmasi = await modalShow("Konfirmasi", "Hapus produk dari keranjang?", false);
+    if (konfirmasi) {
+      keranjang = keranjang.filter(p => p.id !== id);
+      resetBadge();
+      await modalShow("Berhasil", "Produk telah dihapus!");
+      showCheckout();
+    }
+  }
+  
+  async function showCheckout() {
+    const wadah = document.getElementById("tengah");
+    wadah.innerHTML = "";
+    const wadahUtama = makeParent("wadahUtama");
+    const kiriUtama = makeParent("kiri");
+    const kananUtama = makeParent("kanan");
+    
+    const fr = document.createElement("div");
+    fr.style.display = "flex";
+    fr.style.justifyContent = "center";
+    fr.style.alignItems = "center";
+    
+    let totalBelanja = 0;
+    for (const k of keranjang) {
+      totalBelanja += k.harga * k.qty;
+      const parent = makeParent("frp");
+      const kiri = document.createElement("div");
+      const kanan = document.createElement("div");
+      for (const k of [kiri, kanan]) {
+        k.style.margin = "10px";
+      }
+      const nama = makeLabel("p", k.nama.toUpperCase(), "nama");
+      const gambar = await getPicture(k.nama, "get_katalog");
+      const pict = document.createElement("img");
+      pict.className = "pict";
+      pict.src = gambar;
+      pict.loading = "lazy";
+      const harga = makeLabel("p", "💵 Harga: " + formatMataUang(k.harga), "namaa");
+      const qty = makeLabel("p", "🔢 Qty: " + k.qty + " " + "unit", "namaa");
+      const pr = document.createElement("div");
+      pr.style.display = "flex";
+      pr.style.flexDirection = "column";
+      const btns = [
+        ["✏️ Edit qty", editQty],
+        ["🗑️ Hapus", hapusProduk]
+      ];
+      for (const p of btns) {
+        const [teks, command] = p;
+        const btn = document.createElement("button");
+        btn.className = "btn";
+        btn.textContent = teks;
+        btn.onclick = () => command(k.id);
+        pr.appendChild(btn);
+      }
+      const subtotal = k.harga * k.qty;
+      const subtLabel = makeLabel("p", "Subtotal: " + formatMataUang(subtotal), "namaa");
+      
+      for (const p of [harga, qty, subtLabel, pr]) {
+        kanan.appendChild(p);
+      }
+      for (const p of [nama, pict]) {
+        kiri.appendChild(p);
+      }
+      for (const p of [kiri, kanan]) {
+        parent.appendChild(p);
+      }
+      kiriUtama.appendChild(parent);
+    }
+    
+    const i = [
+      ["text", "catatan", "Tuliskan catatan pesanan..."],
+      ["text", "nama", "Tuliskan nama..."],
+      ["text", "alamat", "Tuliskan alamat..."],
+      ["tel", "kontak", "Tuliskan nomor telepon/Whatsapp..."],
+      ["email", "email", "Tuliskan email(opsional)..."]
+    ];
+    const identitas = {};
+    i.forEach((item) => {
+      const [jenis, id, teks] = item;
+      const inp = makeEntry(teks);
+      inp.type = jenis;
+      identitas[id] = inp;
+      kananUtama.appendChild(inp);
+    });
+    
+    const pembayaran = await getData("media_bayar");
+    const bank = ["Cash on Delivery (COD)"];
+    for (const p of pembayaran) {
+      bank.push(p["bank"]);
+    }
+    const selectBayar = selectMaker("Pilih pembayaran", bank, "combo");
+    const warning = makeLabel("p", "Data pesanan Anda akan kami tinjau terlebih dahulu. Kami akan mengirimkan total harga asli setelah peninjauan. Terima kasih atas kesabarannya!!", "biasa");
+    for (const p of [selectBayar, warning]) {
+      kananUtama.appendChild(p);
+    }
+    
+    for (const a of [kiriUtama, kananUtama]) {
+      wadahUtama.appendChild(a);
+    }
+
+    const judulTotal = [
+      ["h4", "🛒 DAFTAR BELANJA", "judul"],
+      ["h3", `TOTAL: \n${formatMataUang(totalBelanja)}`, "label"]
+    ];
+    judulTotal.forEach((item) => {
+      const [jenis, teks, kelas] = item;
+      const lbl = makeLabel(jenis, teks, kelas);
+      fr.appendChild(lbl);
+    })
+    
+    const fr2 = document.createElement("div");
+    fr2.className = "fr2";
+    
+    const buttons = [
+      ["reset", "🔄 Reset keranjang", resetKeranjang],
+      ["simpan", "💾 Simpan pesanan", simpanKeranjang],
+      ["pesan", "Ajukan pesanan", kumpulkanData]
+    ];
+    let tombol = {};
+    for (const k of buttons) {
+      const [id, teks, command] = k;
+      const btn = makeButton(teks);
+      btn.onclick = command;
+      tombol[id] = btn;
+      fr2.appendChild(btn);
+    }
+    
+    async function kumpulkanData() {
+      try {
+        const namaPembeli = identitas.nama.value;
+        const alamat = identitas.alamat.value;
+        const kontak = identitas.kontak.value;
+        const email = identitas.email.value;
+        const cttn = identitas.catatan.value;
+        const opsiBayar = selectBayar.value;
+        if (![namaPembeli, alamat, kontak, email, opsiBayar].every(item => item)) {
+          await modalShow("Kosong", "Mohon tuliskan informasi pemesan dengan benar!");
+          return;
+        }
+        const number = await getData("generate_number");
+        const idUser = localStorage.getItem("idUser");
+        const idev = localStorage.getItem("idDevice");
+        const data = {
+          nama: namaPembeli,
+          alamat: alamat,
+          kontak: kontak,
+          email: email,
+          catatan: cttn,
+          bayar: opsiBayar,
+          belanjaan: keranjang,
+          oleh: idUser,
+          device: idev,
+          nomor: number.time
+        };
+        const konfirmasi = await modalShow("Konfirmasi", "Data telah siap. Ajukan pesanan sekarang?", false);
+        if (konfirmasi) {
+          const upload = await postData("tambahkan_pesanan", data);
+          await modalShow(upload.stat || "", upload.pesan);
+          if (upload.stat.toLowerCase() !== "berhasil") {
+            return;
+          }
+          
+          const smp = localStorage.getItem("belanja");
+          let simpan = smp ? JSON.parse(smp) : [];
+          
+          if (nomorPesanan !== "") {
+            for (const s of simpan) {
+              if (s.no === nomorPesanan) {
+                s["status"] = "Terkirim";
+                break;
+              }
+            }
+          } else {
+            const dt = {
+              nama: namaPembeli,
+              no: number.time,
+              item: keranjang,
+              status: "Terkirim",
+            }
+            simpan.push(dt);
+          }
+          localStorage.setItem("belanja", JSON.stringify(simpan));
+          nomorPesanan = "";
+          keranjang = [];
+          resetBadge();
+          await modalShow("Tersimpan", "Riwayat belanja Anda telah tersimpan");
+        }
+      } catch (error) {
+        await modalShow("Gagal", error);
+      };
+    }
+    for (const x of [fr, wadahUtama, fr2]) {
+      wadah.appendChild(x);
+    }
+  }
+  
+  async function simpanKeranjang() {
+    if (keranjang.length === 0) {
+      return;
+    }
+    const pengenal = await modalShow("Pengenal", "Masukkan sesuatu untuk menandai data ini...", true);
+    if (!pengenal) {
+      return;
+    }
+    const time = await getData("generate_number");
+    const data = {
+      nama: pengenal,
+      no: time.time,
+      item: keranjang,
+      status: "pending"
+    };
+    const simpan = localStorage.getItem("belanja");
+    const dataSimpan = simpan ? JSON.parse(simpan) : [];
+    dataSimpan.push(data);
+    localStorage.setItem("belanja", JSON.stringify(dataSimpan));
+    await modalShow("Berhasil", "Data telah disimpan");
+    keranjang = [];
+    resetBadge();
+    showCheckout();
+  }
+  
+  function resetBadge() {
+    const totalQty = keranjang.reduce((sum, item) => sum + item.qty, 0);
+    document.getElementById("bad").innerHTML = totalQty;
+  }
+  
+  async function resetKeranjang() {
+    const konfirmasi = await modalShow("Konfirmasi", "Hapus seluruh item dikeranjang?", false);
+    if (konfirmasi) {
+      keranjang = [];
+      resetBadge();
+      showCheckout();
+    }
+  }
+  
+  async function addKeranjang(id, nilai, satuan) {
+    const jumlah = Number(nilai);
+    if (jumlah === 0 || nilai === "") {
+      return;
+    }
+    const produk = await getData("produk");
+    const p = produk.find(p => p.id_produk === id) ?? null;
+    if (p) {
+      const qtyAsli = p.satuan_beli === satuan ? jumlah * p.isi_satuan : jumlah;
+      if (p.jumlah < qtyAsli) {
+        await modalShow("Tidak cukup", `Jumlah stok produk ${p.nama} tidak mencukupi..`);
+        return;
+      } else {
+        const same = keranjang.find(k => k.id === p.id_produk) ?? null;
+        if (same) {
+          same.qty += qtyAsli;
+        } else {
+          keranjang.push({
+            id: p.id_produk || "",
+            nama: p.nama || "",
+            barcode: p.barcode || "",
+            qty: qtyAsli,
+            harga: hitungPajak(p.harga_jual || 0)
+          })
+        }
+        resetBadge();
+      }
+    }
+  }
+  
+  async function tambahKeranjang(id, jumlah) {
+    const produk = await getData("produk");
+    const produkTarget = produk.find(p => p.id_produk === id) ?? null;
+    if (produkTarget) {
+      if (produkTarget.jumlah < jumlah) {
+        await modalShow("Produk kurang", "Jumlah stok produk tidak cukup");
+        return
+      } else {
+        let same = false;
+        for (const k of keranjang) {
+          if (k.id === produkTarget.id_produk) {
+            k.qty += jumlah;
+            same = true;
+            break;
+          }
+        }
+        if (!same) {
+          keranjang.push({
+            barcode: produkTarget.barcode,
+            id: produkTarget.id_produk,
+            nama: produkTarget.nama,
+            qty: jumlah,
+            harga: hitungPajak(produkTarget.harga_jual)
+          })
+        }
+        resetBadge();
+      }
+    }
+  }
+  
+  function selectMaker(teksDefault, data, kelas) {
+    const select = document.createElement("select");
+    select.className = kelas;
+    const defaultTop = document.createElement("option");
+    defaultTop.value = "";
+    defaultTop.textContent = teksDefault;
+    select.appendChild(defaultTop);
+    
+    for (const p of data) {
+      const opsi = document.createElement("option");
+      opsi.textContent = p;
+      opsi.value = p;
+      select.appendChild(opsi);
+    };
+    return select;
+  }
+  
+  function makeEntry(teks) {
+    const entri = document.createElement("input");
+    entri.className = "entry";
+    entri.placeholder = teks;
+    return entri;
+  }
+  
+  function makeButton(teks) {
+    btn = document.createElement("button");
+    btn.textContent = teks;
+    btn.className = "btn";
+    return btn;
+  }
+  
+  async function showData(wadah2, data) {
+    wadah2.innerHTML = "";
+    for (const p of data) {
+      const parent = document.createElement("div");
+      const kiri = document.createElement("div");
+      const kanan = document.createElement("div");
+      const picture = await getPicture(p.nama, "get_katalog");
+      const gambar = document.createElement("img");
+      gambar.src = picture;
+      gambar.loading = "lazy";
+      parent.className = "frp";
+      gambar.className = "pict";
+      gambar.onclick = () => lihatDetailGambar(p.nama);
+      const sat = [p.satuan_jual, p.satuan_beli];
+      const selectSatuan = selectMaker("Pilih satuan", sat, "combo");
+      const info = ["💰 " + formatMataUang(hitungPajak(p.harga_jual)), "📦 " + p.jumlah + " " + p.satuan_jual]
+      for (const i of info) {
+        const wd = document.createElement("p");
+        wd.textContent = i;
+        wd.className = "namaa";
+        kanan.appendChild(wd);
+      };
+      kanan.appendChild(selectSatuan);
+      const qty = makeEntry("Masukkan jumlah");
+      qty.type = "number";
+      const pesan = makeButton("🛒 Pesan");
+      pesan.onclick = () => addKeranjang(p.id_produk, qty.value, selectSatuan.value);
+      for (const p of [qty, pesan]) {
+        kanan.appendChild(p);
+      }
+      const nm = document.createElement("p");
+      nm.className = "nama";
+      nm.textContent = p.nama.toUpperCase();
+      kiri.appendChild(nm);
+      kiri.appendChild(gambar);
+      for (const k of [kiri, kanan]) {
+        parent.appendChild(k);
+      }
+      wadah2.appendChild(parent);
+    }
+  }
+  
+  async function getPajak() {
+    const pajak = await getData("pajak");
+    persen = pajak[0]["persen"];
+    aktif = pajak[0]["aktif"];
+  }
+      
+  async function belanjaNow() {
+    resetPop();
+    const wadah = document.getElementById("tengah");
+    wadah.innerHTML = "";
+    const produk = await getData("produk");
+    if (!produk) {
+      await modalShow("Kosong", "Data produk tidak tersedia");
+      return
+    };
+    const kategori = [...new Set(produk.map(p => p.kategori))];
+    const select = selectMaker("Semua kategori", kategori, "combox");
+    const btn = document.createElement("button");
+    btn.textContent = "Filter";
+    btn.className = "btn";
+    btn.onclick = shownow;
+    const frame = document.createElement("div");
+    frame.className = "frame";
+    for (const p of [select, btn]) {
+      frame.appendChild(p);
+    }
+    wadah.appendChild(frame);
+    const wadah2 = document.createElement("div");
+    wadah2.className = "wdh2";
+    wadah.appendChild(wadah2)
+    
+    function filterData() {
+      const kategori = select.value;
+      if (!kategori) {
+        return produk;
+      };
+      const filtered = produk.filter(p => p.kategori === kategori);
+      return filtered;
+    }
+    function shownow() {
+      const data = filterData();
+      showData(wadah2, data);
+    }
+    shownow();
+  }
+  
+  async function lihatDetailGambar(nama) {
+    const wadah = document.getElementById("tengah");
+    wadah.innerHTML = "";
+    const gambar = await getPicture(nama, "get_gambar_detail");
+    const img = document.createElement("img");
+    img.className = "image";
+    img.src = gambar;
+    img.loading = "lazy";
+    wadah.appendChild(img);
+  }
+  
+  async function message() {
+    await modalShow("Failed", "Mohon maaf. Kami sedang dalam perbaikan. Silahkan kembali beberapa saat lagi!");
+  }
+  
+  async function beranda() {
+    resetPop();
+    const format = await getData("pengaturan_format");
+    if (format.length > 0) {
+    	formatUang = JSON.parse(format[0]["format_uang"]);
+    }
+    const wadah = document.getElementById("tengah");
+    wadah.innerHTML = "";
+    
+    const profil = await getData("profil") ?? [];
+    const riwayat = await getData("riwayat_penjualan_campuran") ?? [];
+    const produk = await getData("produk") ?? [];
+    let namaToko = "-";
+    if (profil.length > 0) {
+    	namaToko = profil[0].nama;
+    }
+    const parents = makeParent("login");
+    wadah.appendChild(parents);
+    const wd = [
+      ["h3", "🏪 " + namaToko, "toko"],
+      ["p", "Selamat datang di " + namaToko + " .Menyediakan berbagai macam produk kebutuhan harian Anda...!", "wise"]
+    ]
+    wd.forEach((item) => {
+      const [jenis, teks, kelas] = item;
+      const isi = document.createElement(jenis);
+      isi.innerHTML = teks;
+      isi.className = kelas;
+      parents.appendChild(isi);
+    });
+    
+    const belanja = document.createElement("button");
+    belanja.textContent = "🛒 Belanja sekarang?";
+    belanja.className = "shopping";
+    belanja.onclick = belanjaNow;
+    wadah.appendChild(belanja);
+    const namaProduk = [];
+    for (const r of riwayat) {
+      const krj = JSON.parse(r.data_belanja);
+      for (const p of krj) {
+        const id = p.id;
+        let same = false;
+        for (const n of namaProduk) {
+          if (n.idProduk === id) {
+            n.terjual += p.qty_asli || 0;
+            same = true;
+            break;
+          }
+        }
+        if (!same) {
+          namaProduk.push({
+            idProduk: id,
+            nama: p.nama,
+            terjual: p.qty_asli || 0
+          })
+        }
+      }
+    }
+    
+    const container = document.createElement("div");
+    container.className = "container";
+    wadah.appendChild(container);
+    const sortedData = namaProduk.sort((a, b) => b.terjual - a.terjual);
+    const dataSorted = sortedData.slice(0, 10);
+    for (const item of dataSorted) {
+      const wdh = document.createElement("div");
+      wdh.className = "wdh";
+      const nama = item.nama;
+      const harga = hitungPajak(produk.find(p => p.id_produk === item.idProduk)?.harga_jual || 0);
+      const gambar = await getPicture(nama, "get_katalog");
+      if (!gambar) {
+        continue;
+      };
+      const img = document.createElement("img");
+      img.src = gambar;
+      img.loading = "lazy";
+      img.className = "image";
+      img.onclick = () => lihatDetailGambar(nama);
+      const labelHarga = document.createElement("p");
+      labelHarga.className = "namaBeranda";
+      labelHarga.textContent = formatMataUang(harga);
+      const label = document.createElement("p");
+      const btn = document.createElement("button");
+      btn.textContent = "🛒 Tambah ke keranjang";
+      btn.className = "btns";
+      btn.onclick = () => tambahKeranjang(item.idProduk, 1);
+      label.textContent = nama;
+      label.className = "namaBeranda";
+      
+      for (const s of [img, label, labelHarga, btn]) {
+        wdh.appendChild(s);
+      }
+      container.appendChild(wdh);
+    }
+  }
+
+  function openSearch() {
+    const cari = document.getElementById("cari");
+    const search = cari.value;
+    findData(search);
+  }
+  
+  function goDashboardAdmin() {
+    window.location.href = url + "login_user";
+  }
+  
+  async function findData(teks) {
+    const foundData = [];
+    const wadah = document.getElementById("tengah");
+    wadah.innerHTML = "";
+    const wadahUtama = makeParent("container2");
+    wadah.appendChild(wadahUtama);
+    for (const p of produkData) {
+      if (p.nama.toLowerCase().includes(teks.toLowerCase())) {
+        foundData.push(p);
+      }
+    }
+    showData(wadahUtama, foundData);
+  }
+  
+  async function lihatPenggunaanData() {
+    await modalShow("Baca selengkapnya", "Yes");
+  }
+  
+  async function goSignUp() {
+    resetPop();
+    const main = document.querySelector(".logpop");
+    main.style.display = "block";
+    const wadah = document.querySelector(".loginPop");
+    wadah.innerHTML = "";
+    
+    const profil = await getData("profil");
+    const namaToko = profil[0]["nama"];
+    const warning = "Selamat datang di " + namaToko.toUpperCase() + ". Klik untuk melihat bagaimana kami menggunakan data Anda!"
+    const btn = makeLabel("p", warning, "lblwarning")
+    btn.onclick = function() {
+      setTimeout(lihatPenggunaanData, 0);
+    }
+    wadah.appendChild(btn);
+    const jdl = document.createElement("h3");
+    jdl.textContent = "FORM Register";
+    wadah.appendChild(jdl);
+    
+    const info = [
+      ["text", "nama", "Nama..."],
+      ["text", "alamat", "Alamat(opsional)..."],
+      ["tel", "kontak", "Nomor telepon/Whatsapp..."],
+      ["email", "email", "Email(opsional)..."],
+      ["password", "password", "Kata sandi Anda..."],
+      ["password", "konfir", "Konfirmasi kata sandi..."]
+    ];
+    let entries = {};
+    for (const p of info) {
+      const[jenis, id, teks] = p;
+      const ent = makeEntry(teks);
+      ent.type = jenis;
+      entries[id] = ent;
+      wadah.appendChild(ent);
+    }
+    async function simpanCustomer() {
+      try {
+        nama = entries.nama.value;
+        alamat = entries.alamat.value;
+        kontak = entries.kontak.value;
+        email = entries.email.value;
+        pw = entries.password.value;
+        kpw = entries.konfir.value;
+
+        let id = localStorage.getItem("idDevice");
+        if (!id) {
+          const newId = generateId();
+          localStorage.setItem("idDevice", newId);
+          id = newId;
+        }
+        const data = {
+          nama: nama,
+          alamat: alamat,
+          kontak: kontak,
+          email: email,
+          password: pw,
+          "konfirmasi password": kpw,
+          idDev: id
+        }
+        const konfirmasi = await modalShow("Data siap", "Data dari " + id + " telah siap. Daftar sekarang?", false);
+        if (!konfirmasi) {
+          return;
+        }
+        const upload = await postData2("tambah_customer", data);
+        if (upload.stat.toLowerCase() === "berhasil") {
+          await modalShow(upload.stat || "", upload.pesan);
+          localStorage.setItem("idUser", upload.id || "");
+          main.style.display = "none";
+          sapa();
+          beranda();
+        } else {
+          await modalShow(upload.stat || "", upload.pesan);
+        }
+      } catch (error) {
+        await modalShow("Error", error);
+      }
+    }
+    const daftar = makeButton("Sign Up");
+    const batal = makeButton("Batal");
+    daftar.onclick = simpanCustomer;
+    batal.onclick = function() {
+      main.style.display = "none";
+    }
+    for (const x of [daftar, batal]) {
+      wadah.appendChild(x);
+    }
+  }
+  
+  function generateId() {
+    const id = "dev_" + Date.now() + "_" + Math.random().toString(36).substring(2, 10);
+    return id;
+  }
+  
+  async function logout() {
+    const idev = localStorage.getItem("idDevice");
+    const idus = localStorage.getItem("idUser");
+    const konfirmasi = await modalShow("Konfirmasi", "Logout sekarang?", false);
+    if (konfirmasi) {
+      const data = {
+        idUser: idus,
+        idev: idev
+      }
+      const up = await postData("logout_customer", data);
+      if (up.stat.toLowerCase() === "berhasil") {
+        localStorage.removeItem("idUser");
+        await modalShow(up.stat, up.pesan);
+        sapa();
+        beranda();
+      } else {
+        await modalShow(up.stat, up.pesan);
+      }
+    }
+  }
+  
+  async function sapa() {
+    const sapaan = document.getElementById("sapaan");
+    const wadah = document.getElementById("login");
+    const customer = await getData("customer");
+    const idUser = localStorage.getItem("idUser");
+    if (!idUser) {
+      return;
+    }
+    const cs = customer.find(p => p.id_user === idUser) ?? null;
+    if (!cs) {
+      await modalShow("Gagal", "Data customer tidak tersedia!");
+      return;
+    }
+    if (cs.status_login === 0) {
+      return;
+    }
+    wadah.innerHTML = "";
+    sapaan.innerHTML = `<span class='sapaEmoji'>🖐🏻 </span> Halo, ${cs.nama}`;
+    sapaan.className = "haloBang";
+      
+    const infoUser = [
+      ["h3", "Poin: " + cs.poin, "toko"],
+      ["p", "ID pengguna: " + cs.id_user, "namaa"],
+      ["p", "Kontak: " + cs.kontak, "namaa"],
+      ["p", "Email: " + cs.email, "namaa"],
+    ];
+    for (const k of infoUser) {
+      const [jenis, teks, kelas] = k
+      const label = makeLabel(jenis, teks, kelas);
+      wadah.appendChild(label);
+    }
+    const btn = document.createElement("button");
+    btn.textContent = "Logout";
+    btn.onclick = function() {
+      setTimeout(logout, 500);
+    }
+    wadah.appendChild(btn);
+  }
+  
+  async function loginCustomer() {
+    resetPop();
+    document.querySelector(".logpop").style.display = "block";
+    const utama = document.querySelector(".loginPop");
+    utama.innerHTML = "";
+    
+    const template = [
+      ["judul", "h3", "SignIn"],
+      ["email", "input", "Masukkan kontak atau email..."],
+      ["password", "input", "Masukkan kata sandi..."],
+      ["cek", "button", "Login"],
+      ["batal", "button", "Batal"]
+    ]
+    let dt = {};
+    template.forEach((item, i) => {
+      const [id, jenis, teks] = item;
+      const inp = document.createElement(jenis);
+      if (i === 1 || i === 2) {
+        inp.placeholder = teks;
+        inp.type = id;
+      } else {
+        inp.textContent = teks;
+      }
+      dt[id] = inp;
+      utama.appendChild(inp);
+    })
+    
+    async function cekLogin() {
+      const us = dt.email.value;
+      const pw = dt.password.value;
+      const dataKirim = {
+        username: us,
+        password: pw
+      };
+      const up = await postData("login_customer", dataKirim);
+      if (up.stat.toLowerCase() === "berhasil") {
+        localStorage.setItem("idUser", up.id);
+        await modalShow(up.stat, up.pesan);
+        sapa();
+        document.querySelector(".logpop").style.display = "none";
+        beranda();
+      } else {
+        await modalShow(up.stat, up.pesan);
+      }
+    }
+    dt.cek.onclick = cekLogin;
+    dt.batal.onclick = function() {
+      document.querySelector(".logpop").style.display = "none";
+    }
+  }
+  
+  async function setbawah() {
+    const bawah = document.getElementById("bawah");
+    bawah.innerHTML = "";
+    const profil = await getData("profil");
+    if (!profil) return;
+
+    const p = profil[0];
+    const info = [
+        `📋 TENTANG KAMI`,
+        `🏪 ${p.nama}`,
+        `📍 ${p.alamat}`,
+        `📞 ${p.kontak}`,
+        `📧 ${p.email}`,
+    ];
+
+    info.forEach((teks, i) => {
+        const lbl = i === 0 ? document.createElement("h3") : document.createElement("p");
+        lbl.textContent = teks;
+        bawah.appendChild(lbl);
+    });
+  }
+  
+  window.onload = function() {
+    try {
+    const btnLogin = document.getElementById("log-in");
+    const btnSignUp = document.getElementById("sign");
+    const info = [
+      [btnLogin, loginCustomer],
+      [btnSignUp, goSignUp]
+    ];
+    for (const p of info) {
+      const [btn, func] = p;
+      btn.onclick = function() {
+        setTimeout(func, 500);
+      }
+    }
+    sapa();
+    getPajak();
+    ambilProduk();
+    setbawah();
+    beranda();
+    } catch (e) {
+      alert("", e);
+    }
+  }
+</script>

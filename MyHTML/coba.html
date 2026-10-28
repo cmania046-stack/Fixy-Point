@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Virtual pet</title>
+
+<style>  
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  font-family: 'Inter', sans-serif;
+  background: linear-gradient(180deg, #FFE9F0, #ECE0FF);
+  color: #4A3B47;
+  line-height: 1.45;
+  align-items: flex-start;
+  justify-content: center;
+}
+
+#induk {
+	display: flex;
+	flex-direction: column;
+	justify-content: flex-start;
+	align-items: center;
+	background: rgba(255, 214, 235, 0.35);
+	padding: 10px;
+	border-radius: 24px;
+	margin: 30px;
+	width: 90%;
+	flex: 0;
+	border: 2px dashed #FFC2DD;
+}
+
+.wrapper {
+  position: relative;
+  width: 300px;
+  height: 300px;
+  animation: hidup 2s ease infinite;
+  margin-bottom: 25px;
+}
+
+.kepala {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 300px;
+  height: 300px;
+  background: #FFFBF6;
+  border-radius: 50%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  z-index: 10;
+  box-shadow: 0 6px 16px rgba(255, 143, 187, 0.35);
+}
+
+.telinga {
+  position: absolute;
+  width: 70px;
+  height: 80px;
+  background: #7A5C72;
+  border-radius: 50%;
+  top: 25px;
+  z-index: 5;
+}
+
+.telinga-kiri {
+  left: -20px;
+}
+
+.telinga-kanan {
+  right: -20px;
+}
+
+.mata {
+	position: absolute;
+	background: #7A5C72;
+	width: 80px;
+	height: 70px;
+	top: 80px;
+	z-index: 15;
+	display: flex;
+	overflow: hidden;
+	padding: 10px;
+	box-shadow: 0 4px 10px rgba(122, 92, 114, 0.5)
+}
+
+.mata-kiri {
+	left: 50px;
+	border-radius: 40% 50% 40% 50%;
+	align-items: flex-end;
+	justify-content: flex-end;	
+}
+
+.mata-kanan {
+	right: 50px;
+	border-radius: 50% 40% 50% 40%;
+	align-items: flex-end;
+	justify-content: flex-start;
+}
+
+.bola-mata {
+	background: #FFFBF6;
+	width: 50px;
+	height: 40px;
+	border-radius: 50%;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+}
+
+.pupil {
+	width: 30px;
+	height: 30px;
+	border-radius: 50%;
+	background: #3D2B39;
+	align-self: center;
+}
+
+.mulut {
+	position: absolute;
+	width: 60px;
+	height: 40px;
+	border-radius: 0 0 50% 50%;
+	bottom: 70px;
+	background: #3D2B39;
+	border-top: 10px solid #FFFBF6;
+	box-shadow: 0 4px 10px rgba(122, 92, 114, 0.45);
+}
+
+.transisi {
+	transition:
+		width .2s ease,
+		height .2s ease,
+		transform .2s ease,
+		border-radius .2s ease;
+}
+
+.dialog {
+	position: absolute;
+	width, height: fit-content;
+	top: -150px;
+	left: 5px;
+	padding: 20px;
+	border: 2px solid #FF8FBB;
+	background: #FFF6FA;
+	border-radius: 25px;
+	box-shadow: 0 6px 14px rgba(255, 143, 187, 0.35);
+	color: #4A3B47;
+	word-break: break-all;
+	z-index: 50;
+}
+
+.hidden {
+	display: none!important;
+}
+
+@keyframes hidup {
+	50% {
+		transform: translateY(-5px);
+	}
+	0, 100% {
+		transform: translateY(0);
+	}
+}
+
+.kotak-teks {
+	padding: 10px;
+	border: 2px solid #C6A8F0;
+	background: #FFFBF6;
+	width: 100%;
+	margin: 10px;
+	border-radius: 10px;
+	color: #4A3B47;
+}
+
+.kotak-teks::placeholder {
+	color: #B79CC4;
+}
+
+</style>
+
+</head>
+
+<body>
+<div id="induk">
+<input type="text" placeholder="Tuliskan sesuatu..." class="kotak-teks">
+<div class="wrapper">
+  <div class="dialog hidden">
+  	<p id="dialog"></p>
+  </div>
+  <div class="telinga telinga-kiri"></div>
+  <div class="telinga telinga-kanan"></div>
+  <div class="kepala">
+  	<div class="mata mata-kiri">
+  		<div class="bola-mata transisi">
+  			<div class="pupil transisi"></div>
+  		</div>
+  	</div>
+  	<div class="mata mata-kanan">
+  		<div class="bola-mata transisi">
+  			<div class="pupil transisi"></div>
+  		</div>
+  	</div>
+  	
+  	<div class="mulut transisi"></div>
+  </div>
+</div>
+</div>
+<script>
+
+function defaultFace() {
+	document.querySelector(".mulut").style.cssText = "";
+	document.querySelectorAll(".pupil").forEach((pup) => {
+		pup.style.cssText = "";
+	})
+
+	document.querySelectorAll(".bola-mata").forEach((bola) => {
+		bola.style.cssText = "";
+	});
+	setTimeout(hideDialog, 1000);
+}
+
+function say(teks){
+	document.getElementById("dialog").textContent = teks;
+}
+
+function showDialog(){
+	document.querySelector(".dialog").classList.remove("hidden");
+}
+function hideDialog(){
+	document.querySelector(".dialog").classList.add("hidden");
+}
+
+document.addEventListener("click", () => {
+	const mulut = document.querySelector(".mulut");
+	mulut.style.height = "35px";
+	mulut.style.borderRadius = "15% 20% 5px 5px";
+	
+	const pupil = document.querySelector(".pupil");
+	pupil.style.width = "20px";
+	pupil.style.height = "20px";
+	
+	const mkiri = document.querySelector(".mata-kiri");
+	mKiri.style.height = "50px";
+	
+	showDialog();
+	say("Hai, itu sakit...!hsjsndbsjsbsbnsjwhwjkwnsbbshsjbsbsbnwkwbdhshwbksbsbiwkwbsbnwkkwnsbkwoqnsbisjsbsjakkanshsijwbsbjallanshsinwnwkjsiwnsiwjsnjwowbsuwbwnn");	
+	setTimeout(defaultFace, 5000);
+})
+
+window.onload = function() {
+	showDialog();
+	say("Halo. Aku Panda, senang berkenalan denganmu...");
+	setTimeout(hideDialog, 2000);
+}
+</script>
+
+</body>

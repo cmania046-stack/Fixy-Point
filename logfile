@@ -1,0 +1,171 @@
+2026-10-21 21:46:12.730 WIT [13512] LOG:  starting PostgreSQL 18.6 on arm-unknown-linux-androideabi, compiled by Android (16134705, +pgo, +bolt, +lto, +mlgo, based on r574158c) clang version 21.0.0 (https://android.googlesource.com/toolchain/llvm-project 9f872551d3c681d06fd303b36f16ed5c274735eb), 32-bit
+2026-10-21 21:46:12.731 WIT [13512] LOG:  listening on IPv4 address "127.0.0.1", port 5432
+2026-10-21 21:46:12.734 WIT [13512] LOG:  listening on Unix socket "/data/data/com.termux/files/usr/tmp/.s.PGSQL.5432"
+2026-10-21 21:46:12.856 WIT [13529] LOG:  database system was shut down at 2026-10-21 16:16:19 WIT
+2026-10-21 21:46:12.875 WIT [13512] LOG:  database system is ready to accept connections
+2026-10-21 21:51:12.967 WIT [13527] LOG:  checkpoint starting: time
+2026-10-21 21:51:13.016 WIT [13527] LOG:  checkpoint complete: wrote 0 buffers (0.0%), wrote 3 SLRU buffers; 0 WAL file(s) added, 0 removed, 0 recycled; write=0.015 s, sync=0.002 s, total=0.055 s; sync files=2, longest=0.002 s, average=0.001 s; distance=0 kB, estimate=0 kB; lsn=0/204C660, redo lsn=0/204C608
+2026-10-25 10:49:42.472 WIT [20999] LOG:  starting PostgreSQL 18.6 on arm-unknown-linux-androideabi, compiled by Android (16134705, +pgo, +bolt, +lto, +mlgo, based on r574158c) clang version 21.0.0 (https://android.googlesource.com/toolchain/llvm-project 9f872551d3c681d06fd303b36f16ed5c274735eb), 32-bit
+2026-10-25 10:49:42.476 WIT [20999] LOG:  listening on IPv4 address "127.0.0.1", port 5432
+2026-10-25 10:49:42.478 WIT [20999] LOG:  listening on Unix socket "/data/data/com.termux/files/usr/tmp/.s.PGSQL.5432"
+2026-10-25 10:49:42.492 WIT [21007] LOG:  database system was shut down at 2026-10-25 10:48:52 WIT
+2026-10-25 10:49:42.505 WIT [20999] LOG:  database system is ready to accept connections
+2026-10-25 10:52:42.595 WIT [28256] ERROR:  syntax error at or near "user" at character 28
+2026-10-25 10:52:42.595 WIT [28256] STATEMENT:  CREATE TABLE IF NOT EXISTS user (
+				id SERIAL PRIMARY KEY,
+				nama TEXT, status TEXT, inisial TEXT, inisial_code TEXT, password TEXT, pertanyaan TEXT, jawaban TEXT,
+				created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+				)
+			
+2026-10-25 10:56:59.575 WIT [21005] LOG:  checkpoint starting: time
+2026-10-25 10:58:42.227 WIT [21005] LOG:  checkpoint complete: wrote 1007 buffers (6.1%), wrote 3 SLRU buffers; 1 WAL file(s) added, 0 removed, 0 recycled; write=101.733 s, sync=0.559 s, total=102.653 s; sync files=553, longest=0.020 s, average=0.002 s; distance=4847 kB, estimate=4847 kB; lsn=0/1DB91D0, redo lsn=0/1C21900
+2026-10-25 11:08:40.849 WIT [21005] LOG:  checkpoint starting: time
+2026-10-25 11:09:17.807 WIT [21005] LOG:  checkpoint complete: wrote 205 buffers (1.3%), wrote 1 SLRU buffers; 0 WAL file(s) added, 0 removed, 0 recycled; write=36.886 s, sync=0.042 s, total=36.960 s; sync files=82, longest=0.006 s, average=0.001 s; distance=1630 kB, estimate=4525 kB; lsn=0/1DB93B0, redo lsn=0/1DB9320
+2026-10-25 14:43:34.733 WIT [20999] LOG:  received fast shutdown request
+2026-10-25 14:43:34.735 WIT [20999] LOG:  aborting any active transactions
+2026-10-25 14:43:34.754 WIT [20999] LOG:  background worker "logical replication launcher" (PID 21010) exited with exit code 1
+2026-10-25 14:43:34.754 WIT [21005] LOG:  shutting down
+2026-10-25 14:43:34.757 WIT [21005] LOG:  checkpoint starting: shutdown immediate
+2026-10-25 14:43:34.789 WIT [21005] LOG:  checkpoint complete: wrote 0 buffers (0.0%), wrote 0 SLRU buffers; 0 WAL file(s) added, 0 removed, 0 recycled; write=0.011 s, sync=0.001 s, total=0.035 s; sync files=0, longest=0.000 s, average=0.000 s; distance=0 kB, estimate=4073 kB; lsn=0/1DB9460, redo lsn=0/1DB9460
+2026-10-25 14:43:34.839 WIT [20999] LOG:  database system is shut down
+2026-10-25 20:39:48.607 WIT [21689] LOG:  starting PostgreSQL 18.6 on arm-unknown-linux-androideabi, compiled by Android (16134705, +pgo, +bolt, +lto, +mlgo, based on r574158c) clang version 21.0.0 (https://android.googlesource.com/toolchain/llvm-project 9f872551d3c681d06fd303b36f16ed5c274735eb), 32-bit
+2026-10-25 20:39:48.610 WIT [21689] LOG:  listening on IPv4 address "127.0.0.1", port 5432
+2026-10-25 20:39:48.613 WIT [21689] LOG:  listening on Unix socket "/data/data/com.termux/files/usr/tmp/.s.PGSQL.5432"
+2026-10-25 20:39:48.701 WIT [21699] LOG:  database system was interrupted; last known up at 2026-10-25 20:24:12 WIT
+2026-10-25 20:39:48.906 WIT [21699] LOG:  database system was not properly shut down; automatic recovery in progress
+2026-10-25 20:39:48.914 WIT [21699] LOG:  redo starts at 0/1D7EB08
+2026-10-25 20:39:48.914 WIT [21699] LOG:  invalid record length at 0/1D7EC10: expected at least 24, got 0
+2026-10-25 20:39:48.914 WIT [21699] LOG:  redo done at 0/1D7EBD8 system usage: CPU: user: 0.00 s, system: 0.00 s, elapsed: 0.00 s
+2026-10-25 20:39:48.927 WIT [21697] LOG:  checkpoint starting: end-of-recovery immediate wait
+2026-10-25 20:39:48.944 WIT [21697] LOG:  checkpoint complete: wrote 0 buffers (0.0%), wrote 3 SLRU buffers; 0 WAL file(s) added, 0 removed, 0 recycled; write=0.006 s, sync=0.001 s, total=0.019 s; sync files=2, longest=0.001 s, average=0.001 s; distance=0 kB, estimate=0 kB; lsn=0/1D7EC10, redo lsn=0/1D7EC10
+2026-10-25 20:39:48.950 WIT [21689] LOG:  database system is ready to accept connections
+2026-10-25 21:32:45.523 WIT [21697] LOG:  checkpoint starting: time
+2026-10-25 21:32:47.311 WIT [21697] LOG:  checkpoint complete: wrote 17 buffers (0.1%), wrote 1 SLRU buffers; 0 WAL file(s) added, 0 removed, 0 recycled; write=1.729 s, sync=0.008 s, total=1.795 s; sync files=15, longest=0.002 s, average=0.001 s; distance=7 kB, estimate=7 kB; lsn=0/1D80918, redo lsn=0/1D808C0
+2026-10-25 21:35:00.862 WIT [21689] LOG:  received fast shutdown request
+2026-10-25 21:35:00.864 WIT [21689] LOG:  aborting any active transactions
+2026-10-25 21:35:00.879 WIT [21689] LOG:  background worker "logical replication launcher" (PID 21702) exited with exit code 1
+2026-10-25 21:35:00.879 WIT [21697] LOG:  shutting down
+2026-10-25 21:35:00.881 WIT [21697] LOG:  checkpoint starting: shutdown immediate
+2026-10-25 21:35:00.911 WIT [21697] LOG:  checkpoint complete: wrote 0 buffers (0.0%), wrote 0 SLRU buffers; 0 WAL file(s) added, 0 removed, 0 recycled; write=0.008 s, sync=0.001 s, total=0.033 s; sync files=0, longest=0.000 s, average=0.000 s; distance=0 kB, estimate=6 kB; lsn=0/1D809C8, redo lsn=0/1D809C8
+2026-10-25 21:35:00.944 WIT [21689] LOG:  database system is shut down
+2026-10-26 10:11:45.035 WIT [17266] LOG:  starting PostgreSQL 18.6 on arm-unknown-linux-androideabi, compiled by Android (16134705, +pgo, +bolt, +lto, +mlgo, based on r574158c) clang version 21.0.0 (https://android.googlesource.com/toolchain/llvm-project 9f872551d3c681d06fd303b36f16ed5c274735eb), 32-bit
+2026-10-26 10:11:45.039 WIT [17266] LOG:  listening on IPv4 address "127.0.0.1", port 5432
+2026-10-26 10:11:45.042 WIT [17266] LOG:  listening on Unix socket "/data/data/com.termux/files/usr/tmp/.s.PGSQL.5432"
+2026-10-26 10:11:45.065 WIT [17274] LOG:  database system was shut down at 2026-10-26 10:03:43 WIT
+2026-10-26 10:11:45.085 WIT [17266] LOG:  database system is ready to accept connections
+2026-10-26 10:16:45.081 WIT [17272] LOG:  checkpoint starting: time
+2026-10-26 10:16:45.236 WIT [17272] LOG:  checkpoint complete: wrote 1 buffers (0.0%), wrote 3 SLRU buffers; 0 WAL file(s) added, 0 removed, 0 recycled; write=0.114 s, sync=0.004 s, total=0.156 s; sync files=3, longest=0.002 s, average=0.002 s; distance=1 kB, estimate=1 kB; lsn=0/1D81EC8, redo lsn=0/1D81E70
+2026-10-26 11:14:00.152 WIT [17266] LOG:  received fast shutdown request
+2026-10-26 11:14:00.154 WIT [17266] LOG:  aborting any active transactions
+2026-10-26 11:14:00.165 WIT [17266] LOG:  background worker "logical replication launcher" (PID 17277) exited with exit code 1
+2026-10-26 11:14:00.165 WIT [17272] LOG:  shutting down
+2026-10-26 11:14:00.169 WIT [17272] LOG:  checkpoint starting: shutdown immediate
+2026-10-26 11:14:00.207 WIT [17272] LOG:  checkpoint complete: wrote 0 buffers (0.0%), wrote 0 SLRU buffers; 0 WAL file(s) added, 0 removed, 0 recycled; write=0.016 s, sync=0.001 s, total=0.042 s; sync files=0, longest=0.000 s, average=0.000 s; distance=0 kB, estimate=1 kB; lsn=0/1D81F78, redo lsn=0/1D81F78
+2026-10-26 11:14:00.254 WIT [17266] LOG:  database system is shut down
+2026-10-26 11:14:10.039 WIT [8211] LOG:  starting PostgreSQL 18.6 on arm-unknown-linux-androideabi, compiled by Android (16134705, +pgo, +bolt, +lto, +mlgo, based on r574158c) clang version 21.0.0 (https://android.googlesource.com/toolchain/llvm-project 9f872551d3c681d06fd303b36f16ed5c274735eb), 32-bit
+2026-10-26 11:14:10.045 WIT [8211] LOG:  listening on IPv4 address "127.0.0.1", port 5432
+2026-10-26 11:14:10.047 WIT [8211] LOG:  listening on Unix socket "/data/data/com.termux/files/usr/tmp/.s.PGSQL.5432"
+2026-10-26 11:14:10.071 WIT [8219] LOG:  database system was shut down at 2026-10-26 11:14:00 WIT
+2026-10-26 11:14:10.086 WIT [8211] LOG:  database system is ready to accept connections
+2026-10-26 11:19:10.125 WIT [8217] LOG:  checkpoint starting: time
+2026-10-26 11:19:10.169 WIT [8217] LOG:  checkpoint complete: wrote 0 buffers (0.0%), wrote 3 SLRU buffers; 0 WAL file(s) added, 0 removed, 0 recycled; write=0.012 s, sync=0.002 s, total=0.045 s; sync files=2, longest=0.001 s, average=0.001 s; distance=0 kB, estimate=0 kB; lsn=0/1D82098, redo lsn=0/1D82040
+2026-10-26 11:26:24.842 WIT [8211] LOG:  received fast shutdown request
+2026-10-26 11:26:24.844 WIT [8211] LOG:  aborting any active transactions
+2026-10-26 11:26:24.859 WIT [8211] LOG:  background worker "logical replication launcher" (PID 8222) exited with exit code 1
+2026-10-26 11:26:24.863 WIT [8217] LOG:  shutting down
+2026-10-26 11:26:24.868 WIT [8217] LOG:  checkpoint starting: shutdown immediate
+2026-10-26 11:26:24.900 WIT [8217] LOG:  checkpoint complete: wrote 0 buffers (0.0%), wrote 0 SLRU buffers; 0 WAL file(s) added, 0 removed, 0 recycled; write=0.009 s, sync=0.001 s, total=0.036 s; sync files=0, longest=0.000 s, average=0.000 s; distance=0 kB, estimate=0 kB; lsn=0/1D82148, redo lsn=0/1D82148
+2026-10-26 11:26:24.933 WIT [8211] LOG:  database system is shut down
+2026-10-26 11:27:09.655 WIT [13192] LOG:  starting PostgreSQL 18.6 on arm-unknown-linux-androideabi, compiled by Android (16134705, +pgo, +bolt, +lto, +mlgo, based on r574158c) clang version 21.0.0 (https://android.googlesource.com/toolchain/llvm-project 9f872551d3c681d06fd303b36f16ed5c274735eb), 32-bit
+2026-10-26 11:27:09.658 WIT [13192] LOG:  listening on IPv4 address "127.0.0.1", port 5432
+2026-10-26 11:27:09.660 WIT [13192] LOG:  listening on Unix socket "/data/data/com.termux/files/usr/tmp/.s.PGSQL.5432"
+2026-10-26 11:27:09.684 WIT [13200] LOG:  database system was shut down at 2026-10-26 11:26:24 WIT
+2026-10-26 11:27:09.706 WIT [13192] LOG:  database system is ready to accept connections
+2026-10-26 11:28:47.848 WIT [13192] LOG:  received fast shutdown request
+2026-10-26 11:28:47.856 WIT [13192] LOG:  aborting any active transactions
+2026-10-26 11:28:47.872 WIT [13192] LOG:  background worker "logical replication launcher" (PID 13203) exited with exit code 1
+2026-10-26 11:28:47.886 WIT [13198] LOG:  shutting down
+2026-10-26 11:28:47.888 WIT [13198] LOG:  checkpoint starting: shutdown immediate
+2026-10-26 11:28:47.925 WIT [13198] LOG:  checkpoint complete: wrote 4 buffers (0.0%), wrote 3 SLRU buffers; 0 WAL file(s) added, 0 removed, 0 recycled; write=0.011 s, sync=0.003 s, total=0.039 s; sync files=6, longest=0.001 s, average=0.001 s; distance=3 kB, estimate=3 kB; lsn=0/1D83030, redo lsn=0/1D83030
+2026-10-26 11:28:47.965 WIT [13192] LOG:  database system is shut down
+2026-10-26 19:04:19.067 WIT [9639] LOG:  starting PostgreSQL 18.6 on arm-unknown-linux-androideabi, compiled by Android (16134705, +pgo, +bolt, +lto, +mlgo, based on r574158c) clang version 21.0.0 (https://android.googlesource.com/toolchain/llvm-project 9f872551d3c681d06fd303b36f16ed5c274735eb), 32-bit
+2026-10-26 19:04:19.071 WIT [9639] LOG:  listening on IPv4 address "127.0.0.1", port 5432
+2026-10-26 19:04:19.073 WIT [9639] LOG:  listening on Unix socket "/data/data/com.termux/files/usr/tmp/.s.PGSQL.5432"
+2026-10-26 19:04:19.112 WIT [9647] LOG:  database system was shut down at 2026-10-26 16:11:02 WIT
+2026-10-26 19:04:19.132 WIT [9639] LOG:  database system is ready to accept connections
+2026-10-26 19:26:16.535 WIT [9645] LOG:  checkpoint starting: time
+2026-10-26 19:26:17.317 WIT [9645] LOG:  checkpoint complete: wrote 7 buffers (0.0%), wrote 3 SLRU buffers; 0 WAL file(s) added, 0 removed, 0 recycled; write=0.735 s, sync=0.004 s, total=0.783 s; sync files=9, longest=0.001 s, average=0.001 s; distance=14 kB, estimate=14 kB; lsn=0/1D8FAC8, redo lsn=0/1D8FA70
+2026-10-26 19:31:16.418 WIT [9645] LOG:  checkpoint starting: time
+2026-10-26 19:31:16.680 WIT [9645] LOG:  checkpoint complete: wrote 2 buffers (0.0%), wrote 1 SLRU buffers; 0 WAL file(s) added, 0 removed, 0 recycled; write=0.214 s, sync=0.002 s, total=0.264 s; sync files=3, longest=0.002 s, average=0.001 s; distance=4 kB, estimate=13 kB; lsn=0/1D90C98, redo lsn=0/1D90C40
+2026-10-26 19:36:16.781 WIT [9645] LOG:  checkpoint starting: time
+2026-10-26 19:36:16.919 WIT [9645] LOG:  checkpoint complete: wrote 1 buffers (0.0%), wrote 0 SLRU buffers; 0 WAL file(s) added, 0 removed, 0 recycled; write=0.111 s, sync=0.002 s, total=0.138 s; sync files=1, longest=0.002 s, average=0.002 s; distance=0 kB, estimate=12 kB; lsn=0/1D90E88, redo lsn=0/1D90E30
+2026-10-26 19:47:33.042 WIT [9645] LOG:  checkpoint starting: time
+2026-10-26 19:47:33.530 WIT [9645] LOG:  checkpoint complete: wrote 4 buffers (0.0%), wrote 1 SLRU buffers; 0 WAL file(s) added, 0 removed, 0 recycled; write=0.436 s, sync=0.004 s, total=0.489 s; sync files=5, longest=0.001 s, average=0.001 s; distance=4 kB, estimate=11 kB; lsn=0/1D91FE8, redo lsn=0/1D91F90
+2026-10-26 19:52:33.634 WIT [9645] LOG:  checkpoint starting: time
+2026-10-26 19:52:48.136 WIT [9645] LOG:  checkpoint complete: wrote 143 buffers (0.9%), wrote 1 SLRU buffers; 0 WAL file(s) added, 0 removed, 0 recycled; write=14.450 s, sync=0.006 s, total=14.508 s; sync files=13, longest=0.002 s, average=0.001 s; distance=1116 kB, estimate=1116 kB; lsn=0/1EA93A8, redo lsn=0/1EA9318
+2026-10-26 20:09:10.422 WIT [9645] LOG:  checkpoint starting: time
+2026-10-26 20:09:10.724 WIT [9645] LOG:  checkpoint complete: wrote 1 buffers (0.0%), wrote 0 SLRU buffers; 0 WAL file(s) added, 0 removed, 0 recycled; write=0.178 s, sync=0.009 s, total=0.307 s; sync files=1, longest=0.009 s, average=0.009 s; distance=1 kB, estimate=1005 kB; lsn=0/1EA9B08, redo lsn=0/1EA9AB0
+2026-10-26 20:19:10.925 WIT [9645] LOG:  checkpoint starting: time
+2026-10-26 20:19:11.383 WIT [9645] LOG:  checkpoint complete: wrote 4 buffers (0.0%), wrote 1 SLRU buffers; 0 WAL file(s) added, 0 removed, 0 recycled; write=0.428 s, sync=0.003 s, total=0.459 s; sync files=4, longest=0.002 s, average=0.001 s; distance=0 kB, estimate=904 kB; lsn=0/1EA9EE0, redo lsn=0/1EA9E88
+2026-10-28 06:08:11.493 WIT [19261] LOG:  starting PostgreSQL 18.6 on arm-unknown-linux-androideabi, compiled by Android (16134705, +pgo, +bolt, +lto, +mlgo, based on r574158c) clang version 21.0.0 (https://android.googlesource.com/toolchain/llvm-project 9f872551d3c681d06fd303b36f16ed5c274735eb), 32-bit
+2026-10-28 06:08:11.496 WIT [19261] LOG:  listening on IPv4 address "127.0.0.1", port 5432
+2026-10-28 06:08:11.498 WIT [19261] LOG:  listening on Unix socket "/data/data/com.termux/files/usr/tmp/.s.PGSQL.5432"
+2026-10-28 06:08:11.601 WIT [19272] LOG:  database system was shut down at 2026-10-27 22:52:54 WIT
+2026-10-28 06:08:11.622 WIT [19261] LOG:  database system is ready to accept connections
+2026-10-28 07:15:17.041 WIT [19270] LOG:  checkpoint starting: time
+2026-10-28 07:15:17.084 WIT [19270] LOG:  checkpoint complete: wrote 0 buffers (0.0%), wrote 3 SLRU buffers; 0 WAL file(s) added, 0 removed, 0 recycled; write=0.014 s, sync=0.002 s, total=0.055 s; sync files=2, longest=0.001 s, average=0.001 s; distance=0 kB, estimate=0 kB; lsn=0/1EB1978, redo lsn=0/1EB1920
+2026-10-28 09:12:38.348 WIT [19261] LOG:  received fast shutdown request
+2026-10-28 09:12:38.350 WIT [19261] LOG:  aborting any active transactions
+2026-10-28 09:12:38.359 WIT [19261] LOG:  background worker "logical replication launcher" (PID 19275) exited with exit code 1
+2026-10-28 09:12:38.363 WIT [19270] LOG:  shutting down
+2026-10-28 09:12:38.366 WIT [19270] LOG:  checkpoint starting: shutdown immediate
+2026-10-28 09:12:38.399 WIT [19270] LOG:  checkpoint complete: wrote 0 buffers (0.0%), wrote 0 SLRU buffers; 0 WAL file(s) added, 0 removed, 0 recycled; write=0.012 s, sync=0.001 s, total=0.035 s; sync files=0, longest=0.000 s, average=0.000 s; distance=0 kB, estimate=0 kB; lsn=0/1EB1A28, redo lsn=0/1EB1A28
+2026-10-28 09:12:38.435 WIT [19261] LOG:  database system is shut down
+2026-10-28 12:09:43.183 WIT [25500] LOG:  starting PostgreSQL 18.6 on arm-unknown-linux-androideabi, compiled by Android (16134705, +pgo, +bolt, +lto, +mlgo, based on r574158c) clang version 21.0.0 (https://android.googlesource.com/toolchain/llvm-project 9f872551d3c681d06fd303b36f16ed5c274735eb), 32-bit
+2026-10-28 12:09:43.185 WIT [25500] LOG:  listening on IPv4 address "127.0.0.1", port 5432
+2026-10-28 12:09:43.188 WIT [25500] LOG:  listening on Unix socket "/data/data/com.termux/files/usr/tmp/.s.PGSQL.5432"
+2026-10-28 12:09:43.219 WIT [25509] LOG:  database system was shut down at 2026-10-28 09:12:38 WIT
+2026-10-28 12:09:43.241 WIT [25500] LOG:  database system is ready to accept connections
+2026-10-28 12:14:43.317 WIT [25507] LOG:  checkpoint starting: time
+2026-10-28 12:14:43.361 WIT [25507] LOG:  checkpoint complete: wrote 0 buffers (0.0%), wrote 3 SLRU buffers; 0 WAL file(s) added, 0 removed, 0 recycled; write=0.011 s, sync=0.002 s, total=0.045 s; sync files=2, longest=0.001 s, average=0.001 s; distance=0 kB, estimate=0 kB; lsn=0/1EB1B30, redo lsn=0/1EB1AD8
+2026-10-28 12:30:14.839 WIT [31436] ERROR:  bind message supplies 1 parameters, but prepared statement "" requires 0
+2026-10-28 12:30:14.839 WIT [31436] STATEMENT:  DELETE FROM riwayat_penjualan_campuran
+2026-10-28 12:33:12.618 WIT [25507] LOG:  checkpoint starting: time
+2026-10-28 12:33:14.307 WIT [25507] LOG:  checkpoint complete: wrote 16 buffers (0.1%), wrote 1 SLRU buffers; 0 WAL file(s) added, 0 removed, 0 recycled; write=1.640 s, sync=0.007 s, total=1.690 s; sync files=16, longest=0.002 s, average=0.001 s; distance=17 kB, estimate=17 kB; lsn=0/1EB5FB0, redo lsn=0/1EB5F58
+2026-10-28 12:54:41.470 WIT [25507] LOG:  checkpoint starting: time
+2026-10-28 12:54:42.729 WIT [25507] LOG:  checkpoint complete: wrote 12 buffers (0.1%), wrote 1 SLRU buffers; 0 WAL file(s) added, 0 removed, 0 recycled; write=1.234 s, sync=0.005 s, total=1.265 s; sync files=11, longest=0.002 s, average=0.001 s; distance=14 kB, estimate=16 kB; lsn=0/1EB9860, redo lsn=0/1EB9808
+2026-10-28 12:59:47.030 WIT [25507] LOG:  checkpoint starting: time
+2026-10-28 12:59:48.336 WIT [25507] LOG:  checkpoint complete: wrote 12 buffers (0.1%), wrote 1 SLRU buffers; 0 WAL file(s) added, 0 removed, 0 recycled; write=1.246 s, sync=0.011 s, total=1.307 s; sync files=13, longest=0.003 s, average=0.001 s; distance=16 kB, estimate=16 kB; lsn=0/1EBD9D8, redo lsn=0/1EBD980
+2026-10-28 13:49:25.098 WIT [13411] ERROR:  bind message supplies 1 parameters, but prepared statement "" requires 0
+2026-10-28 13:49:25.098 WIT [13411] STATEMENT:  DELETE FROM riwayat_penjualan_campuran
+2026-10-28 13:53:24.749 WIT [25507] LOG:  checkpoint starting: time
+2026-10-28 13:53:25.125 WIT [25507] LOG:  checkpoint complete: wrote 3 buffers (0.0%), wrote 1 SLRU buffers; 0 WAL file(s) added, 0 removed, 0 recycled; write=0.328 s, sync=0.005 s, total=0.377 s; sync files=4, longest=0.002 s, average=0.002 s; distance=8 kB, estimate=15 kB; lsn=0/1EBFB80, redo lsn=0/1EBFB28
+2026-10-28 13:58:24.225 WIT [25507] LOG:  checkpoint starting: time
+2026-10-28 13:58:25.890 WIT [25507] LOG:  checkpoint complete: wrote 16 buffers (0.1%), wrote 1 SLRU buffers; 0 WAL file(s) added, 0 removed, 0 recycled; write=1.634 s, sync=0.008 s, total=1.666 s; sync files=16, longest=0.002 s, average=0.001 s; distance=18 kB, estimate=18 kB; lsn=0/1EC4428, redo lsn=0/1EC43D0
+2026-10-28 14:34:26.998 WIT [25507] LOG:  checkpoint starting: time
+2026-10-28 14:34:27.285 WIT [25507] LOG:  checkpoint complete: wrote 2 buffers (0.0%), wrote 1 SLRU buffers; 0 WAL file(s) added, 0 removed, 0 recycled; write=0.214 s, sync=0.005 s, total=0.288 s; sync files=3, longest=0.003 s, average=0.002 s; distance=1 kB, estimate=16 kB; lsn=0/1EC4838, redo lsn=0/1EC47E0
+2026-10-28 22:18:33.915 WIT [22036] LOG:  starting PostgreSQL 18.6 on arm-unknown-linux-androideabi, compiled by Android (16134705, +pgo, +bolt, +lto, +mlgo, based on r574158c) clang version 21.0.0 (https://android.googlesource.com/toolchain/llvm-project 9f872551d3c681d06fd303b36f16ed5c274735eb), 32-bit
+2026-10-28 22:18:33.918 WIT [22036] LOG:  listening on IPv4 address "127.0.0.1", port 5432
+2026-10-28 22:18:33.924 WIT [22036] LOG:  listening on Unix socket "/data/data/com.termux/files/usr/tmp/.s.PGSQL.5432"
+2026-10-28 22:18:34.006 WIT [22044] LOG:  database system was interrupted; last known up at 2026-10-28 21:35:32 WIT
+2026-10-28 22:18:34.172 WIT [22044] LOG:  database system was not properly shut down; automatic recovery in progress
+2026-10-28 22:18:34.178 WIT [22044] LOG:  redo starts at 0/1ED2228
+2026-10-28 22:18:34.178 WIT [22044] LOG:  invalid record length at 0/1ED2330: expected at least 24, got 0
+2026-10-28 22:18:34.178 WIT [22044] LOG:  redo done at 0/1ED22F8 system usage: CPU: user: 0.00 s, system: 0.00 s, elapsed: 0.00 s
+2026-10-28 22:18:34.190 WIT [22042] LOG:  checkpoint starting: end-of-recovery immediate wait
+2026-10-28 22:18:34.206 WIT [22042] LOG:  checkpoint complete: wrote 0 buffers (0.0%), wrote 3 SLRU buffers; 0 WAL file(s) added, 0 removed, 0 recycled; write=0.005 s, sync=0.001 s, total=0.017 s; sync files=2, longest=0.001 s, average=0.001 s; distance=0 kB, estimate=0 kB; lsn=0/1ED2330, redo lsn=0/1ED2330
+2026-10-28 22:18:34.212 WIT [22036] LOG:  database system is ready to accept connections
+2026-10-28 22:18:43.003 WIT [22036] LOG:  received fast shutdown request
+2026-10-28 22:18:43.010 WIT [22036] LOG:  aborting any active transactions
+2026-10-28 22:18:43.020 WIT [22036] LOG:  background worker "logical replication launcher" (PID 22047) exited with exit code 1
+2026-10-28 22:18:43.021 WIT [22042] LOG:  shutting down
+2026-10-28 22:18:43.022 WIT [22042] LOG:  checkpoint starting: shutdown immediate
+2026-10-28 22:18:43.039 WIT [22042] LOG:  checkpoint complete: wrote 0 buffers (0.0%), wrote 0 SLRU buffers; 0 WAL file(s) added, 0 removed, 0 recycled; write=0.005 s, sync=0.001 s, total=0.018 s; sync files=0, longest=0.000 s, average=0.000 s; distance=0 kB, estimate=0 kB; lsn=0/1ED23A8, redo lsn=0/1ED23A8
+2026-10-28 22:18:43.069 WIT [22036] LOG:  database system is shut down
+2026-10-28 22:30:22.868 WIT [28035] LOG:  starting PostgreSQL 18.6 on arm-unknown-linux-androideabi, compiled by Android (16134705, +pgo, +bolt, +lto, +mlgo, based on r574158c) clang version 21.0.0 (https://android.googlesource.com/toolchain/llvm-project 9f872551d3c681d06fd303b36f16ed5c274735eb), 32-bit
+2026-10-28 22:30:22.870 WIT [28035] LOG:  listening on IPv4 address "127.0.0.1", port 5432
+2026-10-28 22:30:22.873 WIT [28035] LOG:  listening on Unix socket "/data/data/com.termux/files/usr/tmp/.s.PGSQL.5432"
+2026-10-28 22:30:22.955 WIT [28043] LOG:  database system was shut down at 2026-10-28 22:18:43 WIT
+2026-10-28 22:30:22.974 WIT [28035] LOG:  database system is ready to accept connections
+2026-10-28 22:35:23.056 WIT [28041] LOG:  checkpoint starting: time
+2026-10-28 22:35:23.109 WIT [28041] LOG:  checkpoint complete: wrote 0 buffers (0.0%), wrote 3 SLRU buffers; 0 WAL file(s) added, 0 removed, 0 recycled; write=0.012 s, sync=0.002 s, total=0.057 s; sync files=2, longest=0.001 s, average=0.001 s; distance=0 kB, estimate=0 kB; lsn=0/1ED24B0, redo lsn=0/1ED2458

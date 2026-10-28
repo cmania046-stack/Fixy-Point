@@ -1,0 +1,2 @@
+2026-10-26 10:02:46.858 WIT [15062] FATAL:  lock file "postmaster.pid" already exists
+2026-10-26 10:02:46.858 WIT [15062] HINT:  Is another postmaster (PID 14846) running in data directory "/data/data/com.termux/files/usr/var/lib/postgresql"?
