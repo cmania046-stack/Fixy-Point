@@ -3326,28 +3326,35 @@ class Produk {
 			this.kelolaGambarProduk();
 		}
 	}
+	
 	async kelolaGambarProduk() {
 		this.kanan.innerHTML = "";
 		const files = await getDt("get_files/folder_katalog");
-		this.kanan.appendChild(makeButton("btn", "Hapus semua", () => this.hapusSemuaGambar(files)));
-		const fr = makeParent("container");
-		fr.style.display = "grid";
-		fr.style.gridTemplateColumns = "repeat(3,1fr)";
-		
+		this.kanan.appendChild(makeButton("btns", "Hapus semua", () => this.hapusSemuaGambar(files), "Pictures/hapus.png"));
+		const fr = makeParent("frame");
+
 		this.kanan.appendChild(fr);
 		for (const path of files) {
 			const pathBagi = path.split(/[\\/]+/);
 			const nama = pathBagi.at(-1);
 			const gambar = await takePictures(nama, "folder_katalog");
-			const field = pembuatField(fr, nama);
+			const field = makeParent("container");
 			const pict = document.createElement("img");
 			pict.src = gambar;
 			pict.className = "image";
 			pict.loading = "lazy";
 			field.appendChild(pict);
-			field.appendChild(makeButton("btn", "Hapus", () => this.hapusGambarProduk(path, nama)));
+			pict.onclick = (e) => {
+				const p = makeFlyParent(e);
+				pembuatButtonGambar(p, [
+					["btns", "Hapus", () => this.hapusGambarProduk(path, nama), "Pictures/hapus.png"]
+				]);
+				document.body.appendChild(p);
+			}
+			fr.appendChild(field);
 		}
 	}
+	
 	async hapusGambarProduk(path, nama) {
 		if (await modalShow(confirm, "Hapus foto " + nama + " sekarang?")) {
 			const hapus = await postDataKedua("hapus_foto", {path: path});
@@ -3451,10 +3458,20 @@ class Produk {
 			await modalShow(gagal, "Produk tidak ditemukan");
 			return;
 		}
-
+		
+		const diskon = await getData("produk_diskon");
+		const findDiskon = diskon.find(
+			p =>
+			p.barcode === produk.barcode &&
+			p.nama.toLowerCase() === produk.nama.toLowerCase()
+		);
+		if (findDiskon) {
+			if (!(await modalShow(confirm, `Produk ${produk.nama} telah terdaftar dalam produk diskon. Apa Anda yakin masih ingin mendaftarkannya ke produk ${path}?`))) return;
+		}
 		const pathQuery = path.replace(/ /g, "_").toLowerCase();
 		const hj = safeFloat(hargaJual);
 		const min = safeInt(minimum);
+		
 		const data = {
 			id_produk: produk.id_produk,
 			barcode: produk.barcode,
