@@ -2970,11 +2970,7 @@ class Produk {
 					sumber: idDevice
 				}
 				const upload = await postData("hapus_produk", data);
-				if (upload) {
-					await modalShow(upload.stat, upload.pesan);
-				} else {
-					await modalShow(gagal, pesanGagal);
-				}
+				await message(upload);
 				this.setup();
 			}
 		}
@@ -2996,6 +2992,7 @@ class Produk {
 					nama: item.nama,
 					jumlah: tambahan,
 					barcode: item.barcode,
+					stok_lama: item.jumlah,
 					stok_terbaru: stok,
 					operator: user,
 					sumber: idDevice
@@ -3783,10 +3780,64 @@ class Produk {
 		const tengah = makeParent("container");
 		for (const i of [atas,tengah]) this.kanan.appendChild(i);
 		pembuatButton(atas, [
-			["btn", "Tambah stok massal", () => this.tambahStokMassal(tengah)]
+			["btn", "Tambah stok massal", () => this.tambahStokMassal(tengah)],
+			["btn", "Arus stok", () => this.arusStok(tengah)]
 		]);
 		this.kanan.appendChild(makeButton("btn", "Berikutnya", () => this.tampilkanStok(tengah)));
 		this.tampilkanStok(tengah);
+	}
+	
+	tampilkanFlow(tabel, data) {
+		if (this.flowTampil >= data.length) return;
+		const forTampil = data.slice(
+			this.flowTampil,
+			this.flowTampil + this.flowPertampil
+		);
+		tabel.tBodies[0].innerHTML = "";
+		for (const i of forTampil) {
+			const tr = document.createElement("tr");
+			tr.innerHTML = `
+				<td>${i.tipe_flow}</td>
+				<td>${i.id_produk}</td>
+				<td>${i.barcode}</td>
+				<td>${i.nama}</td>
+				<td>${i.stok_lama}</td>
+				<td>${i.stok_baru}</td>
+				<td>${i.selisih > 0 ? "+" + i.selisih : i.selisih}</td>
+				<td>${i.referensi}</td>
+				<td>${i.keterangan}</td>
+				<td>${i.device_id}</td>
+				<td>${i.user_id}</td>
+			`;
+			tabel.appendChild(tr);
+		}
+		this.flowTampil += forTampil.length;
+	}
+	
+	async arusStok(p) {
+		const dt = await getData("stok_flow");
+		const data = dt.toReversed();
+		p.innerHTML = "";
+		this.flowTampil = 0;
+		this.flowPertampil = 100;
+		const tabel = makeTable(`
+			<tr>
+				<th>Tipe flow</th>
+				<th>Id produk</th>
+				<th>Barcode</th>
+				<th>Nama</th>
+				<th>Jumlah awal</th>
+				<th>Jumlah akhir</th>
+				<th>Selisih jumlah</th>
+				<th>Referensi</th>
+				<th>Keterangan</th>
+				<th>Sumber</th>
+				<th>Operator</th>
+			</tr>
+		`);
+		p.appendChild(tabel);
+		p.appendChild(makeButton("btn", "Lainnya", () => this.tampilkanFlow(tabel, data)));
+		this.tampilkanFlow(tabel, data);
 	}
 	
 	tampilkanStok(p) {
@@ -5423,7 +5474,8 @@ class OpsiTransaksi {
 			belanja: this.dt,
 			retur: this.keranjangRetur,
 			alasan: alasan,
-			operator: user
+			operator: user,
+			sumber: idDevice
 		}
 		if (await modalShow(confirm, "Data retur siap. Selesaikan sekarang?")) {
 			const up = await postDataKedua("proses_retur", data);

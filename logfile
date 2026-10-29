@@ -214,3 +214,52 @@
 2026-10-29 15:24:18.298 WIT [30112] LOG:  listening on Unix socket "/data/data/com.termux/files/usr/tmp/.s.PGSQL.5432"
 2026-10-29 15:24:18.386 WIT [30133] LOG:  database system was shut down at 2026-10-29 14:37:52 WIT
 2026-10-29 15:24:18.408 WIT [30112] LOG:  database system is ready to accept connections
+2026-10-29 15:29:18.488 WIT [30131] LOG:  checkpoint starting: time
+2026-10-29 15:29:18.680 WIT [30131] LOG:  checkpoint complete: wrote 1 buffers (0.0%), wrote 3 SLRU buffers; 0 WAL file(s) added, 0 removed, 0 recycled; write=0.131 s, sync=0.009 s, total=0.198 s; sync files=3, longest=0.004 s, average=0.003 s; distance=0 kB, estimate=0 kB; lsn=0/1EDAB78, redo lsn=0/1EDAB20
+2026-10-29 15:34:39.383 WIT [30131] LOG:  checkpoint starting: time
+2026-10-29 15:34:39.529 WIT [30131] LOG:  checkpoint complete: wrote 1 buffers (0.0%), wrote 0 SLRU buffers; 0 WAL file(s) added, 0 removed, 0 recycled; write=0.115 s, sync=0.002 s, total=0.147 s; sync files=1, longest=0.002 s, average=0.002 s; distance=5 kB, estimate=5 kB; lsn=0/1EDBFC0, redo lsn=0/1EDBF68
+2026-10-29 16:41:34.070 WIT [20351] ERROR:  syntax error at or near "tipe_flow" at character 210
+2026-10-29 16:41:34.070 WIT [20351] STATEMENT:  CREATE TABLE IF NOT EXISTS stok_flow (
+				id SERIAL PRIMARY KEY,
+				
+					id_produk TEXT,
+					nama VARCHAR(100) NOT NULL,
+					barcode TEXT,
+					stok_lama INTEGER,
+					stok_baru INTEGER,
+					selisih INTEGER
+					tipe_flow TEXT,
+					referensi TEXT,
+					keterangan TEXT,
+					user_id TEXT,
+					device_id TEXT
+				,
+				created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+				)
+			
+2026-10-29 16:44:43.483 WIT [30131] LOG:  checkpoint starting: time
+2026-10-29 16:44:49.900 WIT [30131] LOG:  checkpoint complete: wrote 62 buffers (0.4%), wrote 1 SLRU buffers; 0 WAL file(s) added, 0 removed, 0 recycled; write=6.357 s, sync=0.017 s, total=6.418 s; sync files=45, longest=0.002 s, average=0.001 s; distance=325 kB, estimate=325 kB; lsn=0/1F2D5D0, redo lsn=0/1F2D540
+2026-10-29 16:54:25.103 WIT [27763] ERROR:  relation "stok_flow" does not exist at character 28
+2026-10-29 16:54:25.103 WIT [27763] STATEMENT:  SELECT id, created_at FROM stok_flow ORDER BY id DESC LIMIT 1
+	;
+2026-10-29 17:35:31.068 WIT [30131] LOG:  checkpoint starting: time
+2026-10-29 17:35:32.134 WIT [30131] LOG:  checkpoint complete: wrote 10 buffers (0.1%), wrote 1 SLRU buffers; 0 WAL file(s) added, 0 removed, 0 recycled; write=1.032 s, sync=0.006 s, total=1.067 s; sync files=11, longest=0.002 s, average=0.001 s; distance=19 kB, estimate=294 kB; lsn=0/1F32278, redo lsn=0/1F32220
+2026-10-29 17:45:31.336 WIT [30131] LOG:  checkpoint starting: time
+2026-10-29 17:45:31.490 WIT [30131] LOG:  checkpoint complete: wrote 1 buffers (0.0%), wrote 0 SLRU buffers; 0 WAL file(s) added, 0 removed, 0 recycled; write=0.115 s, sync=0.002 s, total=0.156 s; sync files=1, longest=0.002 s, average=0.002 s; distance=5 kB, estimate=265 kB; lsn=0/1F339E8, redo lsn=0/1F33990
+2026-10-29 18:52:06.361 WIT [14884] FATAL:  lock file "postmaster.pid" already exists
+2026-10-29 18:52:06.361 WIT [14884] HINT:  Is another postmaster (PID 30112) running in data directory "/data/data/com.termux/files/usr/var/lib/postgresql"?
+2026-10-29 18:52:55.215 WIT [18451] WARNING:  there is no transaction in progress
+2026-10-29 18:53:15.997 WIT [30131] LOG:  checkpoint starting: time
+2026-10-29 18:53:16.449 WIT [30131] LOG:  checkpoint complete: wrote 4 buffers (0.0%), wrote 1 SLRU buffers; 0 WAL file(s) added, 0 removed, 0 recycled; write=0.420 s, sync=0.004 s, total=0.453 s; sync files=5, longest=0.002 s, average=0.001 s; distance=7 kB, estimate=240 kB; lsn=0/1F35600, redo lsn=0/1F355A8
+2026-10-29 18:58:15.550 WIT [30131] LOG:  checkpoint starting: time
+2026-10-29 18:58:15.697 WIT [30131] LOG:  checkpoint complete: wrote 1 buffers (0.0%), wrote 0 SLRU buffers; 0 WAL file(s) added, 0 removed, 0 recycled; write=0.116 s, sync=0.002 s, total=0.148 s; sync files=1, longest=0.002 s, average=0.002 s; distance=0 kB, estimate=216 kB; lsn=0/1F35968, redo lsn=0/1F35910
+2026-10-29 22:34:26.993 WIT [30131] LOG:  checkpoint starting: time
+2026-10-29 22:34:28.878 WIT [30131] LOG:  checkpoint complete: wrote 18 buffers (0.1%), wrote 1 SLRU buffers; 0 WAL file(s) added, 0 removed, 0 recycled; write=1.846 s, sync=0.010 s, total=1.885 s; sync files=19, longest=0.002 s, average=0.001 s; distance=24 kB, estimate=196 kB; lsn=0/1F3BC50, redo lsn=0/1F3BBC0
+2026-10-29 22:39:26.988 WIT [30131] LOG:  checkpoint starting: time
+2026-10-29 22:39:29.641 WIT [30131] LOG:  checkpoint complete: wrote 18 buffers (0.1%), wrote 1 SLRU buffers; 0 WAL file(s) added, 0 removed, 0 recycled; write=2.540 s, sync=0.035 s, total=2.663 s; sync files=19, longest=0.005 s, average=0.002 s; distance=28 kB, estimate=180 kB; lsn=0/1F42CB0, redo lsn=0/1F42C58
+2026-10-29 22:43:17.614 WIT [22816] ERROR:  relation "stok_flows" does not exist at character 13
+2026-10-29 22:43:17.614 WIT [22816] STATEMENT:  DELETE FROM stok_flows
+2026-10-29 22:44:26.743 WIT [30131] LOG:  checkpoint starting: time
+2026-10-29 22:44:28.696 WIT [30131] LOG:  checkpoint complete: wrote 18 buffers (0.1%), wrote 1 SLRU buffers; 0 WAL file(s) added, 0 removed, 0 recycled; write=1.878 s, sync=0.015 s, total=1.954 s; sync files=19, longest=0.002 s, average=0.001 s; distance=30 kB, estimate=165 kB; lsn=0/1F4C0F0, redo lsn=0/1F4A800
+2026-10-29 22:49:26.796 WIT [30131] LOG:  checkpoint starting: time
+2026-10-29 22:49:28.690 WIT [30131] LOG:  checkpoint complete: wrote 18 buffers (0.1%), wrote 1 SLRU buffers; 0 WAL file(s) added, 0 removed, 0 recycled; write=1.852 s, sync=0.007 s, total=1.895 s; sync files=18, longest=0.002 s, average=0.001 s; distance=25 kB, estimate=151 kB; lsn=0/1F50EA0, redo lsn=0/1F50E48

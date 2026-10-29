@@ -99,7 +99,7 @@ const allowedMethods = [
 ];
 
 const existedTable = [
-	"users", "vipayment", "info_admin", "pin", "keuangan_lengkap", "aset_lain", "kewajiban", "Pengeluaran", "profil", "produk", "riwayat_utama", "margin", "produk_diskon", "keuangan", "operator",
+	"stok_flow", "users", "vipayment", "info_admin", "pin", "keuangan_lengkap", "aset_lain", "kewajiban", "Pengeluaran", "profil", "produk", "riwayat_utama", "margin", "produk_diskon", "keuangan", "operator",
 	"device", "customer", "supplier", "pajak", "riwayat_pajak", "riwayat_penjualan_campuran",
 	"media_bayar", "cadangan_keranjang", "hak_akses", "status_qr", "riwayat_login", "shift",
 	"produk_tingkat", "tingkat_a", "tingkat_b", "validasi_owner", "pengaturan_nota", "riwayat_retur",
@@ -312,7 +312,19 @@ class Database {
 			await this.createTable(cl, "aset_lain", "waktu_aktif TEXT, nama TEXT, jenis TEXT, nilai DOUBLE PRECISION, status TEXT");
 			await this.createTable(cl, "vipayment", "profile TEXT, prepaid TEXT, social_media TEXT, game_feature TEXT");
 			await this.createTable(cl, "pin", "pin TEXT");
-
+			await this.createTable(cl, "stok_flow", `
+				id_produk TEXT,
+				nama VARCHAR(100) NOT NULL,
+				barcode TEXT,
+				stok_lama INTEGER,
+				stok_baru INTEGER,
+				selisih INTEGER,
+				tipe_flow TEXT,
+				referensi TEXT,
+				keterangan TEXT,
+				user_id TEXT,
+				device_id TEXT
+			`);
 			await cl.query("COMMIT");
 		} catch (err) {
 			await cl.query("ROLLBACK");
@@ -1019,16 +1031,31 @@ app.post("/hapus_produk", async (req,res) => {
 		stat: "Gagal",
 		pesan: "Data kosong"
 	});
+	const client = await pool.connect();
 	try {
-		await pool.query("DELETE FROM produk WHERE id = $1", [data.id || 0]);
+		const { rows: [row] } = await client.query(`SELECT * FROM produk WHERE id = $1`, [data.id || 0]);
+		await client.query(`
+			INSERT INTO stok_flow (
+				id_produk, nama, barcode, stok_lama, stok_baru,
+				selisih, tipe_flow, referensi, keterangan, user_id, device_id
+			) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)`, [
+				row.id_produk, row.nama || "", row.barcode || "", row.jumlah || 0, 0,
+				-(row.jumlah || 0), "out", crypto.randomUUID().slice(15,25).replaceAll("-",""),
+				"Hapus produk", data.operator || "", data.sumber || ""
+			]
+		);
+				
+		await client.query("DELETE FROM produk WHERE id = $1", [data.id || 0]);
+		await client.query("COMMIT");
 		res.status(200).json({
 			stat: "Berhasil",
 			pesan: `Produk ${data.nama || ""} telah dihapus`
 		});
 	} catch (e) {
+		console.log(e);
 		const [hasil, kode] = errorReturn(e);
 		return res.status(kode).json(hasil);
-	} finally { await catatLog(req.path, res.statusCode); }
+	} finally { client.release(); await catatLog(req.path, res.statusCode); }
 });
 
 app.post("/generate_barcode", async (req,res) => {
@@ -1295,11 +1322,22 @@ app.post("/penjualan_campuran", async (req,res) => {
 		for (const k of keranjang) {
 			const id = k.id ?? "";
 			const qty = k.qty_asli ?? 0;
-
-			const { rows: [prd] } = await client.query("SELECT poin FROM produk WHERE id_produk = $1", [id]);
+			
+			const { rows: [prd] } = await client.query("SELECT * FROM produk WHERE id_produk = $1", [id]);
 			let pn = 0;
 			if (prd) pn = prd.poin ?? pn;
 			totalPoin += pn * qty;
+			
+			const jumlahBaru = (prd.jumlah || 0) - qty;
+			await client.query(`
+				INSERT INTO stok_flow (
+					id_produk, barcode, nama, stok_lama, stok_baru,
+					selisih, tipe_flow, referensi, keterangan, user_id, device_id
+				) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)`, [
+					id, prd.barcode, prd.nama, prd.jumlah, jumlahBaru,
+					jumlahBaru - prd.jumlah, "sold", noTrans, "Penjualan produk", operator, sumber
+				]
+			);
 
 			const hasil = await client.query("UPDATE produk SET jumlah = jumlah - $1 WHERE id_produk = $2 AND jumlah >= $3", [qty, id, qty]);
 			if (hasil.rowCount === 0) {
@@ -2412,7 +2450,7 @@ class PostData {
 
 			let total = 0, laba = 0, modal = 0;
 			for (const p of retur) {
-				const { rows: [jumlah] } = await client.query("SELECT jumlah FROM produk WHERE id_produk = $1", [p.id ?? ""]);
+				const { rows: [jumlah] } = await client.query("SELECT * FROM produk WHERE id_produk = $1", [p.id ?? ""]);
 				if (kosong(jumlah)) {
 					await client.query("ROLLBACK");
 					return [{
@@ -2420,6 +2458,18 @@ class PostData {
 						pesan: `Produk ${p.id ?? ""} tidak ditemukan`
 					}, 400];
 				}
+				const jumlahBaru = (jumlah.jumlah ?? 0) + (p.jumlah ?? 0);
+				await client.query(`
+					INSERT INTO stok_flow (
+						id_produk, barcode, nama, stok_lama, stok_baru,
+						selisih, tipe_flow, referensi, keterangan, user_id, device_id
+					) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)`, [
+						p.id ?? "", jumlah.barcode || "", jumlah.nama || "", jumlah.jumlah || 0, jumlahBaru,
+						jumlahBaru - jumlah.jumlah || 0, "return", crypto.randomUUID().slice(15,25).replaceAll("-",""),
+						"Retur produk", d.operator || "", d.sumber || ""
+					]
+				);
+				
 				await client.query("UPDATE produk SET jumlah = $1 WHERE id_produk = $2", [
 					(jumlah.jumlah ?? 0) + (p.jumlah ?? 0),
 					p.id ?? ""
@@ -3052,10 +3102,22 @@ class PostData {
 			const namaNama = [];
 			for (const id of d) {
 				const { rows: [row] } = await client.query(
-					"SELECT nama FROM produk WHERE id_produk = $1",
+					"SELECT * FROM produk WHERE id_produk = $1",
 					[id]
 				);
 				if (row) namaNama.push(row.nama || "");
+				
+				await client.query(`
+					INSERT INTO stok_flow (
+						id_produk, nama, barcode, stok_lama, stok_baru,
+						selisih, tipe_flow, referensi, keterangan, user_id, device_id
+					) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)`, [
+						row.id_produk, row.nama || "", row.barcode || "", row.jumlah || 0, 0,
+						-(row.jumlah || 0), "out", crypto.randomUUID().slice(15,25).replace("-",""),
+						"Hapus produk", data.operator || "", data.sumber || ""
+					]
+				);
+				
 				await client.query(
 					"DELETE FROM produk WHERE id_produk = $1",
 					[id]
@@ -3127,6 +3189,16 @@ class PostData {
 				0,
 				"-"
 			]);
+			await client.query(`INSERT INTO stok_flow 
+				(
+					id_produk, nama, barcode, stok_lama, stok_baru,
+					selisih, tipe_flow, referensi, keterangan, user_id, device_id
+				) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)`, [
+					idProduk, r.nama || "", r.barcode || "", r.stok_lama || 0, r.stok_terbaru || 0,
+					data.tambahan || 0, "in", crypto.randomUUID().slice(15,25).replaceAll("-", ""),
+					"Tambah stok", r.operator || "", r.sumber || ""
+				]
+			);
 			keuangan.kas = (keuangan.kas || 0) - totalModal;
 			keuangan.persediaan = (keuangan.persediaan || 0) + totalModal;
 			await client.query("COMMIT");
@@ -3150,6 +3222,7 @@ class PostData {
 			pesan: "Data kosong"
 		}, 400];
 		const client = await pool.connect();
+		const { rows: [prd] } = await client.query("SELECT * FROM produk WHERE id = $1 LIMIT $2", [d.id || 0, 1]);
 		try {
 			let md;
 			const isiSatuan = parseInt(d.isi_satuan || 0);
@@ -3245,6 +3318,19 @@ class PostData {
 				0,
 				"-"
 			]);
+			const jl = r.jumlah_lama || 0;
+			const jb = r.jumlah || 0;
+			await client.query(`INSERT INTO stok_flow 
+				(
+					id_produk, nama, barcode, stok_lama, stok_baru,
+					selisih, tipe_flow, referensi, keterangan, user_id, device_id
+				) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)`, [
+					prd.id_produk, d.nama || "", d.barcode || "", jl, jb,
+					jb - jl, "adjust", crypto.randomUUID().slice(15,25).replaceAll("-", ""),
+					"Edit produk", r.operator || "", r.sumber || ""
+				]
+			);
+			
 			keuangan.kas = (keuangan.kas || 0) - dataBaru;
 			keuangan.persediaan = (keuangan.persediaan || 0) + dataBaru;
 			await this.addRiwayat(client, r, "Edit produk");
@@ -3290,7 +3376,8 @@ class PostData {
 			const tanggal = DateTime.fromFormat(tgl, "yyyy-M-d");
 			if (!tanggal.isValid) throw new Error("Format tanggal salah");
 			const exp = tanggal.toFormat("MM/dd/yy");
-
+			const idProduk = strftime("f");
+			
 			await client.query("BEGIN");
 			await client.query(`INSERT INTO produk (
 				id_produk,
@@ -3311,7 +3398,7 @@ class PostData {
 				stok_minimum,
 				poin
 			) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17)`, [
-				strftime("%f"),
+				idProduk,
 				d.barcode || "",
 				d.nama || "",
 				d.kategori || "",
@@ -3364,6 +3451,16 @@ class PostData {
 				0,
 				"-"
 			]);
+			await client.query(`INSERT INTO stok_flow 
+				(
+					id_produk, nama, barcode, stok_lama, stok_baru,
+					selisih, tipe_flow, referensi, keterangan, user_id, device_id
+				) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)`, [
+					idProduk, d.nama || "", d.barcode || "", 0, d.jumlah || 0,
+					d.jumlah || 0, "in", crypto.randomUUID().slice(15,25).replaceAll("-", ""),
+					"Tambah produk baru", d.operator || "", d.sumber || ""
+				]
+			);
 			keuangan.kas = (keuangan.kas || 0) - penyediaan;
 			keuangan.persediaan = (keuangan.persediaan || 0) + penyediaan;
 			
