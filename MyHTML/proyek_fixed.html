@@ -3344,6 +3344,7 @@ class Produk {
 			pict.className = "image";
 			pict.loading = "lazy";
 			field.appendChild(pict);
+			field.appendChild(makeLabel(nama, "teks"));
 			pict.onclick = (e) => {
 				const p = makeFlyParent(e);
 				pembuatButtonGambar(p, [
