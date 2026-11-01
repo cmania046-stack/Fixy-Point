@@ -50,6 +50,7 @@
 		<br>
 		<img id="qr-struk" style="align-self: center; width: 40mm; height: 40mm" alt="">
 		<p>Silahkan datang kembali!....</p>
+		<div id="voucher-div" style="display: none;"></div>
 	</div>
 
 <div id="utama">
@@ -160,6 +161,14 @@ function pecahObject(data) {
 	return hasil;
 }
 
+function kosong(x) {
+  if (x == null) return true;
+  if (Array.isArray(x)) return x.length === 0;
+  if (typeof x === "object") return Object.keys(x).length === 0;
+  if (typeof x === "string") return x.length === 0;
+  return false;
+}
+
 function kenaPajak(harga,status=0,persen=0){
 	if (status === 1) {
 		return Math.round(harga * (1 + persen / 100));
@@ -185,6 +194,68 @@ function aktifkanScanner(){
 	mainkanBeep();
 }
 
+async function mulaiScan(vid, target=null, dispatch=false, stopAfterScanning=true) {
+	if (!("BarcodeDetector" in window)) {
+		await modalShow(gagal, "Browser ini tidak mendukung barcode");
+		return;
+	}
+	const statusEl = document.getElementById("status");
+	try {
+		const stream = await navigator.mediaDevices.getUserMedia({
+			video: { facingMode: "environment" }
+		});
+		vid.srcObject = stream;
+		await new Promise(resolve => {
+			vid.onloadedmetadata = resolve;
+		});
+		statusEl.textContent = "Mulai scan...";
+	} catch (err) {
+		await modalShow(error, err);
+		return;
+	}
+	const detector = new BarcodeDetector({
+		formats: ["qr_code", "ean_13", "ean_8", "code_128", "code_39", "upc_a", "upc_e"]
+	});
+
+	let hasilTerakhir = null;
+	let waktuTerakhir = 0;
+
+	const loop = async () => {
+		if (!scanning) return;
+		try {
+			const barcodes = await detector.detect(vid);
+			if (barcodes.length > 0) {
+				const hasil = barcodes[0].rawValue;
+				const sekarang = Date.now();
+				const sudahlewat = sekarang - waktuTerakhir > 2000;
+				if (sudahlewat || hasil !== hasilTerakhir) {
+					hasilTerakhir = hasil;
+					waktuTerakhir = sekarang;
+					if (target) {
+						target.value = hasil;
+						if (dispatch) {
+							target.dispatchEvent(new KeyboardEvent("keydown", {
+								key: "Enter",
+								code: "Enter",
+								bubbles: true,
+								cancelable: true
+							}));
+						}
+						if (stopAfterScanning) {
+							tutupScanner();
+							return;
+						}
+					}
+				}
+			}
+		} catch (err) {
+			await modalShow(error, err);
+		}
+		requestAnimationFrame(loop);
+	};
+	loop();
+}
+
 function cetak(id, ukuran="80mm auto", lebar="80mm") {
 	const elemen = document.querySelector(id);
 	const style = document.createElement("style");
@@ -204,48 +275,96 @@ function cetak(id, ukuran="80mm auto", lebar="80mm") {
 	style.remove();
 }
 
-async function cetakStruk(data, includingQr=true){
-	try {
-		const keranjang = data.items || [];
-		const map = {
-			toko: toko,
-			alamat: alamatToko,
-			kontak: kontakToko,
-			waktu: new Date().toLocaleString("id-ID"),
-			no_trans: data.no_trans || "",
-			operator: data.operator,
-			total: formatMataUang(data.total || 0),
-			bayar: formatMataUang(data.bayar || 0),
-			kembali: formatMataUang(data.kembali || 0)
-		}
-		for (const [key, value] of Object.entries(map)) {
-			document.getElementById(key).textContent = value;
-		}
-		const isi = document.getElementById("isi-keranjang");
-		let for_isi = "";
-		for (const item of keranjang) {
-			for_isi += `${item.nama || ""} ${item.qty || 0}x = ${formatMataUang(item.subtotal_jual || 0)}<br>`;	
-		}
-		isi.innerHTML = for_isi;
-		if (includingQr) {
-			const elemenImg = document.getElementById("qr-struk");
-			elemenImg.style.display = "block";
-			const respon = await fetch(`${url}buat_qr_struk/${encodeURIComponent(data.no_trans || "")}`);
-			if (!respon.ok) throw new Error("Gagal ambil QR");
-			const blob = await respon.blob();
-			if (elemenImg.dataset.url) URL.revokeObjectURL(elemenImg.dataset.url);
-			const urlQr = URL.createObjectURL(blob);
-			elemenImg.dataset.url = urlQr;
-			elemenImg.src = urlQr;
-			await elemenImg.decode();
-		} else {
-			document.getElementById("qr-struk").style.display = "none";
-		}
-		cetak("#struk");
-		
-	} catch (err) {
-		await modalShow(error, err);
-	}
+async function cetakStruk(data, includingQr = true) {
+    try {
+        const keranjang = data.items || [];
+        const map = {
+            toko: toko,
+            alamat: alamatToko,
+            kontak: kontakToko,
+            waktu: new Date().toLocaleString("id-ID"),
+            no_trans: data.no_trans || "",
+            operator: data.operator,
+            total: formatMataUang(data.total || 0),
+            bayar: formatMataUang(data.bayar || 0),
+            kembali: formatMataUang(data.kembali || 0)
+        };
+        for (const [key, value] of Object.entries(map)) {
+            document.getElementById(key).textContent = value;
+        }
+
+        const isi = document.getElementById("isi-keranjang");
+        let for_isi = "";
+        for (const item of keranjang) {
+            for_isi += `${item.nama || ""} ${item.qty || 0}x = ${formatMataUang(item.subtotal_jual || 0)}<br>`;	
+        }
+        isi.innerHTML = for_isi;
+
+        if (includingQr) {
+            const elemenImg = document.getElementById("qr-struk");
+            elemenImg.style.display = "block";
+            const respon = await fetch(`${url}buat_qr_struk/${encodeURIComponent(data.no_trans || "")}`);
+            if (!respon.ok) throw new Error("Gagal ambil QR");
+            const blob = await respon.blob();
+            if (elemenImg.dataset.url) URL.revokeObjectURL(elemenImg.dataset.url);
+            const urlQr = URL.createObjectURL(blob);
+            elemenImg.dataset.url = urlQr;
+            elemenImg.src = urlQr;
+            await elemenImg.decode();
+        } else {
+            document.getElementById("qr-struk").style.display = "none";
+        }
+
+        const daftarVoucher = data.voucher || [];
+
+        if (daftarVoucher.length > 0) {
+            const idProgram = daftarVoucher[0];
+            const hasil = await postDataKedua("klaim_voucher", { id_program: idProgram });
+
+            if (hasil && hasil.stat && hasil.stat.toLowerCase() === "berhasil") {
+                const d = hasil.data;
+                d["id_program"] = idProgram;
+
+                const res = await fetch(url + "buat_qr_voucher", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(d),
+                    credentials: "include"
+                });
+                if (!res.ok) throw new Error("Terjadi kesalahan saat mengambil kode QR");
+
+                const blob = await res.blob();
+                const urlImg = URL.createObjectURL(blob);
+                const parent = document.getElementById("voucher-div");
+                parent.classList.remove("hidden");
+                parent.innerHTML = "";
+                
+                makeLabel("========== VOUCHER ===========", "teks", parent);
+                makeLabel(d.nama_voucher, "teks", parent);
+                const image = document.createElement("img");
+                image.src = urlImg;
+                image.style.width = "40mm";
+                image.style.height = "40mm";
+                parent.appendChild(image);
+                makeLabel(d.kode_voucher, "teks", parent);
+                makeLabel(d.tipe_voucher + " : " + (d.tipe_voucher.toLowerCase() === "diskon" ? d.nilai_voucher : formatMataUang(d.nilai_voucher)), "teks", parent);
+                makeLabel("Berlaku: " + d.berlaku, "teks", parent);
+                makeLabel("Tunjukkan QR Code ini ke kasir saat belanja berikutnya. Voucher tidak dapat diuangkan.", "teks", parent);
+                makeLabel(`Info lebih lanjut hubungi ${kontakToko}`, "teks", parent);
+                makeLabel("==============================", "teks", parent);
+				
+                image.onload = () => cetak("#struk");
+                image.onerror = () => cetak("#struk");
+            } else {
+                cetak("#struk");
+            }
+        } else {
+            cetak("#struk");
+        }
+
+    } catch (err) {
+        await modalShow(error, err);
+    }
 }
 
 function tutupScanner() {
@@ -469,9 +588,10 @@ function makeCekTrx(parent, label) {
 	return cek;
 }
 
-function makeParent(kelas) {
+function makeParent(kelas, parent=null) {
 	const div = document.createElement("div");
 	div.className = kelas;
+	if (parent) parent.appendChild(div);
 	return div
 }
 
@@ -485,7 +605,7 @@ function makeFlyParent(e) {
 	return p;
 }
 
-function makeButton(kelas, teks, command, image=null, bg=null, fg=null, fw=null) {
+function makeButton(kelas, teks, command, image=null, parent=null, bg=null, fg=null, fw=null) {
 	const btn = document.createElement("button");
 	btn.className = kelas;
 	
@@ -512,6 +632,7 @@ function makeButton(kelas, teks, command, image=null, bg=null, fg=null, fw=null)
 	btn.onclick = function() {
 		setTimeout(command, 300);
 	}
+	if (parent) parent.appendChild(btn);
 	return btn;
 }
 
@@ -577,6 +698,9 @@ function pembuatEntry(parent, arrayObject) {
 		const lbl = makeLabel(key.replace(/_/g, " ").toUpperCase(), "input-title");
 		const ent = document.createElement("input");
 		ent.type = tipe;
+		if (tipe.toLowerCase() === "date") {
+			ent.value = new Date().toISOString().split("T")[0];
+		}
 		ent.placeholder = value;
 		ent.className = "entry";
 		entries[key] = ent
@@ -1213,10 +1337,11 @@ function pembuatField(parent, teks) {
 	return field;
 }
 
-function makeLabel(teks, kelas) {
+function makeLabel(teks, kelas, parent=null) {
 	const lbl = document.createElement("p");
 	lbl.textContent = teks;
 	lbl.className = kelas;
+	if (parent) parent.appendChild(lbl);
 	return lbl;
 }
 
@@ -1414,11 +1539,12 @@ function entryMaker(placeholder, tipe, gambar, parent){
 	return entry;
 }
 
-function makeEntry(placeholder, tipe) {
+function makeEntry(placeholder, tipe, parent=null) {
 	const ent = document.createElement("input");
 	ent.type = tipe;
 	ent.className = "entry";
 	ent.placeholder = placeholder;
+	if (parent) parent.appendChild(ent);
 	return ent;
 }
 
@@ -1925,6 +2051,61 @@ window.addEventListener("pageshow", (event) => {
 	}
 });
 
+async function cekVoucher(parent, keranjang, totalBelanja, totalQty, nama, kontak) {
+	const ketentuan = await getData("ketentuan_voucher");
+	const voucher = await getData("vouchers_data");
+	const cs = await getData("customer");
+	
+	const sekarang = new Date();
+	let vc = {};
+	parent.innerHTML = "";
+	
+	makeLabel("Dari daftar belanja Anda. Anda bisa mendapatkan salah satu dari voucher dibawah!", "teks", parent);
+	for (const item of ketentuan) {
+		const infoUmum = JSON.parse(item.info_umum);
+		const syaratKlaim = JSON.parse(item.syarat_klaim);
+		if (sekarang < new Date(infoUmum.start)) {
+			let lolos = false, lolosKedua = false;
+			if (syaratKlaim.penerima.toLowerCase() !== "semua pelanggan") {
+				const name = nama.value.trim().toLowerCase();
+				const contact = kontak.value.trim();
+				const poin = cs.find(p => 
+					p.nama.toLowerCase() === name &&
+					p.kontak === contact
+				)?.poin ?? 0;
+				if (poin >= syaratKlaim.min_poin &&
+					totalBelanja >= syaratKlaim.min_total &&
+					totalQty >= syaratKlaim.min_qty
+				) lolos = true;
+			} else {
+				if (
+					totalBelanja >= syaratKlaim.min_total &&
+					totalQty >= syaratKlaim.min_qty
+				) lolos = true;
+			}
+			let iter = 0;
+			
+			for (const produk of keranjang) {
+				if (syaratKlaim.produk_klaim.includes(produk.id)) {
+					iter += 1;
+					if (iter === syaratKlaim.jumlah_beli) {
+						lolosKedua = true;
+						break;
+					}
+				}
+			}
+			
+			if (lolos && lolosKedua) {
+				parent.classList.remove("hidden");
+				const cek = makeCekbox(parent, infoUmum.nama + " - " + infoUmum.nilai);
+				vc[item.id_program] = cek;
+			}
+		}
+	}
+	return vc;
+}
+
+
 class Pengeluaran {
 	constructor() {
 		this.pengeluaran = null;
@@ -2427,72 +2608,9 @@ class Produk {
 		this.status = document.getElementById("status");
 	}
 	
-	async bukaScanner(target, dispatch=false) {
+	async bukaScanner(target, dispatch=false, stop=true) {
 		await aktifkanScanner();
-		this.mulaiScan(target, dispatch);	
-	}
-	
-	async mulaiScan(target=null, dispatch=false) {
-		if (!("BarcodeDetector" in window)){await modalShow(gagal, "Browser ini tidak mendukung barcode");return;}
-		try {
-			const stream = await navigator.mediaDevices.getUserMedia({
-				video: { facingMode: "environment" }
-			});
-			this.video.srcObject = stream;
-			await new Promise(resolve => {
-				this.video.onloadedmetadata = resolve;
-			});
-			this.status.textContent = "Mulai scan...";
-		} catch (err) {
-			await modalShow(error, err);
-			return;
-		}
-		
-		const detector = new BarcodeDetector({
-			formats: ["qr_code", "ean_13", "ean_8", "code_128", "code_39", "upc_a", "upc_e"]
-		});
-		
-		let hasilTerakhir = null;
-		let waktuTerakhir = 0;
-		
-		const loop = async () => {
-			if (!scanning) return;
-			try {
-				const barcodes = await detector.detect(this.video);
-				if (barcodes.length > 0) {
-					const hasil = barcodes[0].rawValue;
-					const sekarang = Date.now();
-					const sudahlewat = sekarang - waktuTerakhir > 2000;
-					if (sudahlewat || hasil !== hasilTerakhir) {
-						hasilTerakhir = hasil;
-						waktuTerakhir = sekarang;
-						if (target) {
-							target.value = hasil;
-							if (dispatch) {
-								target.dispatchEvent(new KeyboardEvent("keydown", {
-									key: "Enter",
-								    code: "Enter",
-								    bubbles: true,
-							        cancelable: true
-								}));
-								return; }
-							const prd = await getData("produk");
-							if (prd.find(p => p.barcode === hasil) ?? null) {
-								await modalShow(gagal, "Produk dengan barcode ini sudah ada");
-								tutupScanner();
-								return;
-							}
-							mainkanBeep();
-							tutupScanner();
-						}
-					}
-				}
-			} catch (err) {
-				await modalShow(error, err);
-			}
-			this.animationId = requestAnimationFrame(loop);
-		}
-		loop();
+		await mulaiScan(this.video, target, dispatch, stop);	
 	}
 	
 	hitungJumlahDanModal(parent, harga, jumlah, isi) {
@@ -2537,7 +2655,19 @@ class Produk {
 		const pr1 = makeParent("container");
 		const frameForBarcode = makeParent("container-horizontal");
 		const inputBarcode = entryMaker("Masukkan barcode", "text", "Pictures/barcode.png", frameForBarcode);
-		frameForBarcode.appendChild(makeButton("btns", "", () => this.bukaScanner(inputBarcode), "Pictures/barcode.png"));
+		inputBarcode.addEventListener("keydown", async (e) => {
+			if (e.key === "Enter") {
+				e.preventDefault();
+				const brc = inputBarcode.value.trim();
+				const prd = await getData("produk");
+				if (!(kosong(prd.find(p => p.barcode === brc)))) {
+					await modalShow(gagal, `Produk dengan barcode ${brc} sudah ada.`);
+					return;
+				}
+			}
+		});
+		
+		frameForBarcode.appendChild(makeButton("btns", "", () => this.bukaScanner(inputBarcode, true, true), "Pictures/barcode.png"));
 		pr1.appendChild(frameForBarcode);
 		this.info1 = pembuatEntry(pr1, [
 				["nama", "Masukkan nama", "text"],
@@ -3771,7 +3901,7 @@ class Produk {
 				}
 			}
 		});
-		p.querySelector("img").onclick = () => this.bukaScanner(cari, true);
+		p.querySelector("img").onclick = () => this.bukaScanner(cari, true, false);
 	}
 		
 	laporanStok() {
@@ -4107,7 +4237,13 @@ class Transaksi {
 		hideWindow();
 		this.lihatKeranjang();
 	}
-	async transaksiSelesai() {
+	async transaksiSelesai(voc) {
+		const voucher = pecahCek(voc);
+		if (voucher.length > 1) {
+			await modalShow(gagal, "Anda tidak diizinkan mengklaim lebih dari satu voucher dalam sekali transaksi");
+			return;
+		}
+		
 		const jumlahBayar = this.sudahBayar + this.bayar;
 		if (secondKeranjang.length === 0) {
 			await modalShow(gagal, "Keranjang kosong");
@@ -4131,6 +4267,7 @@ class Transaksi {
 			no_trans: this.noTrans,
 			pembeli: pembeli,
 			is_pending: this.isPending,
+			voucher: voucher
 		}
 	
 		try {
@@ -4170,8 +4307,9 @@ class Transaksi {
 		const wadah = pembuatJendela();
 		
 		const wadahUtama = pembuatField(wadah, "MENU PEMBAYARAN");
-		const atas = makeParent("container-horizontal");
-		const bawah = makeParent("container");
+		const atas = makeParent("container-horizontal", wadahUtama);
+		const bawah = makeParent("container", wadahUtama);
+		const bot = makeParent("container hidden", wadahUtama);
 		const totalQty = secondKeranjang.reduce((sum, a) => sum + a.qty_asli, 0);
 
 		let teksTotal = "Total belanja: " + formatMataUang(totalBelanja);
@@ -4189,8 +4327,11 @@ class Transaksi {
 				["kontak", "Nomor telepon/WhatsApp pembeli", "number"]
 		])
 		
+		const voc = await cekVoucher(bot, secondKeranjang, totalBelanja, totalQty,
+			this.infoBuyer.nama, this.infoBuyer.kontak);
+	
 		const labelQty = makeLabel("Total qty: " + formatUnit(totalQty, "unit"), "jdl");
-		const btnSelesai = makeButton("btn", "Selesai", () => this.transaksiSelesai());
+		const btnSelesai = makeButton("btn", "Selesai", () => this.transaksiSelesai(voc));
 		labelQty.style.height = "100%";
 		for (const x of [labelQty, btnSelesai]) bawah.appendChild(x);
 	
@@ -4200,10 +4341,8 @@ class Transaksi {
 		inputUang.oninput = () => this.hitungKembalian(inputUang.value.trim());
 		
 		this.infoBuyer.kontak.addEventListener("keydown", (e) => {
-			if (e.key === "Enter") { e.preventDefault(); this.transaksiSelesai(); }
+			if (e.key === "Enter") { e.preventDefault(); this.transaksiSelesai(voc); }
 		});
-
-		for (const frame of [atas, bawah]) wadahUtama.appendChild(frame);
 		inputUang.focus();
 	}
 	
@@ -4848,6 +4987,7 @@ class TransaksiCepat {
 		this.secondKeranjang = [];
 		this.currentSearchId = 0;
 		this.totalBelanja = 0;
+		this.potonganPromo = 0;
 		this.kembalian = 0;
 		this.persenPajak = 0;
 		this.aktifPajak = 0;
@@ -4860,58 +5000,7 @@ class TransaksiCepat {
 	
 	async openCamera() {
 		await aktifkanScanner();
-		this.mulaiScan();
-	}
-	
-	async mulaiScan(){
-		if (!("BarcodeDetector" in window)){
-			this.status.textContent = "Browser ini tidak mendukung barcode";
-			return;
-		}
-		try {
-			const stream = await navigator.mediaDevices.getUserMedia({
-				video: { facingMode: "environment" }
-			});
-			this.video.srcObject = stream;
-			await new Promise(resolve => {
-			    this.video.onloadedmetadata = resolve;
-			});
-			this.status.textContent = "Mulai scan...";
-
-		} catch (err) {
-			await modalShow(error, err);
-			return;
-		}
-		const detector = new BarcodeDetector({
-			formats: ["qr_code", "ean_13", "ean_8", "code_128", "code_39", "upc_a", "upc_e"]
-		});
-		
-		let hasilTerakhir = null;
-		let waktuTerakhir = 0;
-
-		const loop = async () => {
-			if (!scanning) return;
-			try {
-				const barcodes = await detector.detect(this.video);
-				if (barcodes.length > 0) {
-				    const hasil = barcodes[0].rawValue;
-				    const sekarang = Date.now();
-				    const sudahLewat = sekarang - waktuTerakhir > 2000;
-				
-				    if (hasil !== hasilTerakhir || sudahLewat) {
-				        hasilTerakhir = hasil;
-				        waktuTerakhir = sekarang;
-				        this.cari.value = hasil;
-				        this.addKeranjang();
-				        mainkanBeep();
-				    }
-				}
-			} catch (err) {
-				await modalShow(error, err);
-			}
-			this.animationId = requestAnimationFrame(loop);
-		};
-		loop();
+		await mulaiScan(this.video, this.cari, true, false);
 	}
 	
 	generateNoTrans() {
@@ -5018,7 +5107,8 @@ class TransaksiCepat {
 	
 	tampilkanProduk() {
 		this.frBawah.innerHTML = "";
-		for (const item of this.hasilPencarian.slice(0,10)) {
+		const data = this.hasilPencarian.slice(0,10);
+		data.forEach((item, i) => {
 			const fr = pembuatField(this.frBawah, item.nama);
 			fr.appendChild(makeLabel("🏷️ " + item.barcode), "biasa");
 			fr.appendChild(makeLabel("🆔 " + item.id_produk), "biasa");
@@ -5028,7 +5118,19 @@ class TransaksiCepat {
 			qty.id = "qty-inp";
 			fr.appendChild(qty);
 			fr.appendChild(makeButton("btn", "Tambah", () => this.tambahKeranjang(item.id_produk, safeInt(qty.value.trim()))));
-		}
+			qty.addEventListener("keydown", (e) => {
+				if (e.key === "Enter") {
+					e.preventDefault();
+					const q = safeInt(qty.value.trim());
+					if (q > 0) {
+						this.tambahKeranjang(item.id_produk, q);
+						qty.value = "";
+					}
+					if (i === data.length - 1) { this.cari.focus(); }
+					else { fr.nextElementSibling.querySelector("#qty-inp").focus(); }
+				}
+			});
+		});
 	}
 
 	async hapusProduk(id) {
@@ -5036,7 +5138,12 @@ class TransaksiCepat {
 		await this.tambahkanSecondKeranjang();
 		this.lihatKeranjang();
 	}
-	async selesaikanTransaksi(input) {
+	async selesaikanTransaksi(input, voucher) {
+		const vc = pecahCek(voucher);
+		if (vc.length > 1) {
+			await modalShow(gagal, "Anda tidak diizinkan melakukan klaim lebih dari satu voucher dalam satu kali transaksi");
+			return;
+		}
 		const result = Object.fromEntries(Object.entries(input).map(([key, val]) => [key, val.value.trim()]));
 		let bayar = 0;
 		if (result["jumlah bayar"] !== "") {
@@ -5057,7 +5164,8 @@ class TransaksiCepat {
 			sumber: String(idDevice),
 			operator: String(user),
 			no_trans: this.noTrans,
-			pembeli: pembeli
+			pembeli: pembeli,
+			voucher: vc
 		}
 		if (await modalShow(confirm, "Data telah siap. Selesaikan transaksi sekarang?")) {
 			const up = await postData("penjualan_campuran", data);
@@ -5080,41 +5188,74 @@ class TransaksiCepat {
 		this.labelTotal.textContent = "Total: " + formatMataUang(this.totalBelanja);
 		this.setup();
 	}
-	lihatKeranjang() {
+	
+	async lihatKeranjang() {
 		this.frBawah.innerHTML = "";
-		const fr = makeParent("container");
-		
-		this.frBawah.appendChild(fr);
+		const fr = makeParent("container", this.frBawah);
+		const tabel = makeTable(`
+			<tr>
+				<th>Aksi</th>
+				<th>Nama</th>
+				<th>Qty</th>
+				<th>Harga jual</th>
+				<th>Subtotal</th>
+			</tr>
+		`);
+		fr.appendChild(tabel);
 		for (const item of this.secondKeranjang) {
-			const frame = pembuatField(fr, item.nama);
-			const p = makeParent("container");
-			p.style.display = "grid";
-			p.style.gridTemplateColumns = "repeat(3,1fr)";
-			
-			for (const [key, val] of [
-				["Qty", formatUnit(item.qty, "unit")],
-				["Harga jual", formatMataUang(item.harga_jual)],
-				["Subtotal", formatMataUang(item.subtotal_jual)]
-			]) {
-				for (const i of [
-					makeLabel(key, "biasa"),
-					makeLabel(":", "biasa"),
-					makeLabel(val, "biasa")
-				]) p.appendChild(i);	
-			}
-			frame.appendChild(p);
-			frame.appendChild(makeButton("btn", "Hapus", () => this.hapusProduk(item.id), "Pictures/hapus.png"));
+			const tr = document.createElement("tr");
+			tr.innerHTML = `
+				<td>
+					<img src="${url}Pictures/hapus.png" class="icon" onclick="trx.hapusProduk('${item.id}')">
+				</td>
+				<td>${item.nama}</td>
+				<td>${formatUnit(item.qty, "unit")}</td>
+				<td>${formatMataUang(item.harga_jual)}</td>
+				<td>${formatMataUang(item.subtotal_jual)}</td>
+			`;
+			tabel.appendChild(tr);
 		}
 	
+		let voc = {};
+		const prt = pembuatField(this.frBawah, "Voucher tersedia");
 		const co = pembuatField(this.frBawah, "Checkout");
+		
 		const ent = pembuatEntry(co, [
-				["jumlah bayar", "Jumlah bayar", "number"],
-				["nama", "Nama pembeli", "text"],
-				["nomor telepon", "Nomor telepon", "number"]
-		])
-		ent["jumlah bayar"].oninput = () => this.hitungKembalian(ent["jumlah bayar"].value.trim())
-		co.appendChild(makeButton("btn", "Selesai", () => this.selesaikanTransaksi(ent)));
+			["jumlah bayar", "Jumlah bayar", "number"],
+			["nama", "Nama pembeli", "text"],
+			["nomor telepon", "Nomor telepon", "number"]
+		]);
+		makeButton("btn", "Selesaikan transaksi", () => this.selesaikanTransaksi(ent, voc), null, co);
+		
+		const vcp = makeParent("container-horizontal", this.frBawah);
+		vcp.style.flexWrap = "nowrap";
+		const inpVoucher = entryMaker("Masukkan kode voucher...", "text", "Pictures/barcode.png", vcp);
+		makeButton("btn", "Reedem", () => this.reedemVoucher(inpVoucher.value.trim()), null, vcp);
+		makeButton("btn", "Cek voucher", async () => {
+			voc = await cekVoucher(prt, this.secondKeranjang, this.totalBelanja,
+				this.secondKeranjang.reduce((sum, b) => sum + b.qty_asli,0), ent["nama"], ent["nomor telepon"]
+			);
+		}, null, vcp);
+		ent["jumlah bayar"].oninput = () => this.hitungKembalian(ent["jumlah bayar"].value.trim());
 	}
+	
+	async reedemVoucher(kode) {
+		if (kosong(kode)) {
+			await modalShow(gagal, "Anda perlu memasukkan kode voucher...");
+			return;
+		}
+		const data = {
+			kode_voucher: kode,
+			keranjang: this.secondKeranjang
+		}
+		if (await modalShow(confirm, `Pakai voucher ${kode} sekarang?. Harap jangan membatalkan transaksi setelah voucher dipakai. Voucher tidak dapat dikembalikan.`)) {
+			const cek = await postDataKedua("pakai_voucher", data);
+			if (cek.stat.toLowerCase() === "berhasil") {
+				this.potonganPromo = cek.hasil;
+			}
+		}
+	}
+
 	hitungKembalian(bayar) {
 		let jumlahBayar = 0;
 		if (bayar !== "") {
@@ -5123,11 +5264,13 @@ class TransaksiCepat {
 		this.kembalian = jumlahBayar - this.totalBelanja;
 		this.labelTotal.textContent = "Kembali: " + formatMataUang(this.kembalian);
 	}
+	
 	prepareFrames() {
 		this.labelTotal = document.getElementById("jdl");
 		this.labelTotal.textContent = "Total: " + formatMataUang(this.totalBelanja);
 
 		const atas = makeParent("container-horizontal");
+		atas.style.flexWrap = "nowrap";
 		this.cari = makeEntry("Cari produk", "text");
 		this.cari.oninput = () => this.cariProduk(this.cari.value.trim());
 				
@@ -5153,20 +5296,7 @@ class TransaksiCepat {
 					this.tambahKeranjang(isBarcode.id_produk, 1);
 				} else {
 					const inps = this.frBawah.querySelectorAll("#qty-inp");
-					if (inps.length) {
-						inps[0].focus();
-						inps.forEach((item, i) => {
-							item.addEventListener("keydown", (e) => {
-								if (e.key === "Enter") {
-									if ( i >= (inps.length - 1)) {
-										this.cari.focus();
-										return;
-									}
-									inps[i+1].focus();
-								}
-							});
-						});
-					}
+					if (inps.length) inps[0].focus();
 				}
 			}
 		});
@@ -7434,7 +7564,7 @@ class HakAkses {
 			'laporan penjualan', 'laporan keuangan', 'lainnya'
 		]);
 		this.lainnya = this.pembuatCek(this.bawah, "Lainnya", [
-			'hiburan', 'backup', 'hak akses'
+			'hiburan', 'backup', 'hak akses', 'voucher'
 		]);
 	}
 	
@@ -8198,6 +8328,278 @@ class Kalkulator {
 	}
 }
 
+function pecahCek(data) {
+	let forReturn = [];
+	for (const [key, value] of Object.entries(data)) {
+		const val = value.checked;
+		if (val) forReturn.push(key);
+	}
+	return forReturn;	
+}
+
+class Voucher {
+	produkTerlibat(parent) {
+		const label = makeLabel("Berlaku untuk produk", "teks");
+		parent.appendChild(label);
+		const kategori = pembuatCombo(parent, "- Pilih kategori -", [...new Set(this.produk.map(p => p.kategori))]);
+		const prt = makeParent("container");
+		prt.style.display = "grid";
+		prt.style.gridTemplateColumns = "repeat(3,1fr)";
+		parent.appendChild(prt);
+		
+		let prd = {};
+		kategori.onchange = () => {
+		    prt.innerHTML = "";
+		    const info = this.produk.filter(p => p.kategori.toLowerCase() === kategori.value.toLowerCase());
+		    for (const i of info) {
+		        const cek = makeCekbox(prt, i.nama);    
+		        if (prd[i.id_produk]) {
+		            cek.checked = prd[i.id_produk].checked;
+		        }	        
+		        prd[i.id_produk] = cek; 
+		    }
+		}
+		return prd;
+	}
+	
+	terbitkanVoucher(btn) {
+		btn.textContent = "Simpan";
+		this.atas.innerHTML = "";
+		const fu = pembuatField(this.atas, "Informasi umum");
+		const sc = pembuatField(this.atas, "Syarat klaim voucher");
+		const su = pembuatField(this.atas, "Syarat penggunaan voucher");
+		
+		const tipe = pembuatCombo(fu, "- Pilih tipe voucher -", ["Diskon", "Cashback"]);
+		const infoUmum = pembuatEntry(fu, [
+			["nama voucher", "Masukkan nama voucher...", "text"],
+			["jumlah diterbitkan", "Masukkan jumlah voucher...", "number"],
+			["nilai voucher", "Masukkan nilai voucher...", "text"],
+			["tanggal berlaku", "", "date"],
+			["tanggal berakhir", "", "date"]
+		]);
+		
+		const penerima = pembuatCombo(sc, "- Pilih penerima voucher -", ["Pelanggan tetap", "Semua pelanggan"]);
+		const syaratClaim = pembuatEntry(sc, [
+			["minimum total qty", "Total minimal qty...", "number"],
+			["minimum total belanja", "Total minimal belanja...", "number"]
+		]);
+		const pr = makeParent("container hidden", sc);
+		const minPoin = pembuatEntry(pr, [["minimum poin", "Poin minimal pelanggan...", "number"]]);
+		const produkTerlibatClaim = this.produkTerlibat(sc);
+		penerima.onchange = () => {
+			const r = penerima.value;
+			if (r.toLowerCase() === "pelanggan tetap") { pr.classList.remove("hidden"); }
+			else { pr.classList.add("hidden"); }
+		}
+		
+		const jumlahWajib = makeCekbox(sc, "Wajib beli seluruh produk terpilih?");
+		jumlahWajib.checked = true;
+		const inpJumlahWajib = makeEntry("Masukkan jumlah produk wajib dibeli...", "number", sc);
+		inpJumlahWajib.classList.add("hidden");
+		jumlahWajib.onchange = () => {
+			if (jumlahWajib.checked) { inpJumlahWajib.classList.add("hidden"); }
+			else { inpJumlahWajib.classList.remove("hidden"); }
+		}
+		
+		const termasukDiskon = makeCekbox(su, "Termasuk produk diskon");
+		const termasukTingkat = makeCekbox(su, "Termasuk produk harga bertingkat");
+		const syaratGuna = pembuatEntry(su, [
+			["minimum qty belanja", "Total qty minimal...", "number"],
+			["minimum total belanja", "Total belanja...", "number"]
+		]);
+		const produkTerlibatGuna = this.produkTerlibat(su);
+		
+		const wajibBeli = makeCekbox(su, "Wajib beli seluruh produk terpilih?");
+		wajibBeli.checked = true;
+		const inpWajibBeli = makeEntry("Masukkan jumlah produk wajib dibeli...", "number", su);
+		inpWajibBeli.classList.add("hidden");
+		wajibBeli.onchange = () => {
+			if (wajibBeli.checked) { inpWajibBeli.classList.add("hidden"); }
+			else { inpWajibBeli.classList.remove("hidden"); }
+		}
+		
+		btn.onclick = async () => {
+			const tipeVoucher = tipe.value;
+			if (tipeVoucher.toLowerCase() === "- pilih tipe voucher -") {
+				await modalShow(gagal, "Silahkan pilih tipe voucher terlebih dahulu");
+				return;
+			}
+			const iu = pecahObject(infoUmum);
+			if (kosong(iu["nama voucher"]) ||
+				kosong(iu["jumlah diterbitkan"]) ||
+				kosong(iu["nilai voucher"])
+			) {
+				await modalShow(gagal, "Nama, jumlah dan nilai voucher wajib diisi");
+				return;
+			}
+			
+			let receiver = penerima.value.toLowerCase();
+			if (receiver === "- pilih penerima voucher -") receiver = "semua pelanggan";
+			const klaim = pecahObject(syaratClaim);
+			const produkClaimAffected = pecahCek(produkTerlibatClaim);
+			
+			const disk = termasukDiskon.checked;
+			const tingk = termasukTingkat.checked;
+			const sg = pecahObject(syaratGuna);
+			const terlibatGuna = pecahCek(produkTerlibatGuna);
+			
+			const dataUtama = {
+				info_umum: {
+					tipe: tipeVoucher,
+					nama: iu["nama voucher"],
+					jumlah: safeInt(iu["jumlah diterbitkan"]),
+					nilai: iu["nilai voucher"],
+					start: iu["tanggal berlaku"],
+					end: iu["tanggal berakhir"]
+				},
+				syarat_claim: {
+					penerima: receiver,
+					min_qty: safeInt(klaim["minimum total qty"]),
+					min_total: safeFloat(klaim["minimum total belanja"]),
+					min_poin: safeInt(minPoin["minimum poin"].value.trim()),
+					produk_klaim: produkClaimAffected.length === 0 ?
+						this.produk.map(p => p.id_produk) : produkClaimAffected,
+					jumlah_beli: jumlahWajib.checked === true ?
+						produkTerlibatClaim.length : safeInt(inpJumlahWajib.value.trim())
+				},
+				syarat_guna: {
+					termasuk_diskon: disk,
+					termasuk_tingkat: tingk,
+					min_qty: safeInt(sg["minimum qty belanja"]),
+					min_total: safeFloat(sg["minimum total belanja"]),
+					produk_guna: terlibatGuna.length === 0 ? this.produk.map(p => p.id_produk)
+						: terlibatGuna,
+					jumlah_beli: wajibBeli.checked === true ?
+						produkTerlibatGuna.length : safeInt(inpWajibBeli.value.trim())
+				}
+			}
+			if (await modalShow(confirm, "Data sudah siap. Simpan sekarang?")) {
+				const up = await postDataKedua("tambah_voucher", dataUtama);
+				await message(up);
+				this.setup();
+			}
+		}
+	}
+	
+	async tampilkanDataVoucher() {
+		const data_umum = await getData("ketentuan_voucher");
+		const data_voucher = await getData("vouchers_data");
+		this.atas.innerHTML = "";
+		const parentPra = pembuatField(this.atas, "Voucher pra-rilis");
+		const parentAktif = pembuatField(this.atas, "Voucher aktif");
+		const parentExp = pembuatField(this.atas, "Voucher kadaluarsa");
+		
+		for (const p of data_umum) {
+			const dataUmum = JSON.parse(p.info_umum);
+			const now = new Date();
+			const end = new Date(dataUmum.end);
+			const start = new Date(dataUmum.start);
+			let parent = parentAktif;
+			if (now >= end) parent = parentExp;
+			if (now < start) parent = parentPra;
+			
+			const prt = makeParent("container", parent);
+			const top = makeParent("container-horizontal", prt);
+			top.style.background = primary;
+			const tipe = makeLabel("Tipe voucher: " + dataUmum.tipe, "biasa");
+			const masihAda = data_voucher.filter(q => q.status.toLowerCase() === "tersedia" && q.id_program === p.id_program);
+			const jumlah = makeLabel(masihAda.length + " voucher", "teks");
+			jumlah.style.marginLeft = "auto";
+			for (const item of [tipe, jumlah]) {
+				top.appendChild(item);
+				item.style.color = "white";
+			}
+			const nama = makeButton("invisible-btn", dataUmum.nama, null, "Pictures/voucher.png", prt);
+			const periode = makeButton("btns2", "Periode berlaku: " + dataUmum.start + " - " + dataUmum.end, null, null, prt);
+			const nilai = makeButton("btn", dataUmum.tipe.toLowerCase() === "cashback" ? formatMataUang(dataUmum.nilai) : dataUmum.nilai, null, null, prt, "transparent", "green", 700);
+			nilai.style.borderBottom = `2px solid ${primary}`;
+			nilai.style.fontSize = "2rem";
+			parent.appendChild(prt);
+			prt.addEventListener("click", () => this.detailVoucher(p.id_program, data_umum, data_voucher));
+		}
+	}
+	
+	detailVoucher(id, data, voucher) {
+		this.atas.innerHTML = "";
+		const atas = makeParent("container-horizontal", this.atas);
+		const bawah = makeParent("container", this.atas);
+		atas.style.flexWrap = "nowrap";
+		makeButton("btns", "", () => this.setup(), "Pictures/kembali.png", atas);
+		const status = pembuatCombo(atas, "- Pilih status -", ["Tersedia", "Diklaim", "Dipakai", "Hangus"]);
+		pembuatButton(atas, [
+			["btns", "Info umum", () => this.info(id, data, bawah, "info_umum")],
+			["btns", "Syarat klaim", () => this.info(id, data, bawah, "syarat_klaim")],
+			["btns", "Syarat pakai", () => this.info(id, data, bawah, "syarat_guna")]
+		]);
+		status.onchange = () => this.tampilkanVoucher(status.value, id, voucher, bawah);
+		this.tampilkanVoucher(status.value, id, voucher, bawah);
+	}
+	
+	info(id, data, parent, keyword) {
+		parent.innerHTML = "";
+		const dt = data.find(p => p.id_program === id)[keyword] ?? null;
+		if (dt) {
+			const prt = makeParent("container", parent);
+			prt.style.display = "grid";
+			prt.style.gridTemplateColumns = "repeat(3,1fr)";
+			
+			const d = JSON.parse(dt);
+			for (const [key, value] of Object.entries(d)) {
+				makeLabel(capitalize(key.replace(/_/g, " ")), "biasa", prt);
+				makeLabel(":", "biasa", prt);
+				let val = String(value);
+				if (key.toLowerCase() === "nilai") {
+					if (!(value.includes("%"))) val = formatMataUang(value);
+				} else if (key.toLowerCase() === "min_total") val = formatMataUang(value);
+				makeLabel(val, "biasa", prt);
+			}
+		}
+	}
+	
+	tampilkanVoucher(status, id, voucher, parent) {
+		let data = voucher.filter(p => p.id_program === id);
+		const st = status.toLowerCase();
+		if (st !== "- pilih status -") data = voucher.filter(p => p.id_program === id && p.status.toLowerCase() === st);
+		parent.innerHTML = "";
+		if (kosong(data)) {
+			makeLabel(`Voucher ${st} tidak tersedia`, "jdl", parent);
+			return;
+		}
+		const tabel = makeTable(`
+			<tr>
+				<th>Kode voucher</th>
+				<th>Id pelanggan</th>
+				<th>Waktu klaim</th>
+				<th>Waktu pakai</th>
+				<th>Status</th>
+			</tr>
+		`);
+		parent.appendChild(tabel);
+		for (const i of data) {
+			const tr = document.createElement("tr");
+			tr.innerHTML = `
+				<td>${i.kode_voucher}</td>
+				<td>${i.id_pelanggan}</td>
+				<td>${i.waktu_klaim}</td>
+				<td>${i.waktu_pakai}</td>
+				<td>${capitalize(i.status)}</td>
+			`;
+			tabel.appendChild(tr);
+		}
+	}
+	
+	async setup() {
+		resetJudul("Voucher");
+		this.produk = await getData("produk");
+		const tengah = document.getElementById("tgh");
+		tengah.innerHTML = "";
+		this.atas = makeParent("frame");
+		const btn = makeButton("btn", "Terbitkan voucher", () => this.terbitkanVoucher(btn));
+		for (const i of [this.atas, btn]) tengah.appendChild(i);
+		this.tampilkanDataVoucher();
+	}
+}
+
 class Open {
 	openOperasional() { pemilik.setup(); document.getElementById("sub-operasional").classList.toggle("hidden"); }
 	openTransaksi() { opsiTransaksi.setup(); document.getElementById("sub-opsiTransaksi").classList.toggle("hidden"); }
@@ -8225,6 +8627,7 @@ const openMenu = new Open();
 const akses = new HakAkses();
 const digital = new ProdukDigital();
 const kalkulator = new Kalkulator();
+const voucher = new Voucher();
 
 async function setProfil() {
 	const parent = document.getElementById("app");
@@ -8309,7 +8712,8 @@ function setProperties() {
 	pembuatButtonGambar(prtLainnya, [
 		["btn", "Hiburan", async () => {await cek("hiburan", () => lain.hiburan())}, "Pictures/hiburan.png"],
 		["btn", "Backup", async () => {await cek("backup", () => lain.backup())}, "Pictures/backup.png"],
-		["btn", "Hak akses", async () => { await cek("hak akses", () => akses.setup()) }, "Pictures/hak_akses.png"]	
+		["btn", "Hak akses", async () => { await cek("hak akses", () => akses.setup()) }, "Pictures/hak_akses.png"],
+		["btn", "Voucher", async () => { await cek("voucher", () => voucher.setup()) }, "Pictures/voucher.png"]	
 	]);	
 }
 

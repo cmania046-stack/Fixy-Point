@@ -22,6 +22,9 @@ const listTanggal = [
 const listWaktu = ["H:m:s", "H/m/s", "H.m.s", "H:m", "H/m", "H.m"];
 
 const allowedMethods = [
+	"pakai_voucher",
+	"klaim_voucher",
+	"tambah_voucher",
 	"perbarui_pin",
 	"periksa_info",
 	"atur_izin_akses",
@@ -99,7 +102,7 @@ const allowedMethods = [
 ];
 
 const existedTable = [
-	"stok_flow", "users", "vipayment", "info_admin", "pin", "keuangan_lengkap", "aset_lain", "kewajiban", "Pengeluaran", "profil", "produk", "riwayat_utama", "margin", "produk_diskon", "keuangan", "operator",
+	"vouchers_data", "ketentuan_voucher", "stok_flow", "users", "vipayment", "info_admin", "pin", "keuangan_lengkap", "aset_lain", "kewajiban", "Pengeluaran", "profil", "produk", "riwayat_utama", "margin", "produk_diskon", "keuangan", "operator",
 	"device", "customer", "supplier", "pajak", "riwayat_pajak", "riwayat_penjualan_campuran",
 	"media_bayar", "cadangan_keranjang", "hak_akses", "status_qr", "riwayat_login", "shift",
 	"produk_tingkat", "tingkat_a", "tingkat_b", "validasi_owner", "pengaturan_nota", "riwayat_retur",
@@ -325,6 +328,10 @@ class Database {
 				user_id TEXT,
 				device_id TEXT
 			`);
+			
+			await this.createTable(cl, "ketentuan_voucher", "id_program TEXT, info_umum TEXT, syarat_klaim TEXT, syarat_guna TEXT");
+			await this.createTable(cl, "vouchers_data", "id_program TEXT, id_voucher TEXT, kode_voucher TEXT, status TEXT, id_pelanggan TEXT, waktu_klaim TEXT, waktu_pakai TEXT");
+			
 			await cl.query("COMMIT");
 		} catch (err) {
 			await cl.query("ROLLBACK");
@@ -566,6 +573,11 @@ async function catatLog(path, kode) {
 	console.log(`${warna}${await nowStr()} - ${path} - ${kode}${reset}`);
 }
 
+function capitalize(teks=""){
+	if(!teks)return teks;
+	return teks[0].toUpperCase() + teks.slice(1).toLowerCase();
+}
+
 //END HELPER FUNCTIONS
 
 
@@ -671,6 +683,25 @@ app.get("/filter_aktivitas_periode/:data", async (req,res) => {
 	if (pengguna.includes(operator)) forReturn = forFilter.filter(p => p.operator.toLowerCase() === operator.toLowerCase());
 	res.json(forReturn.sort((a,b) => parseDate(b.waktu) - parseDate(a.waktu)));
 	} finally {await catatLog(req.path, res.statusCode);}
+});
+
+app.post("/buat_qr_voucher", async (req, res) => {
+	const data = req.body;
+	try {
+		const qr = makeQr(data.kode_voucher);
+		res.set("Content-Type", "image/jpeg");
+		await pool.query(`UPDATE vouchers_data SET
+			status = $1, id_pelanggan = $2, waktu_klaim = $3
+			WHERE id_program = $4 AND id_voucher = $5`, [
+				"diklaim", crypto.randomBytes(10).toString('hex'), await nowStr(),
+				data.id_program, data.id_voucher
+			]
+		);
+		res.send(qr);
+	} catch (err) {
+		console.error(err);
+		res.status(500).send("QR Voucher gagal dibuat");
+	} finally { await catatLog(req.path, res.statusCode); }
 });
 
 app.get("/buat_qr_struk/:nomor", async (req,res) => {
@@ -1933,6 +1964,149 @@ class PostData {
 	constructor(data, req) {
 		this.data = data;
 		this.req = req;
+	}
+	
+	async pakai_voucher() {
+	    const d = this.data;
+	    const keranjang = d.keranjang ?? [];
+	    const kodeVoucher = d.kode_voucher ?? "";
+	    
+	    try {
+	        const { rows: [stts] } = await pool.query("SELECT status, id_program FROM vouchers_data WHERE kode_voucher = $1", [kodeVoucher]);
+	        
+	        if (!stts) return [{ stat: "Gagal", pesan: "Voucher tidak ditemukan" }, 404];
+	        
+	        if (stts.status.toLowerCase() !== "diklaim") return [{ stat: "Gagal", pesan: "Voucher Anda tidak dapat digunakan (sudah dipakai/tidak valid)" }, 400];
+	
+	        const { rows: [info] } = await pool.query("SELECT info_umum, syarat_guna FROM ketentuan_voucher WHERE id_program = $1", [stts.id_program]);
+	        const now = new Date();
+	        const infoUmum = JSON.parse(info.info_umum);
+	        const start = new Date(infoUmum.start);
+	        const end = new Date(infoUmum.end);
+	        
+	        if (!(now >= start && now <= end)) return [{ stat: "Gagal", pesan: "Voucher Anda tidak dapat digunakan untuk saat ini (kadaluarsa/belum berlaku)" }, 400];
+	
+	        const syaratGuna = JSON.parse(info.syarat_guna);
+	        const mapPromo = [...new Set(keranjang.map(p => (p.tipe_promo || "").toLowerCase()))];
+	        
+	        if (!syaratGuna.termasuk_diskon && mapPromo.includes("diskon")) return [{ stat: "Gagal", pesan: "Voucher tidak bisa digabung dengan produk yang sudah didiskon." }, 400];
+	        if (!syaratGuna.termasuk_tingkat && mapPromo.includes("tingkat")) return [{ stat: "Gagal", pesan: "Voucher tidak bisa digabung dengan produk harga bertingkat." }, 400];
+	
+	        const totalQty = keranjang.reduce((sum, b) => sum + b.qty_asli, 0);
+	        if (totalQty < syaratGuna.min_qty) return [{ stat: "Gagal", pesan: `Minimal qty transaksi adalah ${syaratGuna.min_qty}` }, 400];
+	
+	        const totalBelanja = keranjang.reduce((sum, b) => sum + b.subtotal_jual, 0);
+	        if (totalBelanja < syaratGuna.min_total) return [{ stat: "Gagal", pesan: `Minimal belanja transaksi adalah Rp${syaratGuna.min_total}` }, 400];
+	
+	        const produkGuna = syaratGuna.produk_guna || [];
+	        if (produkGuna.length > 0) {
+	            const mapId = [...new Set(keranjang.map(p => p.id))];
+	            let countCocok = 0;
+	            for (const id of mapId) {
+	                if (produkGuna.includes(id)) countCocok += 1;
+	            }
+	            
+	            if (countCocok < (syaratGuna.jumlah_beli || 1)) return [{ stat: "Gagal", pesan: "Jumlah jenis produk yang memenuhi syarat voucher belum mencukupi" }, 400];
+	        }
+	
+	        let potongan = 0;
+	        if (infoUmum.tipe.toLowerCase() === "diskon") {
+	            potongan = totalBelanja * parseFloat(infoUmum.nilai) / 100;
+	        } else {
+	            potongan = parseFloat(infoUmum.nilai);
+	        }
+	
+	        return [{
+	            stat: "Berhasil",
+	            pesan: "Voucher diterima. Harga baru transaksi Anda akan disesuaikan",
+	            data: {
+	                kode_voucher: kodeVoucher,
+	                potongan: potongan
+	            }
+	        }, 200];
+	        
+	    } catch (err) {
+	        return errorReturn(err);
+	    }
+	}
+	
+	async klaim_voucher() {
+		const id = this.data.id_program ?? "";
+		try {
+			const { rows: [voucher] } = await pool.query("SELECT kode_voucher, id_voucher FROM vouchers_data WHERE id_program = $1 AND LOWER(status) = 'tersedia' LIMIT 1", [id]);
+			if (kosong(voucher)) return [{
+				stat: "Kosong"
+			}, 400];
+			const { rows: [info] } = await pool.query("SELECT info_umum FROM ketentuan_voucher WHERE id_program = $1", [id]);
+			const infoUmum = JSON.parse(info.info_umum);
+			return [{
+				stat: "Berhasil",
+				data: {
+					kode_voucher: voucher.kode_voucher,
+					id_voucher: voucher.id_voucher,
+					nama_voucher: infoUmum.nama,
+					tipe_voucher: infoUmum.tipe,
+					nilai_voucher: infoUmum.nilai,
+					berlaku: infoUmum.start + " / " + infoUmum.end
+				}
+			}, 200];
+		} catch { return [{ stat: "Error" }, 500]; }
+	}
+	
+	async tambah_voucher() {
+	    const client = await pool.connect();
+	    try {
+	        const d = this.data;
+	        const jumlahDibuat = d.info_umum.jumlah;
+	        const nama = d.info_umum.nama;
+	        const splittedNama = nama.split(" ");
+	        const idProgram = "VCR" + nama.replace(/ /g, "").toUpperCase() + strftime("%f");
+	        
+	        let forCode = "";
+	        for (const n of splittedNama) {
+	            if (!(kosong(n))) forCode += n[0].toUpperCase();
+	        }
+	        
+	        await client.query("BEGIN");
+	        
+	        await client.query(`
+	            INSERT INTO ketentuan_voucher (id_program, info_umum, syarat_klaim, syarat_guna)
+	            VALUES ($1, $2, $3, $4)`, [
+	                idProgram, 
+	                JSON.stringify(d.info_umum), 
+	                JSON.stringify(d.syarat_claim), 
+	                JSON.stringify(d.syarat_guna)
+	            ]
+	        );
+	        
+	        for (let i = 0; i < jumlahDibuat; i++) {
+	            await client.query(`
+	                INSERT INTO vouchers_data (
+	                    id_program, id_voucher, kode_voucher, status,
+	                    id_pelanggan, waktu_klaim, waktu_pakai
+	                ) VALUES ($1, $2, $3, $4, $5, $6, $7)`, [
+	                    idProgram, 
+	                    crypto.randomUUID(), 
+	                    forCode + "-" + (i + 1), 
+	                    "tersedia", 
+	                    null, null, null
+	                ]
+	            );
+	        }
+	        
+	        await client.query("COMMIT");
+	        
+	        return [{
+	            stat: "Berhasil",
+	            pesan: `Voucher ${nama} telah dibuat`
+	        }, 200];
+	        
+	    } catch (err) { 
+	        await client.query("ROLLBACK"); 
+	        return errorReturn(err); 
+	    } finally { 
+	        client.release(); 
+	    }
 	}
 
 	async perbarui_pin() {
@@ -3376,7 +3550,7 @@ class PostData {
 			const tanggal = DateTime.fromFormat(tgl, "yyyy-M-d");
 			if (!tanggal.isValid) throw new Error("Format tanggal salah");
 			const exp = tanggal.toFormat("MM/dd/yy");
-			const idProduk = strftime("f");
+			const idProduk = strftime("%f");
 			
 			await client.query("BEGIN");
 			await client.query(`INSERT INTO produk (

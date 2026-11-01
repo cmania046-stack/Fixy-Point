@@ -263,3 +263,38 @@
 2026-10-29 22:44:28.696 WIT [30131] LOG:  checkpoint complete: wrote 18 buffers (0.1%), wrote 1 SLRU buffers; 0 WAL file(s) added, 0 removed, 0 recycled; write=1.878 s, sync=0.015 s, total=1.954 s; sync files=19, longest=0.002 s, average=0.001 s; distance=30 kB, estimate=165 kB; lsn=0/1F4C0F0, redo lsn=0/1F4A800
 2026-10-29 22:49:26.796 WIT [30131] LOG:  checkpoint starting: time
 2026-10-29 22:49:28.690 WIT [30131] LOG:  checkpoint complete: wrote 18 buffers (0.1%), wrote 1 SLRU buffers; 0 WAL file(s) added, 0 removed, 0 recycled; write=1.852 s, sync=0.007 s, total=1.895 s; sync files=18, longest=0.002 s, average=0.001 s; distance=25 kB, estimate=151 kB; lsn=0/1F50EA0, redo lsn=0/1F50E48
+2026-10-30 09:31:15.629 WIT [10530] LOG:  starting PostgreSQL 18.6 on arm-unknown-linux-androideabi, compiled by Android (16134705, +pgo, +bolt, +lto, +mlgo, based on r574158c) clang version 21.0.0 (https://android.googlesource.com/toolchain/llvm-project 9f872551d3c681d06fd303b36f16ed5c274735eb), 32-bit
+2026-10-30 09:31:15.632 WIT [10530] LOG:  listening on IPv4 address "127.0.0.1", port 5432
+2026-10-30 09:31:15.637 WIT [10530] LOG:  listening on Unix socket "/data/data/com.termux/files/usr/tmp/.s.PGSQL.5432"
+2026-10-30 09:31:15.725 WIT [10540] LOG:  database system was interrupted; last known up at 2026-10-30 08:10:48 WIT
+2026-10-30 09:31:15.911 WIT [10540] LOG:  database system was not properly shut down; automatic recovery in progress
+2026-10-30 09:31:15.918 WIT [10540] LOG:  redo starts at 0/1F533B8
+2026-10-30 09:31:15.918 WIT [10540] LOG:  invalid record length at 0/1F534C0: expected at least 24, got 0
+2026-10-30 09:31:15.918 WIT [10540] LOG:  redo done at 0/1F53488 system usage: CPU: user: 0.00 s, system: 0.00 s, elapsed: 0.00 s
+2026-10-30 09:31:15.933 WIT [10538] LOG:  checkpoint starting: end-of-recovery immediate wait
+2026-10-30 09:31:15.948 WIT [10538] LOG:  checkpoint complete: wrote 0 buffers (0.0%), wrote 3 SLRU buffers; 0 WAL file(s) added, 0 removed, 0 recycled; write=0.006 s, sync=0.002 s, total=0.017 s; sync files=2, longest=0.001 s, average=0.001 s; distance=0 kB, estimate=0 kB; lsn=0/1F534C0, redo lsn=0/1F534C0
+2026-10-30 09:31:15.954 WIT [10530] LOG:  database system is ready to accept connections
+2026-10-30 09:47:11.504 WIT [10538] LOG:  checkpoint starting: time
+2026-10-30 09:47:11.743 WIT [10538] LOG:  checkpoint complete: wrote 2 buffers (0.0%), wrote 1 SLRU buffers; 0 WAL file(s) added, 0 removed, 0 recycled; write=0.214 s, sync=0.003 s, total=0.247 s; sync files=3, longest=0.002 s, average=0.001 s; distance=1 kB, estimate=1 kB; lsn=0/1F53980, redo lsn=0/1F53928
+2026-10-30 19:31:44.721 WIT [10530] LOG:  received fast shutdown request
+2026-10-30 19:31:44.728 WIT [10530] LOG:  aborting any active transactions
+2026-10-30 19:31:44.749 WIT [10530] LOG:  background worker "logical replication launcher" (PID 10543) exited with exit code 1
+2026-10-30 19:31:44.751 WIT [10538] LOG:  shutting down
+2026-10-30 19:31:44.755 WIT [10538] LOG:  checkpoint starting: shutdown immediate
+2026-10-30 19:31:44.788 WIT [10538] LOG:  checkpoint complete: wrote 0 buffers (0.0%), wrote 0 SLRU buffers; 0 WAL file(s) added, 0 removed, 0 recycled; write=0.010 s, sync=0.001 s, total=0.036 s; sync files=0, longest=0.000 s, average=0.000 s; distance=0 kB, estimate=1 kB; lsn=0/1F53A30, redo lsn=0/1F53A30
+2026-10-30 19:31:44.826 WIT [10530] LOG:  database system is shut down
+2026-10-31 22:54:04.868 WIT [13018] LOG:  starting PostgreSQL 18.6 on arm-unknown-linux-androideabi, compiled by Android (16134705, +pgo, +bolt, +lto, +mlgo, based on r574158c) clang version 21.0.0 (https://android.googlesource.com/toolchain/llvm-project 9f872551d3c681d06fd303b36f16ed5c274735eb), 32-bit
+2026-10-31 22:54:04.871 WIT [13018] LOG:  listening on IPv4 address "127.0.0.1", port 5432
+2026-10-31 22:54:04.875 WIT [13018] LOG:  listening on Unix socket "/data/data/com.termux/files/usr/tmp/.s.PGSQL.5432"
+2026-10-31 22:54:04.962 WIT [13026] LOG:  database system was interrupted; last known up at 2026-10-31 22:07:42 WIT
+2026-10-31 22:54:05.125 WIT [13026] LOG:  database system was not properly shut down; automatic recovery in progress
+2026-10-31 22:54:05.132 WIT [13026] LOG:  redo starts at 0/20A8E68
+2026-10-31 22:54:05.133 WIT [13026] LOG:  invalid record length at 0/20A8F70: expected at least 24, got 0
+2026-10-31 22:54:05.133 WIT [13026] LOG:  redo done at 0/20A8F38 system usage: CPU: user: 0.00 s, system: 0.00 s, elapsed: 0.00 s
+2026-10-31 22:54:05.146 WIT [13024] LOG:  checkpoint starting: end-of-recovery immediate wait
+2026-10-31 22:54:05.161 WIT [13024] LOG:  checkpoint complete: wrote 0 buffers (0.0%), wrote 3 SLRU buffers; 0 WAL file(s) added, 0 removed, 0 recycled; write=0.005 s, sync=0.002 s, total=0.016 s; sync files=2, longest=0.001 s, average=0.001 s; distance=0 kB, estimate=0 kB; lsn=0/20A8F70, redo lsn=0/20A8F70
+2026-10-31 22:54:05.167 WIT [13018] LOG:  database system is ready to accept connections
+2026-10-31 22:59:05.261 WIT [13024] LOG:  checkpoint starting: time
+2026-10-31 22:59:07.494 WIT [13024] LOG:  checkpoint complete: wrote 21 buffers (0.1%), wrote 1 SLRU buffers; 0 WAL file(s) added, 0 removed, 0 recycled; write=2.157 s, sync=0.024 s, total=2.234 s; sync files=22, longest=0.007 s, average=0.002 s; distance=55 kB, estimate=55 kB; lsn=0/20B6F30, redo lsn=0/20B6ED8
+2026-10-31 23:09:05.641 WIT [13024] LOG:  checkpoint starting: time
+2026-10-31 23:09:07.310 WIT [13024] LOG:  checkpoint complete: wrote 16 buffers (0.1%), wrote 1 SLRU buffers; 0 WAL file(s) added, 0 removed, 0 recycled; write=1.641 s, sync=0.007 s, total=1.670 s; sync files=12, longest=0.002 s, average=0.001 s; distance=73 kB, estimate=73 kB; lsn=0/20C9600, redo lsn=0/20C95A8
