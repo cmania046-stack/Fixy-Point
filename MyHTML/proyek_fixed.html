@@ -2088,7 +2088,7 @@ async function cekVoucher(parent, keranjang, totalBelanja, totalQty, nama, konta
 			for (const produk of keranjang) {
 				if (syaratKlaim.produk_klaim.includes(produk.id)) {
 					iter += 1;
-					if (iter === syaratKlaim.jumlah_beli) {
+					if (iter >= syaratKlaim.jumlah_beli) {
 						lolosKedua = true;
 						break;
 					}
