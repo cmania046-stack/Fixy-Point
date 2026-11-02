@@ -357,3 +357,10 @@
 2026-11-02 11:21:18.382 WIT [27051] LOG:  checkpoint complete: wrote 19 buffers (0.1%), wrote 1 SLRU buffers; 0 WAL file(s) added, 0 removed, 0 recycled; write=2.045 s, sync=0.073 s, total=2.258 s; sync files=20, longest=0.033 s, average=0.004 s; distance=39 kB, estimate=110 kB; lsn=0/2182A90, redo lsn=0/2182A38
 2026-11-02 12:38:56.280 WIT [27051] LOG:  checkpoint starting: time
 2026-11-02 12:38:56.467 WIT [27051] LOG:  checkpoint complete: wrote 1 buffers (0.0%), wrote 0 SLRU buffers; 0 WAL file(s) added, 0 removed, 0 recycled; write=0.121 s, sync=0.001 s, total=0.187 s; sync files=1, longest=0.001 s, average=0.001 s; distance=2 kB, estimate=99 kB; lsn=0/21835E8, redo lsn=0/2183590
+2026-11-02 17:44:21.663 WIT [11158] LOG:  starting PostgreSQL 18.6 on arm-unknown-linux-androideabi, compiled by Android (16134705, +pgo, +bolt, +lto, +mlgo, based on r574158c) clang version 21.0.0 (https://android.googlesource.com/toolchain/llvm-project 9f872551d3c681d06fd303b36f16ed5c274735eb), 32-bit
+2026-11-02 17:44:21.666 WIT [11158] LOG:  listening on IPv4 address "127.0.0.1", port 5432
+2026-11-02 17:44:21.669 WIT [11158] LOG:  listening on Unix socket "/data/data/com.termux/files/usr/tmp/.s.PGSQL.5432"
+2026-11-02 17:44:21.760 WIT [11166] LOG:  database system was shut down at 2026-11-02 16:32:48 WIT
+2026-11-02 17:44:21.781 WIT [11158] LOG:  database system is ready to accept connections
+2026-11-02 17:49:21.858 WIT [11164] LOG:  checkpoint starting: time
+2026-11-02 17:49:23.908 WIT [11164] LOG:  checkpoint complete: wrote 19 buffers (0.1%), wrote 3 SLRU buffers; 0 WAL file(s) added, 0 removed, 0 recycled; write=1.954 s, sync=0.026 s, total=2.051 s; sync files=21, longest=0.004 s, average=0.002 s; distance=42 kB, estimate=42 kB; lsn=0/218E170, redo lsn=0/218E118

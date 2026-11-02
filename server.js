@@ -1508,6 +1508,18 @@ app.post("/penjualan_campuran", async (req,res) => {
 		keuangan.hpp = (keuangan.hpp ?? 0) + totalHpp;
 		keuangan.persediaan = (keuangan.persediaan ?? 0) - totalHpp;
 		keuangan.pendapatan = (keuangan.pendapatan ?? 0) + masuk;
+		const dataPromo = data.data_promo;
+		if (!(kosong(dataPromo))) {
+			const hasilUpdate = await client.query(`
+				UPDATE vouchers_data SET
+				status = $1, waktu_pakai = $2
+				WHERE kode_voucher = $3 AND status = 'diklaim'`, [
+					"dipakai", await nowStr(), dataPromo.kode_voucher
+				]
+			);
+			if (hasilUpdate.rowCount === 0) throw new Error("Update voucher gagal. Voucher tidak valid atau telah digunakan. Transaksi dibatalkan");
+		}
+		
 		await client.query("COMMIT");
 		simpanSemua(fileKeuangan, keuangan);
 		return res.status(200).json({
