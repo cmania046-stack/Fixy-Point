@@ -8538,8 +8538,9 @@ class Voucher {
 	
 	detailVoucher(id, data, voucher) {
 		this.atas.innerHTML = "";
-		const atas = makeParent("container-horizontal", this.atas);
-		const bawah = makeParent("container", this.atas);
+		const p = makeParent("container", this.atas);
+		const atas = makeParent("container-horizontal", p);
+		const bawah = makeParent("container", p);
 		atas.style.flexWrap = "nowrap";
 		makeButton("btns", "", () => this.setup(), "Pictures/kembali.png", atas);
 		const status = pembuatCombo(atas, "- Pilih status -", ["Tersedia", "Diklaim", "Dipakai", "Hangus"]);
@@ -8605,8 +8606,13 @@ class Voucher {
 		}
 	}
 	
+	async cekKondisiSemuaVoucher() {
+		await postDataKedua("cek_kondisi_voucher", {no:1});
+	}
+	
 	async setup() {
 		resetJudul("Voucher");
+		this.cekKondisiSemuaVoucher();
 		this.produk = await getData("produk");
 		const tengah = document.getElementById("tgh");
 		tengah.innerHTML = "";

@@ -23,6 +23,7 @@ const listTanggal = [
 const listWaktu = ["H:m:s", "H/m/s", "H.m.s", "H:m", "H/m", "H.m"];
 
 const allowedMethods = [
+	"cek_kondisi_voucher",
 	"pakai_voucher",
 	"klaim_voucher",
 	"tambah_voucher",
@@ -687,22 +688,28 @@ app.get("/filter_aktivitas_periode/:data", async (req,res) => {
 });
 
 app.post("/buat_qr_voucher", async (req, res) => {
-	const data = req.body;
-	try {
-		const qr = makeQr(data.kode_voucher);
-		res.set("Content-Type", "image/jpeg");
-		await pool.query(`UPDATE vouchers_data SET
-			status = $1, id_pelanggan = $2, waktu_klaim = $3
-			WHERE id_program = $4 AND id_voucher = $5`, [
-				"diklaim", crypto.randomBytes(10).toString('hex'), await nowStr(),
-				data.id_program, data.id_voucher
-			]
-		);
-		res.send(qr);
-	} catch (err) {
-		console.error(err);
-		res.status(500).send("QR Voucher gagal dibuat");
-	} finally { await catatLog(req.path, res.statusCode); }
+    const data = req.body;
+    try {
+        const { rows: [info] } = await pool.query("SELECT info_umum FROM ketentuan_voucher WHERE id_program = $1", [data.id_program ?? ""]);
+        if (!info) return res.status(404).send("Program voucher tidak ditemukan");
+        const infoUmum = JSON.parse(info.info_umum);
+        if (new Date() >= new Date(infoUmum.start)) return res.status(400).send("Voucher sudah hangus karena melewati hari pertama periode pemakaian");
+        const qr = makeQr(data.kode_voucher);
+        res.set("Content-Type", "image/jpeg");
+        await pool.query(`UPDATE vouchers_data SET
+            status = $1, id_pelanggan = $2, waktu_klaim = $3
+            WHERE id_program = $4 AND id_voucher = $5`, [
+                "diklaim", crypto.randomBytes(10).toString('hex'), await nowStr(),
+                data.id_program, data.id_voucher
+            ]
+        );
+        res.send(qr);
+    } catch (err) {
+        console.error(err);
+        res.status(500).send("QR Voucher gagal dibuat");
+    } finally { 
+        await catatLog(req.path, res.statusCode); 
+    }
 });
 
 app.get("/buat_qr_struk/:nomor", async (req,res) => {
@@ -1979,6 +1986,35 @@ class PostData {
 		this.req = req;
 	}
 	
+	async cek_kondisi_voucher() {
+		const client = await pool.connect();
+		try {
+			await client.query("BEGIN");
+			const { rows: inf } = await client.query("SELECT id_program, info_umum FROM ketentuan_voucher");
+			for (const i of inf) {
+				const now = new Date();
+				const infoUmum = JSON.parse(i.info_umum);
+				if (now >= new Date(infoUmum.start)) {
+					await client.query(`
+						UPDATE vouchers_data SET
+						status = $1 WHERE id_program = $2 AND LOWER(status) = LOWER($3)
+						`, [
+							"hangus", i.id_program, "tersedia"
+						]
+					);
+				} else if (now > new Date(infoUmum.end)) {
+					await client.query("UPDATE vouchers_data SET status = $1 WHERE id_program = $2 AND LOWER(status) = LOWER($3)", [
+							"hangus", i.id_program, "diklaim"
+						]
+					);
+				}
+			}
+			await client.query("COMMIT");
+			return [{ stat: "Berhasil" }, 200];
+		} catch (err) { await client.query("ROLLBACK"); return errorReturn(err); }
+		finally { client.release(); }
+	}
+	
 	async pakai_voucher() {
 	    const d = this.data;
 	    const keranjang = d.keranjang ?? [];
@@ -2045,12 +2081,17 @@ class PostData {
 	async klaim_voucher() {
 		const id = this.data.id_program ?? "";
 		try {
+			const { rows: [info] } = await pool.query("SELECT info_umum FROM ketentuan_voucher WHERE id_program = $1", [id]);
+			const infoUmum = JSON.parse(info.info_umum);
+			const now = new Date();
+			if (now >= new Date(infoUmum.start)) return [{
+				stat: "Gagal",
+				pesan: "Voucher sudah tidak berlaku. Klaim ditolak"
+			}, 400];
 			const { rows: [voucher] } = await pool.query("SELECT kode_voucher, id_voucher FROM vouchers_data WHERE id_program = $1 AND LOWER(status) = 'tersedia' LIMIT 1", [id]);
 			if (kosong(voucher)) return [{
 				stat: "Kosong"
 			}, 400];
-			const { rows: [info] } = await pool.query("SELECT info_umum FROM ketentuan_voucher WHERE id_program = $1", [id]);
-			const infoUmum = JSON.parse(info.info_umum);
 			return [{
 				stat: "Berhasil",
 				data: {
