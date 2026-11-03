@@ -1,3 +1,4 @@
+process.env.TZ ="Asia/Jayapura";
 const merah = "\x1b[31m", hijau = "\x1b[32m", kuning = "\x1b[33m", reset = "\x1b[0m";
 
 require("dotenv").config();
@@ -490,7 +491,7 @@ function makeQr(teks) {
 }
 
 function errorReturn(e) {
-	console.log(e.message);
+	console.log(e);
 	return [{
 		stat: "Error",
 		pesan: `Terjadi kesalahan\n${e}`
@@ -1995,7 +1996,6 @@ class PostData {
 	        const infoUmum = JSON.parse(info.info_umum);
 	        const start = new Date(infoUmum.start);
 	        const end = new Date(infoUmum.end);
-	        
 	        if (!(now >= start && now <= end)) return [{ stat: "Gagal", pesan: "Voucher Anda tidak dapat digunakan untuk saat ini (kadaluarsa/belum berlaku)" }, 400];
 	
 	        const syaratGuna = JSON.parse(info.syarat_guna);
@@ -2008,7 +2008,7 @@ class PostData {
 	        if (totalQty < syaratGuna.min_qty) return [{ stat: "Gagal", pesan: `Minimal qty transaksi adalah ${syaratGuna.min_qty}` }, 400];
 	
 	        const totalBelanja = keranjang.reduce((sum, b) => sum + b.subtotal_jual, 0);
-	        if (totalBelanja < syaratGuna.min_total) return [{ stat: "Gagal", pesan: `Minimal belanja transaksi adalah Rp${syaratGuna.min_total}` }, 400];
+	        if (totalBelanja < syaratGuna.min_total) return [{ stat: "Gagal", pesan: `Minimal belanja transaksi adalah Rp${syaratGuna.min_total}` }, 400]; //ini kenapa bagian ini bisa sampai tapi.. dua baris sebelumnya gak ditulis di console?
 	
 	        const produkGuna = syaratGuna.produk_guna || [];
 	        if (produkGuna.length > 0) {

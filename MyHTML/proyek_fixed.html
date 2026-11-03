@@ -2114,7 +2114,7 @@ async function reedem(kode, krj) {
 		confirm,
 		`Anda akan memakai voucher ${kode}. Harap tidak membatalkan transaksi setelah voucher dipakai. Voucher yang telah dipakai tidak bisa dikembalikan`
 	)) {
-		const cek = await postDataKedua("pakai_voucher", { kode_voucher: kode, keranjang: keranjang });
+		const cek = await postDataKedua("pakai_voucher", { kode_voucher: kode, keranjang: krj });
 		let data = null;
 		if (cek.stat.toLowerCase() === "berhasil") data = cek.data;
 		await modalShow(cek.stat, cek.pesan);
