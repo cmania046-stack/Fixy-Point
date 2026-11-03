@@ -4079,6 +4079,7 @@ class Transaksi {
 		this.hasilPencarian = [];
 		this.arrUndo = [];
 		this.arrRedo = [];
+		this.dataPromo = null;
 	}
 	
 	doUndo() {
@@ -4225,22 +4226,22 @@ class Transaksi {
 				}
 		});
 	}
+	
 	hitungKembalian(bayar) {
-		if (["0", ""].includes(bayar)) {
-			this.kembalian.textContent = "Kembali: " + formatMataUang(0);
+		if (kosong(bayar)) {
+			this.kembalian.textContent = `Kembali: ${formatMataUang(0)}`;
 			this.kembalian.style.color = "red";
-			return
+			return;
 		}
-		this.bayar = safeFloat(bayar);
+		this.bayar = safeFloat(bayar)
+		if (this.dataPromo && this.dataPromo.potongan) this.bayar += this.dataPromo.potongan;
 		const totalAsli = totalBelanja - this.sudahBayar;
 		this.kembali = this.bayar - totalAsli;
-		let warna = "green";
-		if (this.kembali < 0) {
-			warna = "red";
-		}
-		this.kembalian.textContent = "Kembali: " + formatMataUang(this.kembali);
+		let warna = this.kembali < 0 ? "red" : "green";
+		this.kembalian.textContent = `Kembali: ${formatMataUang(this.kembali)}`;
 		this.kembalian.style.color = warna;
 	}
+
 	async resetTransaksi() {
 		infoCadangan = {};
 		this.isPending = false;
@@ -4255,39 +4256,42 @@ class Transaksi {
 		hideWindow();
 		this.lihatKeranjang();
 	}
+	
 	async transaksiSelesai(voc) {
+		if (secondKeranjang.length === 0) {
+			await modalShow(gagal, "Keranjang kosong");
+			return;
+		}
 		const voucher = pecahCek(voc);
 		if (voucher.length > 1) {
 			await modalShow(gagal, "Anda tidak diizinkan mengklaim lebih dari satu voucher dalam sekali transaksi");
 			return;
 		}
 		
-		const jumlahBayar = this.sudahBayar + this.bayar;
-		if (secondKeranjang.length === 0) {
-			await modalShow(gagal, "Keranjang kosong");
-			return;
-		}
+		let jumlahBayar = this.sudahBayar + this.bayar;
+		if (this.dataPromo && this.dataPromo.potongan) jumlahBayar += this.dataPromo.potongan;
 		if (jumlahBayar < totalBelanja) {
 			await modalShow(gagal, "Pembayaran tidak cukup");
 			return;
 		}
+		
 		const namaPembeli = this.infoBuyer.nama.value.trim();
 		const kontakPembeli = this.infoBuyer.kontak.value.trim();
 		const pembeli = `${namaPembeli} ${kontakPembeli}`;
 		
 		const data = {
 			items: secondKeranjang,
-			total: safeFloat(totalBelanja),
-			bayar: safeFloat(jumlahBayar),
-			kembali: safeFloat(this.kembali),
+			total: totalBelanja,
+			bayar: jumlahBayar,
+			kembali: this.kembali,
 			sumber: String(idDevice),
 			operator: String(user),
 			no_trans: this.noTrans,
 			pembeli: pembeli,
 			is_pending: this.isPending,
-			voucher: voucher
+			voucher: voucher,
+			data_promo: this.dataPromo
 		}
-	
 		try {
 			const res = await fetch(`${url}penjualan_campuran`, {
 				method: "POST",
@@ -4315,8 +4319,9 @@ class Transaksi {
 			} else { this.resetTransaksi(); }
 		}
 	}
-	
+
 	async checkoutBayar() {
+		let voc = {};
 		if (keranjang.length === 0) {
 			await modalShow(gagal, "Keranjang kosong");
 			return;
@@ -4328,6 +4333,8 @@ class Transaksi {
 		const atas = makeParent("container-horizontal", wadahUtama);
 		const bawah = makeParent("container", wadahUtama);
 		const bot = makeParent("container hidden", wadahUtama);
+		const pr = makeParent("container-horizontal", wadahUtama);
+		
 		const totalQty = secondKeranjang.reduce((sum, a) => sum + a.qty_asli, 0);
 
 		let teksTotal = "Total belanja: " + formatMataUang(totalBelanja);
@@ -4335,19 +4342,14 @@ class Transaksi {
 			const belumBayar = totalBelanja - this.sudahBayar;
 			teksTotal = "Total belum dibayar: " + formatMataUang(belumBayar);
 		}
-		atas.appendChild(makeLabel(teksTotal, "tot"));
-		this.kembalian = makeLabel("Kembali: " + formatMataUang(0), "change");
-		atas.appendChild(this.kembalian);
+		const labelTotal = makeLabel(teksTotal, "tot", atas);
+		this.kembalian = makeLabel("Kembali: " + formatMataUang(0), "change", atas);
 		
 		this.infoBuyer = pembuatEntry(bawah, [
-				["jumlah_bayar", "Jumlah pembayaran", "number"],
-				["nama", "Nama pembeli", "text"],
-				["kontak", "Nomor telepon/WhatsApp pembeli", "number"]
-		])
-		
-		const voc = await cekVoucher(bot, secondKeranjang, totalBelanja, totalQty,
-			this.infoBuyer.nama, this.infoBuyer.kontak);
-	
+			["jumlah_bayar", "Jumlah pembayaran", "number"],
+			["nama", "Nama pembeli", "text"],
+			["kontak", "Nomor telepon/WhatsApp pembeli", "number"]
+		]);
 		const labelQty = makeLabel("Total qty: " + formatUnit(totalQty, "unit"), "jdl");
 		const btnSelesai = makeButton("btn", "Selesai", () => this.transaksiSelesai(voc));
 		labelQty.style.height = "100%";
@@ -4362,6 +4364,24 @@ class Transaksi {
 			if (e.key === "Enter") { e.preventDefault(); this.transaksiSelesai(voc); }
 		});
 		inputUang.focus();
+		
+		const inpVoucher = entryMaker("Masukkan kode voucher...", "text", "Pictures/voucher.png", pr);
+		pembuatButton(pr, [
+			["btn", "Reedem", () => this.reedemVoucher(inpVoucher.value.trim(), labelTotal)],
+			["btn", "Cek voucher", async () => {
+				voc = await cekVoucher(bot, secondKeranjang, totalBelanja, totalQty,
+				this.infoBuyer.nama, this.infoBuyer.kontak);
+			}]
+		]);
+	}
+	
+	async reedemVoucher(kode, label) {
+		this.dataPromo = await reedem(kode, secondKeranjang);
+		if (this.dataPromo && this.dataPromo.potongan) {
+			const tb = totalBelanja - this.sudahBayar - this.dataPromo.potongan;
+			if (this.sudahBayar === 0) { label.textContent = `Total belanja: ${formatMataUang(tb)}`; }
+			else { label.textContent = `Total belum dibayar: ${formatMataUang(tb)}`; }
+		}
 	}
 	
 	prepareTengah() {
@@ -5258,6 +5278,12 @@ class TransaksiCepat {
 			);
 		}, null, vcp);
 		ent["jumlah bayar"].oninput = () => this.hitungKembalian(ent["jumlah bayar"].value.trim());
+		inpVoucher.addEventListener("keydown", () => this.reedemVoucher(inpVoucher.value.trim()));
+		
+		vcp.querySelector("img").onclick = async () => {
+			await aktifkanScanner();
+			await mulaiScan(this.video, inpVoucher, true);
+		}
 	}
 	
 	async reedemVoucher(kode) {
