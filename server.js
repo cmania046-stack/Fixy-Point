@@ -3603,7 +3603,7 @@ class PostData {
 			const tanggal = DateTime.fromFormat(tgl, "yyyy-M-d");
 			if (!tanggal.isValid) throw new Error("Format tanggal salah");
 			const exp = tanggal.toFormat("MM/dd/yy");
-			const idProduk = strftime("%f");
+			const idProduk = crypto.randomBytes(10).toString().replace("-","").toUpperCase();
 			
 			await client.query("BEGIN");
 			await client.query(`INSERT INTO produk (
@@ -3712,7 +3712,7 @@ class PostData {
 		const d = this.data;
 		const namaPertama = (d.nama || "").split(" ");
 		const nama = namaPertama[0];
-		const inisialCode = nama[0] + strftime("%S_%f");
+		const inisialCode = nama[0] + crypto.randomUUID().slice(0, 10).replace("-","").toUpperCase();
 		const client = await pool.connect();
 		try {
 			await client.query("BEGIN");

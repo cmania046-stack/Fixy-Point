@@ -421,3 +421,11 @@
 2026-11-04 16:26:27.232 WIT [21882] LOG:  database system is ready to accept connections
 2026-11-04 16:31:27.324 WIT [21890] LOG:  checkpoint starting: time
 2026-11-04 16:33:21.870 WIT [21890] LOG:  checkpoint complete: wrote 1126 buffers (6.9%), wrote 3 SLRU buffers; 1 WAL file(s) added, 0 removed, 0 recycled; write=113.978 s, sync=0.346 s, total=114.550 s; sync files=537, longest=0.016 s, average=0.001 s; distance=5769 kB, estimate=5769 kB; lsn=0/1D0EA50, redo lsn=0/1D080A8
+2026-11-04 16:36:27.973 WIT [21890] LOG:  checkpoint starting: time
+2026-11-04 16:36:29.364 WIT [21890] LOG:  checkpoint complete: wrote 13 buffers (0.1%), wrote 1 SLRU buffers; 0 WAL file(s) added, 0 removed, 0 recycled; write=1.332 s, sync=0.008 s, total=1.392 s; sync files=9, longest=0.002 s, average=0.001 s; distance=26 kB, estimate=5195 kB; lsn=0/1D0ECF0, redo lsn=0/1D0EC98
+2026-11-04 17:12:33.937 WIT [21890] LOG:  checkpoint starting: time
+2026-11-04 17:12:34.501 WIT [21890] LOG:  checkpoint complete: wrote 5 buffers (0.0%), wrote 0 SLRU buffers; 0 WAL file(s) added, 0 removed, 0 recycled; write=0.524 s, sync=0.007 s, total=0.566 s; sync files=4, longest=0.003 s, average=0.002 s; distance=18 kB, estimate=4677 kB; lsn=0/1D13770, redo lsn=0/1D13718
+2026-11-04 17:22:33.635 WIT [21890] LOG:  checkpoint starting: time
+2026-11-04 17:22:34.282 WIT [21890] LOG:  checkpoint complete: wrote 6 buffers (0.0%), wrote 1 SLRU buffers; 0 WAL file(s) added, 0 removed, 0 recycled; write=0.620 s, sync=0.004 s, total=0.647 s; sync files=7, longest=0.002 s, average=0.001 s; distance=2 kB, estimate=4210 kB; lsn=0/1D14330, redo lsn=0/1D142D8
+2026-11-04 17:27:33.382 WIT [21890] LOG:  checkpoint starting: time
+2026-11-04 17:27:33.838 WIT [21890] LOG:  checkpoint complete: wrote 4 buffers (0.0%), wrote 1 SLRU buffers; 0 WAL file(s) added, 0 removed, 0 recycled; write=0.419 s, sync=0.005 s, total=0.457 s; sync files=5, longest=0.002 s, average=0.001 s; distance=2 kB, estimate=3789 kB; lsn=0/1D14CA0, redo lsn=0/1D14C48
