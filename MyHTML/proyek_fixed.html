@@ -762,8 +762,8 @@ class UserMenu {
 			await modalShow(gagal, "Kata sandi dan konfirmasi kata sandi harus sama");
 			return;
 		}
-		const user = await getData("users");
-		const sama = user.find(p => p.nama.toLowerCase() === nama.toLowerCase() &&
+		const users = await getData("users");
+		const sama = users.find(p => p.nama.toLowerCase() === nama.toLowerCase() &&
 			p.email.toLowerCase() === email.toLowerCase());
 		if (sama) {
 			await modalShow(gagal, "Pengguna atas nama " + nama + " telah terdaftar");
@@ -7513,7 +7513,25 @@ class Login {
 				}
 			});
 		});
-		makeButton("btn", "Simpan", null, null, p);
+		makeButton("btn", "Simpan", async () => {
+			const pw = inputs["password"].value.trim();
+			const kpw = inputs["konfirmasi password"].value.trim();
+			if (pw !== kpw) {
+				await modalShow(gagal, "Kata sandi dan konfirmasi kata sandi harus sama");
+				return;
+			}
+			if (pw.length < 6) {
+				await modalShow(gagal, "Kata sandi harus berisi minimal 6 karakter");
+				return;
+			}
+			if (await modalShow(confirm, "Kata sandi siap. Simpan sekarang?")) {
+				const post = await postDataKedua("perbarui_password", {
+					nama: data.nama, id: data.inisial_code, pw: pw
+				});
+				await message(post);
+				this.setup();
+			}
+		}, null, p);
 		const log = this.makeTombol("Login", p);
 		log.onclick = () => this.setup();
 	}

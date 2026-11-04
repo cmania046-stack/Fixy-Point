@@ -620,7 +620,7 @@ function periksaToken(token) {
 	return !!token && tokenSet.has(hashToken(token));
 }
 
-const publik = ["/post_data/periksa_login_web", "/post_data/periksa_admin", "/make_id_device", "/ketentuan_layanan", "/post_data/periksa_email_web", "/post_data/periksa_jawaban"];
+const publik = ["/post_data/periksa_login_web", "/post_data/periksa_admin", "/make_id_device", "/ketentuan_layanan", "/post_data/periksa_email_web", "/post_data/periksa_jawaban", "/post_data/perbarui_password"];
 app.use((req, res, next) => {
 	if (publik.includes(req.path) ||
 		req.path === "/" ||
@@ -2010,7 +2010,7 @@ class PostData {
 			}, 400];
 			return [{
 				stat: "Berhasil",
-				data: { inisial_code: user.inisial_code, pertanyaan: user.pertanyaan }
+				data: { inisial_code: user.inisial_code, pertanyaan: user.pertanyaan, nama: user.nama }
 			}, 200];
 		} catch (e) { return errorReturn(e); }
 	}
