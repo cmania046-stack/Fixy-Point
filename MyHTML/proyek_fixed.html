@@ -1509,14 +1509,13 @@ function hitungPotonganTingkat(harga, min, hargaTingkat, status = 0, persen = 0)
 function entryMaker(placeholder, tipe, gambar, parent){
 	const fr = document.createElement("div");
 	fr.className = "inp";
+	fr.style.position = "relative";
 	
 	const image = document.createElement("img");
 	image.src = url + gambar;
 	image.style.display = "block";
-	image.style.width = "20px";
-	image.style.height = "20px";
-	image.style.minWidth = "20px";
-	image.style.minHeight = "20px";
+	image.style.width = "25px";
+	image.style.height = "25px";
 	image.style.flexShrink = "0";
 	image.style.flexGrow = "0";
 	image.style.border = "none";
@@ -1537,6 +1536,38 @@ function entryMaker(placeholder, tipe, gambar, parent){
 
 	parent.appendChild(fr);
 	return entry;
+}
+
+function pwMaker(placeholder, tipe, gambar, parent){
+	const fr = document.createElement("div");
+	fr.className = "inp";
+	fr.style.position = "relative";
+	
+	const image = document.createElement("img");
+	image.src = url + gambar;
+	image.style.display = "block";
+	image.style.width = "25px";
+	image.style.height = "25px";
+	image.style.flexShrink = "0";
+	image.style.flexGrow = "0";
+	image.style.border = "none";
+	image.style.borderRadius = "0";
+	image.style.background = "transparent";
+	fr.appendChild(image);
+
+	const entry = document.createElement("input");
+	entry.placeholder = placeholder;
+	entry.type = tipe;
+	entry.style.border = "none";
+	entry.style.outline = "none";
+	entry.style.height = "100%";
+	entry.style.flex = "1";
+	entry.style.minWidth = "0";
+	entry.style.boxSizing = "border-box";
+	fr.appendChild(entry);
+
+	parent.appendChild(fr);
+	return [fr, entry];
 }
 
 function makeEntry(placeholder, tipe, parent=null) {
@@ -7353,19 +7384,11 @@ class Login {
 	constructor() {
 		this.data = null;
 	}
-	setLogin(){
-		this.info = pembuatEntry(this.parent, [
-			["username", "Masukkan nama atau nomor telepon...", "text"],
-			["password", "Masukkan kata sandi...", "password"]
-		])
-		const btn = makeButton("btn", "Login", () => this.validasi());
-		this.parent.appendChild(btn);
-	}
 	
-	async validasi(){
+	async validasi(form){
 		const id = localStorage.getItem("id_device");
-		const us = this.info.username.value.trim();
-		const pw = this.info.password.value.trim();
+		const us = form.username.value.trim();
+		const pw = form.password.value;
 		const hasil = await postDataKedua("periksa_login_web", {username: us, password: pw, idDevice: id});
 		if (hasil.stat.toLowerCase() == "berhasil"){
 			kunciKiri = false;
@@ -7382,18 +7405,65 @@ class Login {
 		}
 	}
 	
-	setup(){
-		makeWindow();
-		const parent = document.querySelector(".lc-content");
-		parent.innerHTML = ""
-		this.parent = pembuatField(parent, "Login");
-		const lbl = makeLabel("Gunakan username 'Admin' dan password 'admin123' untuk login pertama. Selanjutnya bisa diubah di pengaturan", "biasa");
-		lbl.style.color = "red";
-		lbl.style.padding = "10px";
-		lbl.style.border = "1px solid red";
-		lbl.style.borderRadius = "10px";
-		this.parent.appendChild(lbl);
-		this.setLogin();
+	buildFrames() {
+		const p = makeParent("container", this.tengah);
+		p.style.width = "100%";
+		p.style.height = "100%";
+		p.style.justifyContent = "center";
+		p.style.alignItems = "center";
+		p.style.backgroundColor = "transparent";
+		p.style.border = "none";
+		
+		const logParent = makeParent("container", p);
+		logParent.style.backgroundColor = "#ffffff";
+		logParent.style.borderRadius = "12px";
+		logParent.style.boxShadow = "0 8px 24px rgba(0, 0, 0, 0.1)";
+		logParent.style.padding = "40px 30px";
+		logParent.style.gap = "5px";
+		logParent.style.width = "90%";
+		logParent.style.maxWidth = "400px";
+		logParent.style.border = "none";
+		
+		const jdl = makeLabel("LOGIN FORM", "jdl", logParent);
+		jdl.style.alignSelf = "center";
+		jdl.style.fontSize = "24px";
+		jdl.style.fontWeight = "700";
+		jdl.style.color = "#1a1a1a";
+		jdl.style.letterSpacing = "1px";
+		jdl.style.marginBottom = "10px";
+		
+		const form = this.pembuatHalamanLogin(logParent);
+		
+		const forgot = makeButton("invisible-btn", "Lupa kata sandi?", null, null, logParent);
+		forgot.style.display = "block";
+		forgot.style.textAlign = "center";
+		
+		const btnLogin = makeButton("btn", "Login", () => this.validasi(form), null, logParent);
+	}
+	
+	pembuatHalamanLogin(p) {
+		makeLabel("Username", "teks", p);
+		const us = entryMaker("Masukkan nama pengguna...", "text", "Pictures/username.png", p);
+		makeLabel("Password", "teks", p);
+		const [prt, pw] = pwMaker("Masukkan kata sandi...", "password", "Pictures/eyebrow.png", p);
+		const img = prt.querySelector("img");
+		img.onclick = () => {
+			if (pw.type === "password") {
+				img.src = "Pictures/see.png";
+				pw.type = "text";
+			} else {
+				img.src = "Pictures/eyebrow.png";
+				pw.type = "password";
+			}
+		}
+		return { username: us, password: pw }
+	}
+	
+	async setup() {
+		resetJudul("Halaman Login");
+		this.tengah = document.getElementById("tgh");
+		this.tengah.innerHTML = "";
+		this.buildFrames();
 	}
 }
 
