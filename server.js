@@ -23,6 +23,8 @@ const listTanggal = [
 const listWaktu = ["H:m:s", "H/m/s", "H.m.s", "H:m", "H/m", "H.m"];
 
 const allowedMethods = [
+	"periksa_jawaban",
+	"periksa_email_web",
 	"cek_kondisi_voucher",
 	"pakai_voucher",
 	"klaim_voucher",
@@ -618,7 +620,7 @@ function periksaToken(token) {
 	return !!token && tokenSet.has(hashToken(token));
 }
 
-const publik = ["/post_data/periksa_login_web", "/post_data/periksa_admin", "/make_id_device", "/ketentuan_layanan"];
+const publik = ["/post_data/periksa_login_web", "/post_data/periksa_admin", "/make_id_device", "/ketentuan_layanan", "/post_data/periksa_email_web", "/post_data/periksa_jawaban"];
 app.use((req, res, next) => {
 	if (publik.includes(req.path) ||
 		req.path === "/" ||
@@ -1984,6 +1986,33 @@ class PostData {
 	constructor(data, req) {
 		this.data = data;
 		this.req = req;
+	}
+	
+	async periksa_jawaban() {
+		const d = this.data;
+		const id = d.id ?? "";
+		const ans = d.jawaban ?? "";
+		try {
+			const { rows: [jwb] } = await pool.query("SELECT jawaban FROM users WHERE inisial_code = $1", [id]);
+			const periksa = await verifyPass(ans, jwb.jawaban);
+			if (periksa) return [{ stat: "Berhasil" }, 200];
+			return [{ stat: "Gagal", pesan: "Jawaban salah" }, 400];
+		} catch (e) { return errorReturn(e); }
+	}
+	
+	async periksa_email_web() {
+		const em = this.data.email ?? "";
+		try {
+			const { rows: [user] } = await pool.query("SELECT inisial_code, pertanyaan FROM users WHERE LOWER(email) = LOWER($1)", [em]);
+			if (kosong(user)) return [{
+				stat: "Gagal",
+				pesan: `Pengguna ${em} tidak ditemukan`
+			}, 400];
+			return [{
+				stat: "Berhasil",
+				data: { inisial_code: user.inisial_code, pertanyaan: user.pertanyaan }
+			}, 200];
+		} catch (e) { return errorReturn(e); }
 	}
 	
 	async cek_kondisi_voucher() {

@@ -7383,6 +7383,23 @@ class Login {
 		this.data = null;
 	}
 	
+	makeJudul(teks, parent) {
+		const jdl = makeLabel(teks, "jdl", parent);
+		jdl.style.alignSelf = "center";
+		jdl.style.fontSize = "24px";
+		jdl.style.fontWeight = "700";
+		jdl.style.color = "#1a1a1a";
+		jdl.style.letterSpacing = "1px";
+		jdl.style.marginBottom = "10px";
+	}
+	
+	makeTombol(teks, parent) {
+		const btn = makeButton("invisible-btn", teks, null, null, parent);
+		btn.style.display = "block";
+		btn.style.textAlign = "center";
+		return btn;
+	}
+	
 	async validasi(form){
 		const id = localStorage.getItem("id_device");
 		const us = form.username.value.trim();
@@ -7422,21 +7439,83 @@ class Login {
 		logParent.style.maxWidth = "400px";
 		logParent.style.border = "none";
 		
-		const jdl = makeLabel("LOGIN FORM", "jdl", logParent);
-		jdl.style.alignSelf = "center";
-		jdl.style.fontSize = "24px";
-		jdl.style.fontWeight = "700";
-		jdl.style.color = "#1a1a1a";
-		jdl.style.letterSpacing = "1px";
-		jdl.style.marginBottom = "10px";
-		
+		this.makeJudul("LOGIN FORM", logParent);
 		const form = this.pembuatHalamanLogin(logParent);
 		
-		const forgot = makeButton("invisible-btn", "Lupa kata sandi?", null, null, logParent);
-		forgot.style.display = "block";
-		forgot.style.textAlign = "center";
-		
+		const forgot = this.makeTombol("Lupa kata sandi?", logParent);
+		forgot.onclick = () => this.lupaKataSandi(logParent);
 		const btnLogin = makeButton("btn", "Login", () => this.validasi(form), null, logParent);
+	}
+	
+	lupaKataSandi(p) {
+		p.innerHTML = "";
+		this.makeJudul("Konfirmasi email / nomor telepon", p);
+		makeLabel("Email atau nomor telepon", "teks", p);
+		const nope = entryMaker("Masukkan email atau nomor telepon...", "text", "Pictures/pulsa.png", p);
+		const lanjut = makeButton("btn", "Lanjut", null, null, p);
+		const login = this.makeTombol("Login", p);
+		login.onclick = () => this.setup();
+		lanjut.onclick = async () => {
+			const em = nope.value.trim();
+			if (kosong(em)) {
+				await modalShow(gagal, "Nomor telepon atau email tidak boleh dikosongkan");
+				return;
+			}
+			const periksa = await postDataKedua("periksa_email_web", { email: em });
+			if (periksa.stat.toLowerCase() === "berhasil") {
+				this.lanjutPertanyaan(p, periksa.data);
+			} else {
+				await modalShow(periksa.stat, periksa.pesan);
+			}
+		}
+	}
+	
+	lanjutPertanyaan(p, data) {
+		p.innerHTML = "";
+		this.makeJudul("Pertanyaan keamanan", p);
+		makeLabel(data.pertanyaan, "teks", p);
+		const ans = entryMaker("Masukkan jawaban...", "text", "Pictures/edit.png", p);
+		const btn = makeButton("btn", "Periksa", null, null, p);
+		btn.onclick = async () => {
+			const jawaban = ans.value.trim();
+			const cek = await postDataKedua("periksa_jawaban", { jawaban: jawaban, id: data.inisial_code });
+			if (cek.stat.toLowerCase() === "berhasil") { this.buatKataSandiBaru(p, data); }
+			else { await modalShow(cek.stat, cek.pesan); }
+		}
+		const log = this.makeTombol("Login", p);
+		log.onclick = () => this.setup();
+	}
+	
+	buatKataSandiBaru(p, data) {
+		p.innerHTML = "";
+		this.makeJudul("Buat kata sandi baru", p);
+		const info = [
+			["password", "Masukkan kata sandi baru..."],
+			["konfirmasi password", "Masukkan konfirmasi kata sandi..."]
+		];
+		let inputs = {};
+		for (const [key, plc] of info) {
+			const lbl = makeLabel(capitalize(key), "teks", p);
+			const inp = entryMaker(plc, "password", "Pictures/eyebrow.png", p);
+			inputs[key] = inp;
+		}
+		const picts = p.querySelectorAll("img");
+		const inps = Object.values(inputs);
+		
+		picts.forEach((item, i) => {
+			item.addEventListener("click", () => {
+				if (inps[i].type === "password") {
+					inps[i].type = "text";
+					item.src = "Pictures/see.png";
+				} else {
+					inps[i].type = "password";
+					item.src = "Pictures/eyebrow.png";
+				}
+			});
+		});
+		makeButton("btn", "Simpan", null, null, p);
+		const log = this.makeTombol("Login", p);
+		log.onclick = () => this.setup();
 	}
 	
 	pembuatHalamanLogin(p) {
