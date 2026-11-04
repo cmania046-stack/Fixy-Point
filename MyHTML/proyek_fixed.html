@@ -4489,9 +4489,10 @@ class Transaksi {
 		wadah.classList.remove("hidden");
 		wadah.innerHTML = "";
 		const rect = this.inputAktif.getBoundingClientRect();
+		const at = document.querySelector(".atas-tengah").getBoundingClientRect();		
 		wadah.style.top = (rect.bottom + 5) + "px";
-		wadah.style.left = rect.left + "px";
-		wadah.style.minWidth = String(Number(rect.width) + Number(rect.width) / 2)+ "px";
+		wadah.style.left = at.left + "px";
+		wadah.style.minWidth = at.width + "px";
 		const tabel = makeTable(`
 				<tr>
 					<th>Barcode</th>
