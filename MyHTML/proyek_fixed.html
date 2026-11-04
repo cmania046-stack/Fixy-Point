@@ -742,47 +742,44 @@ class UserMenu {
 		this.tambahPengguna = this.tambahPengguna.bind(this);
 		this.daftarPengguna = this.daftarPengguna.bind(this);
 	}
-
+	
 	async daftarPengguna() {
-		const hasil = Object.fromEntries(Object.entries(this.entries).map(([key, value]) => [key, value.value.trim()]));
-
-		if (!this.user) {
-			if (hasil["status"].toLowerCase() !== "owner") {
+		const hasil = pecahObject(this.entries);
+		const nama = hasil.nama, email = hasil["email/nomor telepon"];
+		const status = hasil.status, pw = hasil.password, kpw = hasil["konfirmasi password"];
+		
+		if (kosong(this.user)) {
+			if (status.toLowerCase() !== "owner") {
 				await modalShow(gagal, "Pendaftaran pengguna pertama kali harus berstatus owner");
 				return;
 			}
 		}
-		if (![hasil.nama, hasil["status"], hasil.password, hasil.konfir].every(Boolean)) {
+		if (![nama, email, status, pw, kpw].every(Boolean)) {
 			await modalShow(gagal, "Nama, status, kata sandi, konfirmasi kata sandi wajib diisi");
 			return;
 		}
-		if (hasil.password !== hasil.konfir) {
+		if (pw !== kpw) {
 			await modalShow(gagal, "Kata sandi dan konfirmasi kata sandi harus sama");
 			return;
 		}
-		const sama = this.user.find(p => p.nama.toLowerCase() === hasil.nama.toLowerCase) ?? null;
+		const user = await getData("users");
+		const sama = user.find(p => p.nama.toLowerCase() === nama.toLowerCase() &&
+			p.email.toLowerCase() === email.toLowerCase());
 		if (sama) {
-			await modalShow(gagal, "Pengguna atas nama " + hasil.nama + " telah terdaftar");
-			return
-		}
-
-		const dataUnggah = {
-			nama: hasil.nama,
-			status: hasil["status"],
-			password: hasil.password,
-			question: hasil.question,
-			answer: hasil.jawaban,
-			operator: user,
-			sumber: idDevice
-		}
-		const konfirmasi = await modalShow(confirm, "Data telah siap. Unggah sekarang?", false);
-		if (!konfirmasi) {
+			await modalShow(gagal, "Pengguna atas nama " + nama + " telah terdaftar");
 			return;
 		}
-		const upload = await postDataKedua("tambah_user_baru", dataUnggah);
-		await message(upload);
-		resetPop();
-		pengguna.setup();
+		const dataUnggah = {
+			nama: nama, status: status, email: email,
+			password: pw, question: hasil["pertanyaan keamanan"],
+			answer: hasil.jawaban, operator: user, sumber: idDevice
+		}
+		if (await modalShow(confirm, "Data telah siap. Unggah sekarang?")) {
+			const up = await postDataKedua("tambah_user_baru", dataUnggah);
+			await message(up);
+			resetPop();
+			this.setup();
+		}
 	}
 
 	async tambahPengguna() {
@@ -792,10 +789,11 @@ class UserMenu {
 		const judul = makeButton("invisible-btn", "INPUT FORM PENGGUNA BARU", null, "Pictures/edit.png");
 		const info_input = [
 			["nama", "Masukkan nama", "text"],
+			["email/nomor telepon", "Masukkan email atau nomor telepon", "email"],
 			["status", "Masukkan status", "text"],
 			["password", "Masukkan kata sandi", "password"],
-			["konfir", "Masukkan konfirmasi password", "password"],
-			["question", "Masukkan pertanyaan keamanan", "text"],
+			["konfirmasi password", "Masukkan konfirmasi password", "password"],
+			["pertanyaan keamanan", "Masukkan pertanyaan keamanan", "text"],
 			["jawaban", "Masukkan jawaban", "text"]
 		]
 		cont.appendChild(judul);

@@ -269,7 +269,7 @@ class Database {
 			await this.ensureDefaultRow(cl, "keuangan");
 
 			await this.createTable(cl, "operator", "nama TEXT, status TEXT, inisial_code TEXT");
-			await this.createTable(cl, "users", "nama TEXT, status TEXT, inisial TEXT, inisial_code TEXT, password TEXT, pertanyaan TEXT, jawaban TEXT");
+			await this.createTable(cl, "users", "nama TEXT, email TEXT, status TEXT, inisial TEXT, inisial_code TEXT, password TEXT, pertanyaan TEXT, jawaban TEXT");
 			await this.createTable(cl, "device", "id_device TEXT");
 			await this.createTable(cl, "customer", "id_user TEXT, nama TEXT, alamat TEXT, kontak TEXT, email TEXT, id_device TEXT, status_login INTEGER, password TEXT, poin INTEGER");
 			await this.createTable(cl, "supplier", "nama TEXT, alamat TEXT, kontak TEXT, email TEXT, medsos TEXT, bidang TEXT");
@@ -3718,14 +3718,16 @@ class PostData {
 			await client.query("BEGIN");
 			await client.query(`INSERT INTO users (
 				nama,
+				email,
 				status,
 				inisial,
 				inisial_code,
 				password,
 				pertanyaan,
 				jawaban
-			) VALUES ($1, $2, $3, $4, $5, $6, $7)`, [
+			) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`, [
 				d.nama || "",
+				d.email || "",
 				d.status || "",
 				nama[0],
 				inisialCode,

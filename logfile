@@ -395,3 +395,29 @@
 2026-11-03 09:16:23.345 WIT [7313] LOG:  checkpoint starting: end-of-recovery immediate wait
 2026-11-03 09:16:23.361 WIT [7313] LOG:  checkpoint complete: wrote 0 buffers (0.0%), wrote 3 SLRU buffers; 0 WAL file(s) added, 0 removed, 0 recycled; write=0.006 s, sync=0.002 s, total=0.017 s; sync files=2, longest=0.001 s, average=0.001 s; distance=0 kB, estimate=0 kB; lsn=0/2190920, redo lsn=0/2190920
 2026-11-03 09:16:23.367 WIT [7305] LOG:  database system is ready to accept connections
+2026-11-04 16:15:49.343 WIT [32037] FATAL:  lock file "postmaster.pid" already exists
+2026-11-04 16:15:49.343 WIT [32037] HINT:  Is another postmaster (PID 12291) running in data directory "/data/data/com.termux/files/usr/var/lib/postgresql"?
+2026-11-04 16:16:07.811 WIT [2643] LOG:  starting PostgreSQL 18.6 on arm-unknown-linux-androideabi, compiled by Android (16134705, +pgo, +bolt, +lto, +mlgo, based on r574158c) clang version 21.0.0 (https://android.googlesource.com/toolchain/llvm-project 9f872551d3c681d06fd303b36f16ed5c274735eb), 32-bit
+2026-11-04 16:16:07.812 WIT [2643] LOG:  listening on IPv4 address "127.0.0.1", port 5432
+2026-11-04 16:16:07.814 WIT [2643] LOG:  listening on Unix socket "/data/data/com.termux/files/usr/tmp/.s.PGSQL.5432"
+2026-11-04 16:16:07.862 WIT [2655] LOG:  database system was shut down at 2026-11-04 16:16:03 WIT
+2026-11-04 16:16:07.877 WIT [2643] LOG:  database system is ready to accept connections
+2026-11-04 16:18:05.865 WIT [10074] FATAL:  database "users" does not exist
+2026-11-04 16:20:38.029 WIT [10992] ERROR:  could not open shared memory segment "pg_dynshmem/mmap.3194728814": No such file or directory
+2026-11-04 16:20:38.031 WIT [10992] FATAL:  can't attach the same segment more than once
+2026-11-04 16:21:07.960 WIT [2652] LOG:  checkpoint starting: time
+2026-11-04 16:21:07.961 WIT [2652] ERROR:  could not open directory "pg_logical/snapshots": No such file or directory
+2026-11-04 16:21:08.017 WIT [2643] LOG:  could not open file "postmaster.pid": No such file or directory
+2026-11-04 16:21:08.018 WIT [2643] LOG:  performing immediate shutdown because data directory lock file is invalid
+2026-11-04 16:21:08.018 WIT [2643] LOG:  received immediate shutdown request
+2026-11-04 16:21:08.018 WIT [2643] LOG:  could not open file "postmaster.pid": No such file or directory
+2026-11-04 16:21:08.037 WIT [2643] LOG:  could not remove shared memory segment "pg_dynshmem/mmap.3194728814": No such file or directory
+2026-11-04 16:21:08.037 WIT [2643] LOG:  could not remove shared memory segment "pg_dynshmem/mmap.2183280426": No such file or directory
+2026-11-04 16:21:08.049 WIT [2643] LOG:  database system is shut down
+2026-11-04 16:26:27.203 WIT [21882] LOG:  starting PostgreSQL 18.6 on arm-unknown-linux-androideabi, compiled by Android (16134705, +pgo, +bolt, +lto, +mlgo, based on r574158c) clang version 21.0.0 (https://android.googlesource.com/toolchain/llvm-project 9f872551d3c681d06fd303b36f16ed5c274735eb), 32-bit
+2026-11-04 16:26:27.205 WIT [21882] LOG:  listening on IPv4 address "127.0.0.1", port 5432
+2026-11-04 16:26:27.207 WIT [21882] LOG:  listening on Unix socket "/data/data/com.termux/files/usr/tmp/.s.PGSQL.5432"
+2026-11-04 16:26:27.219 WIT [21892] LOG:  database system was shut down at 2026-11-04 16:25:47 WIT
+2026-11-04 16:26:27.232 WIT [21882] LOG:  database system is ready to accept connections
+2026-11-04 16:31:27.324 WIT [21890] LOG:  checkpoint starting: time
+2026-11-04 16:33:21.870 WIT [21890] LOG:  checkpoint complete: wrote 1126 buffers (6.9%), wrote 3 SLRU buffers; 1 WAL file(s) added, 0 removed, 0 recycled; write=113.978 s, sync=0.346 s, total=114.550 s; sync files=537, longest=0.016 s, average=0.001 s; distance=5769 kB, estimate=5769 kB; lsn=0/1D0EA50, redo lsn=0/1D080A8
