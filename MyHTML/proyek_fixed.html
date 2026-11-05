@@ -5127,9 +5127,6 @@ class TransaksiCepat {
 	}
 	
 	async tambahKeranjang(id, qtyValue) {
-		if ([NaN, "0", ""].includes(qtyValue)) {
-			return;
-		}
 		const qty = safeInt(qtyValue);
 		const find = this.keranjang.find(p => p.id === id) ?? null;
 		const prd = this.produk.find(p => p.id_produk === id) ?? null;
@@ -5360,6 +5357,7 @@ class TransaksiCepat {
 				const t = this.cari.value.trim();
 				const isBarcode = this.mapProduk[t];
 				if (isBarcode) {
+					this.cari.value = "";
 					this.tambahKeranjang(isBarcode.id_produk, 1);
 				} else {
 					const inps = this.frBawah.querySelectorAll("#qty-inp");
