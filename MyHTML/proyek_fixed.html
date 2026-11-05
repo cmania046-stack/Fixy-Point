@@ -7441,6 +7441,10 @@ class Login {
 		
 		this.makeJudul("LOGIN FORM", logParent);
 		const form = this.pembuatHalamanLogin(logParent);
+		form["username"].focus();
+		form["password"].addEventListener("keydown", (e) => {
+			if (e.key === "Enter") this.validasi(form);
+		});
 		
 		const forgot = this.makeTombol("Lupa kata sandi?", logParent);
 		forgot.onclick = () => this.lupaKataSandi(logParent);
