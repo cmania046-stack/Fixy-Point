@@ -6612,6 +6612,40 @@ class Lainnya {
 			btn.style.width = "100%";
 			btn.style.flexShrink = "1";
 		});
+		
+		const db = pembuatField(this.tengah, "Database");
+		const frame1 = makeParent("container-horizontal", db);
+		const frame2 = makeParent("frame", db);
+		const dataTabel = await getDt("tabel_tabel");
+		dataTabel.forEach((item, i) => {
+			const btn = makeButton("invisible-btn", `${i+1}. ${capitalize(item.replaceAll("_", " "))}`, null, null, frame2);
+			btn.onclick = (e) => {
+				const p = makeFlyParent(e);
+				pembuatButtonGambar(p, [
+					["invisible-btn", "Backup", () => this.backupTable(item), "Pictures/backup_file.png"],
+					["invisible-btn", "Pulihkan", () => this.pulihkanTable(item), "Pictures/download.png"]
+				]);
+			}
+		});
+		pembuatButton(frame1, [
+			["btn", "Backup semua", () => this.backupSeluruhTabel()],
+			["btn", "Pulihkan semua", () => this.pulihkanSeluruhTabel()]
+		]);
+	}
+	
+	async backupSeluruhTabel() {
+		if (await modalShow(confirm, "Backup seluruh data dari database kedalam file JSON?")) {
+			const post = await postDataKedua("backup_seluruh_data", {a:0});
+			await message(post);
+			this.backup();
+		}
+	}
+	async pulihkanSeluruhTabel() {
+		if (await modalShow(confirm, "Pulihkan seluruh data ke database?")) {
+			const post = await postDataKedua("pulihkan_seluruh_data", {a:0});
+			await message(post);
+			this.backup();
+		}
 	}
 	
 	async unduhFile(path) {
@@ -6647,7 +6681,8 @@ class Lainnya {
 			p.appendChild(img);
 		} else {
 			const hasil = await getDt(url);
-			p.appendChild(makeLabel(hasil.hasil, "biasa"));
+			const lbl = makeLabel(hasil.hasil, "biasa", p);
+			lbl.style.fontFamily = "monospace";
 		}			
 	}
 	

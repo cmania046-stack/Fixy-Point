@@ -23,6 +23,8 @@ const listTanggal = [
 const listWaktu = ["H:m:s", "H/m/s", "H.m.s", "H:m", "H/m", "H.m"];
 
 const allowedMethods = [
+	"pulihkan_seluruh_data",
+	"backup_seluruh_data",
 	"periksa_jawaban",
 	"periksa_email_web",
 	"cek_kondisi_voucher",
@@ -165,6 +167,7 @@ const fileIps = path.join(folderIps, "ips cloudflare.json");
 const fileKeuangan = path.join(folderSqlite, "Keuangan.json");
 const fileAtt = path.join(folderAtribut, "Ketentuan layanan.txt");
 const fileToken = path.join(folderIps, "Session tokens.json");
+const fileTables = path.join(folderBackup, "Database.json");
 
 function openJson(p, def) {
 	if (!fs.existsSync(p)) return def;
@@ -601,14 +604,13 @@ const app = exp();
 app.use(cookieParser());
 
 
-/*
 app.use((req, res, next) => {
 	res.set("Access-Control-Allow-Origin", "*");
 	res.set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
 	res.set("Access-Control-Allow-Headers", req.headers["access-control-request-headers"] || "Content-Type");
 	if (req.method === "OPTIONS") return res.sendStatus(204);
 	next();
-});*/
+});
 
 app.use(exp.json());
 app.use("/Pictures", exp.static(folderPictures, {maxAge: "0"}));
@@ -644,6 +646,9 @@ app.get("/dashboard_admin", (req,res) => { res.sendFile(path.join(folderHtml, "p
 app.get("/lain", (req,res) => { res.sendFile(path.join(folderHtml, "tictactoe.html")); });
 app.get("/manajemen_keuangan", (req,res) => { res.sendFile(path.join(folderHtml, "manajemen_keuangan.html")); });
 
+app.get("/tabel_tabel", (req, res) => {
+	res.json(existedTable);
+});
 
 app.get("/ketentuan_layanan", async (req, res) => {
 	try {
@@ -1981,11 +1986,76 @@ app.post("/beli_produk", async (req, res) => {
 
 //===========================BAGIAN PRODUK DIGITAL===============================================//
 
+async function bulkInsert(cl, tabel, rows) {
+	if (!rows || rows.length === 0) return;
+	const columns = Object.keys(rows[0]);
+	const colCount = columns.length;
+	const rowPlaceholders = [], params = [];
+	let idx = 1;
+	for (const row of rows) {
+		const placeholders = [];
+		for (const col of columns) {
+			placeholders.push(`$${idx++}`);
+			params.push(row[col]);
+		}
+		rowPlaceholders.push(`(${placeholders.join(', ')})`);
+	}
+	const sql = `
+		INSERT INTO ${tabel} (${columns.map(c => `"${c}"`).join(', ')})
+		VALUES ${rowPlaceholders.join(', ')}
+	`;
+	await cl.query(sql, params);
+}
 
 class PostData {
 	constructor(data, req) {
 		this.data = data;
 		this.req = req;
+	}
+	
+	async pulihkan_seluruh_data() {
+		const data = path.join(folderBackup, "Database.json");
+		const dataBackup = openJson(data, {});
+		if (kosong(dataBackup)) return [{
+			stat: "Gagal",
+			pesan: "Data backup tidak tersedia"
+		}, 400];
+		const client = await pool.connect();
+		try {
+			await client.query("BEGIN");
+			for (const [key, value] of Object.entries(dataBackup)) {
+				await client.query(`DELETE FROM ${key}`);
+				await bulkInsert(client, key, value);
+			}
+			await client.query("COMMIT");
+			return [{
+				stat: "Berhasil",
+				pesan: "Data berhasil dipulihkan"
+			}, 200];
+		} catch (e) {
+			await client.query("ROLLBACK");
+		} finally { client.release(); }
+	}
+	
+	async backup_seluruh_data() {
+		try {
+			let data = {};
+			for (const tabel of existedTable) {
+				const { rows: dt } = await pool.query(`SELECT * FROM ${tabel}`);
+				data[tabel] = dt;
+			}
+			if (!(kosong(data))) {
+				simpanSemua(fileTables, data);
+				return [{
+					stat: "Berhasil",
+					pesan: "Seluruh data dalam tabel telah dibackup"
+				}, 200];
+			}
+			return [{
+				stat: "Gagal",
+				pesan: "Tabel gagal dikumpulkan"
+			}, 400];
+		} catch (e) { return errorReturn(e); }
 	}
 	
 	async periksa_jawaban() {
@@ -4050,7 +4120,7 @@ class PostData {
 								id_pengenal, nama, inisial_code, waktu,
 								device, login_menggunakan, kesalahan_login,
 								waktu_logout
-							) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`, [
+							) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) ON CONFLICT DO NOTHING`, [
 								u, u, ada.inisial_code ?? "", await nowStr(),
 								idev, "Manual username & password", kesalahanLogin,
 								"Masih login"
