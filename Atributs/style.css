@@ -85,9 +85,9 @@
 	--state-press: #E1E7EF;
 
 	/* Bentuk & ukuran (maks 10px) */
-	--radius-sm: 6px;
-	--radius: 8px;
-	--radius-lg: 10px;
+	--radius-sm: 16px;
+	--radius: 18px;
+	--radius-lg: 20px;
 	--atas-h: 56px;
 
 	/* Font */
@@ -1321,15 +1321,29 @@ textarea::placeholder {
 }
 
 .laptop {
+	position: relative;
+	inset: 0;
 	width: 70px;
 	height: 70px;
 	margin-bottom: 20px;
 	background: transparent;
+	display: flex;
+	justify-content: center;
+	align-items: center;
 	border: 10px solid var(--primary-soft);
 	border-top-color: var(--primary);
 	border-bottom-color: var(--primary);
-	border-radius: var(--radius-lg);
+	border-radius: 50%;
 	animation: roll .8s ease-in-out infinite;
+}
+
+.child-lap {
+	width: 10%;
+	height: 100%;
+	position: absolute;
+	left: 50%;
+	z-index: 100;
+	background: var(--primary);
 }
 
 .proses {
@@ -1459,7 +1473,7 @@ textarea::placeholder {
    ========================================================================== */
 @keyframes roll {
 	from { transform: rotate(0); }
-	to   { transform: rotate(180deg); }
+	to   { transform: rotate(360deg); }
 }
 
 @keyframes showUp {

@@ -24,7 +24,9 @@
 	<div class="file-field hidden"></div>
 	<div class="produk-pop hidden"></div>
 	<div class="load-container" style="display: none;">
-		<div class="laptop"></div>
+		<div class="laptop">
+			<div class="child-lap"></div>
+		</div>
 		<p class="proses" id="proses">Processing...</p>
 	</div>
 	
@@ -671,23 +673,22 @@ function pembuatCombo(parent, def, data) {
 	return select;
 }
 
-function pembuatTextArea(parent, obj){
+function pembuatTextArea(parent, obj) {
 	let area = {};
-	for (const [key, placeholder, teks] of obj){
+	obj.forEach(([key, placeholder, teks], i) => {
 		const are = document.createElement("textarea");
-		are.rows = 14;
+		let row = 5;
+		if (i === 1) row = 15;
+		are.rows = row;
 		are.cols = 40;
 		are.placeholder = placeholder;
 		are.value = teks;
 		are.className = "entry";
 		are.style.background = "transparent";
-		are.style.color = "white";
 		area[key] = are;
-		const label = makeLabel(capitalize(key.replace(/_/g, " ")), "teks");
-		label.style.color = "white";
-		parent.appendChild(label);
+		const label = makeLabel(capitalize(key.replace(/_/g, " ")), "teks", parent);
 		parent.appendChild(are);
-	}
+	});
 	return area;
 }
 
@@ -6546,6 +6547,7 @@ class Lainnya {
 	}
 	
 	async backup() {
+		resetJudul("Backup");
 		this.tengah.innerHTML = "";
 		const f = pembuatField(this.tengah, "Daftar file");
 		const frame = makeParent("prt");
@@ -6814,6 +6816,7 @@ class Laporan {
 	}
 
 	laporanPenjualanProduk() {
+		resetJudul("Laporan penjualan");
 		this.tengah.innerHTML = "";
 		const atas = makeParent("container-horizontal");
 		atas.style.flexWrap = "nowrap";
@@ -7146,6 +7149,7 @@ class Laporan {
 	}
 
 	async laporanKeuangan() {
+		resetJudul("Laporan keuangan");
 		this.dataKeuangan = await getData("keuangan_lengkap");
 		this.tengah.innerHTML = "";
 		const atas = makeParent("container-horizontal");
@@ -7170,6 +7174,7 @@ class Laporan {
 	}
 	
 	laporanLainnya() {
+		resetJudul("Laporan lainnya");
 		this.tengah.innerHTML = "";
 		this.parentTengah = makeParent("frame");
 		this.container = makeParent("container-horizontal");
@@ -7718,7 +7723,7 @@ class CommandPrompt {
 	}
 	
 	setup() {
-		//if (kunciKiri) return;
+		if (kunciKiri) return;
 		this.map = {
 			all: {
 				paths: this.getAllPaths.bind(this),
@@ -7735,10 +7740,8 @@ class CommandPrompt {
 		parent.style.background = kiriBg;
 		this.tengah.appendChild(parent);
 			
-		const warning = makeButton("invisible-btn", "Hati-hati saat menulis query.", null, "Pictures/danger.png");
-		warning.style.color = "white";
-		parent.appendChild(warning);
-			
+		const warning = makeButton("invisible-btn", "Hati-hati saat menulis query.", null, "Pictures/danger.png", parent);
+				
 		this.qad = pembuatTextArea(parent, [
 			["query", "Tulis query Anda disini...", ""],
 			["data", "Tulis data Anda disini...", ""]
