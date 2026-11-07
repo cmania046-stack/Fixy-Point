@@ -1760,6 +1760,9 @@ class Dashboard {
 		document.getElementById("bwh").innerHTML = "";
 		resetJudul("Dashboard");
 		document.getElementById("sapa").innerHTML = `<img src="${url}Pictures/wave.gif" alt="Halo..." class="icon-halo"> Halo, ${user}`;
+		this.tengah.querySelectorAll(".field").forEach(item => {
+			item.style.height = "100%";
+		});
 	}
 
 	async muatData() {
@@ -2562,10 +2565,11 @@ class Pajak {
 
 	prepareFrames() {
 		resetJudul("Pajak");
-		const atas = makeParent("big-container");
-		this.bawah = makeParent("container");
+		const atas = makeParent("frame", this.wadah);
+		this.bawah = makeParent("container", this.wadah);
 
-		const af = pembuatField(atas, "informasi pajak");
+		const att = pembuatField(atas, "informasi pajak");
+		const af = makeParent("container", att);
 		af.style.display = "grid";
 		af.style.gridTemplateColumns = "repeat(3,1fr)";
 
@@ -2582,19 +2586,11 @@ class Pajak {
 		this.newPersen = entryMaker("Persentase pajak baru", "number", "Pictures/persent.png", bf);
 		const simpan = makeButton("btn", "Simpan", () => this.simpanPajak());
 		bf.appendChild(simpan);
-
-		for (const item of info) {
-			const [teks, value] = item;
-			const lt = makeLabel(teks, "teks");
-			const ltd = makeLabel(":", "teks");
-			const val = makeLabel(value, "teks");
-			for (const x of [lt, ltd, val]) {
-				af.appendChild(x);
-			}
-		}
-
-		for (const fr of [atas, this.bawah]) {
-			this.wadah.appendChild(fr);
+		
+		for (const [teks, value] of info) {
+			makeLabel(teks, "teks", af);
+			makeLabel(":", "teks", af);
+			makeLabel(value, "teks", af);
 		}
 	}
 
@@ -2630,14 +2626,12 @@ class Pajak {
 		}
 		this.bawah.appendChild(tabel);
 	}
-
+	
 	async setup() {
 		this.pajak = await getData("pajak");
 		this.riwayatPajak = await getData("riwayat_pajak");
-		const wadah = document.getElementById("tgh");
-		wadah.innerHTML = "";
-		this.wadah = makeParent("container");
-		wadah.appendChild(this.wadah);
+		this.wadah = document.getElementById("tgh");
+		this.wadah.innerHTML = "";
 		this.hitung();
 		this.prepareFrames();
 		this.showRiwayat();
@@ -5717,7 +5711,7 @@ class OpsiTransaksi {
 	async ringkasanTransaksi(periode) {
 		resetJudul("Ringkasan transaksi");
 		this.prt.innerHTML = "";
-		const parent = makeParent("frame");
+		const parent = makeParent("prt");
 		this.prt.appendChild(parent);
 
 		const dataHasil = await getDt(`get_data_sold_out_today/${periode}`);
@@ -6398,7 +6392,7 @@ class Riwayat {
 		this.atas.style.display = "grid";
 		this.atas.style.gridTemplateColumns = "repeat(3,1fr)";
 		
-		this.bwh = makeParent("frame");
+		this.bwh = makeParent("frame-khusus-produk");
 		for (const item of [this.atas, this.bwh]) {
 			this.tengah.appendChild(item)
 		}
@@ -6554,7 +6548,7 @@ class Lainnya {
 	async backup() {
 		this.tengah.innerHTML = "";
 		const f = pembuatField(this.tengah, "Daftar file");
-		const frame = makeParent("frame");
+		const frame = makeParent("prt");
 		f.appendChild(frame);
 		const files = await getDt("multi_endp/file");
 		const fls = JSON.parse(files.data);
@@ -6615,7 +6609,7 @@ class Lainnya {
 		
 		const db = pembuatField(this.tengah, "Database");
 		const frame1 = makeParent("container-horizontal", db);
-		const frame2 = makeParent("frame", db);
+		const frame2 = makeParent("prt", db);
 		const dataTabel = await getDt("tabel_tabel");
 		dataTabel.forEach((item, i) => {
 			const btn = makeButton("invisible-btn", `${i+1}. ${capitalize(item.replaceAll("_", " "))}`, null, null, frame2);

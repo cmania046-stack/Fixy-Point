@@ -1,47 +1,91 @@
+/* ==========================================================================
+   DAFTAR ISI
+   1.  Font & Variabel (design tokens)
+   2.  Reset & Elemen Dasar
+   3.  Form (input, select, textarea)
+   4.  Utilitas
+   5.  Layout Utama (utama, kanan, kiri, atas, bawah, tengah)
+   6.  Wadah (container, field, profil)
+   7.  Daftar Item (editor, frame, prt)  -> flex column, grid di @media
+   8.  Komponen (input, ikon, gambar, tombol, teks, badge, tabel)
+   9.  Overlay (modal, loading, scanner, popup, menu)
+   10. Struk
+   11. Animasi
+   12. Responsif (@media)
+       12.1 Phone    (max 600px)
+       12.2 Tablet   (min 720px)
+       12.3 Desktop  (min 900px)
+       12.4 Lebar    (min 1200px)
+       12.5 Dark mode
+       12.6 Reduced motion
+       12.7 Print
+   ========================================================================== */
+
+
+/* ==========================================================================
+   1. FONT & VARIABEL
+   ========================================================================== */
 @import url('https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600;700;800&family=Figtree:wght@400;500;600;700&display=swap');
 
 :root {
---tab-btn: #A2C4D9;
---kiri-bg: #142B42;
---primary: #1E3C5A;
---primary-hover: #142B42;
---primary-soft: #DCE8EF;
---accent: #F2A900;
---accent-hover: #D99700;
---accent-ink: #2B1D00;
---rail: #0E2233;
---success: #1E5F7F;
---success-soft: #DDEBF2;
---danger: #B83A34;
---danger-soft: #FADFDD;
---danger-hover: #962B26;
---warning: #9A5B00;
---warning-soft: #FBEBCB;
---bg: #EDF2F4;
---surface: #FFFFFF;
---surface-alt: #F2F6F8;
---header-bg: #FFFFFF;
---footer-bg: #FFFFFF;
---text: #0F1E2A;
---white-text: #FFFFFF;
---text-on-primary: #FFFFFF;
---text-muted: #5A6F70;
---border: #D0DEE0;
---border-strong: #AFC4C7;
---ring: rgba(30, 60, 90, .24);
---overlay: rgba(162, 196, 217, 0.3);
---overlay-soft: rgba(255, 255, 255, .5);
---radius-sm: 8px;
---radius: 8px;
---radius-lg: 10px;
---shadow-sm: 0 1px 2px rgba(14, 34, 51, .08);
---shadow: 0 14px 36px rgba(14, 34, 51, .2);
---atas-h: 56px;
---font: 'Figtree', system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
---font-display: 'Bricolage Grotesque', 'Figtree', system-ui, sans-serif;
---font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, "Courier New", monospace;
+	/* Warna utama */
+	--primary: #1E3C5A;
+	--primary-hover: #142B42;
+	--primary-soft: #DCE8EF;
+	--accent: #F2A900;
+	--accent-hover: #D99700;
+	--accent-ink: #2B1D00;
+
+	/* Warna status */
+	--success: #1E5F7F;
+	--success-soft: #DDEBF2;
+	--danger: #B83A34;
+	--danger-soft: #FADFDD;
+	--danger-hover: #962B26;
+	--warning: #9A5B00;
+	--warning-soft: #FBEBCB;
+
+	/* Permukaan */
+	--bg: #EDF2F4;
+	--surface: #FFFFFF;
+	--surface-alt: #F2F6F8;
+	--header-bg: #FFFFFF;
+	--footer-bg: #FFFFFF;
+	--kiri-bg: #142B42;
+	--rail: #0E2233;
+	--tab-btn: #A2C4D9;
+
+	/* Teks */
+	--text: #0F1E2A;
+	--text-muted: #5A6F70;
+	--text-on-primary: #FFFFFF;
+	--white-text: #FFFFFF;
+
+	/* Garis & efek */
+	--border: #D0DEE0;
+	--border-strong: #AFC4C7;
+	--ring: rgba(30, 60, 90, .24);
+	--overlay: rgba(162, 196, 217, .3);
+	--overlay-soft: rgba(255, 255, 255, .5);
+	--shadow-sm: 0 1px 2px rgba(14, 34, 51, .08);
+	--shadow: 0 14px 36px rgba(14, 34, 51, .2);
+
+	/* Bentuk & ukuran */
+	--radius-sm: 8px;
+	--radius: 8px;
+	--radius-lg: 10px;
+	--atas-h: 56px;
+
+	/* Font */
+	--font: 'Figtree', system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+	--font-display: 'Bricolage Grotesque', 'Figtree', system-ui, sans-serif;
+	--font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, "Courier New", monospace;
 }
 
+
+/* ==========================================================================
+   2. RESET & ELEMEN DASAR
+   ========================================================================== */
 * {
 	margin: 0;
 	padding: 0;
@@ -74,7 +118,10 @@ img {
 	max-width: 100%;
 }
 
-button, input, select, textarea {
+button,
+input,
+select,
+textarea {
 	font-family: inherit;
 	font-size: 1rem;
 	color: inherit;
@@ -87,12 +134,19 @@ button {
 	-webkit-tap-highlight-color: transparent;
 }
 
-button:focus-visible, .tt:focus-visible {
+button:focus-visible,
+.tt:focus-visible {
 	outline: 2px solid var(--primary);
 	outline-offset: 2px;
 }
 
-input, select, textarea {
+
+/* ==========================================================================
+   3. FORM
+   ========================================================================== */
+input,
+select,
+textarea {
 	max-width: 100%;
 	min-height: 46px;
 	padding: 10px 12px;
@@ -108,17 +162,22 @@ textarea {
 	line-height: 1.45;
 }
 
-input:hover, select:hover, textarea:hover {
+input:hover,
+select:hover,
+textarea:hover {
 	border-color: var(--border-strong);
 }
 
-input:focus, select:focus, textarea:focus {
+input:focus,
+select:focus,
+textarea:focus {
 	outline: none;
 	border-color: var(--primary);
 	box-shadow: 0 0 0 3px var(--ring);
 }
 
-input[type="checkbox"], input[type="radio"] {
+input[type="checkbox"],
+input[type="radio"] {
 	min-height: 0;
 	padding: 0;
 	accent-color: var(--primary);
@@ -143,15 +202,26 @@ input[type="file"]::file-selector-button {
 	cursor: pointer;
 }
 
-input::placeholder, textarea::placeholder {
+input::placeholder,
+textarea::placeholder {
 	color: var(--text-muted);
 	opacity: .8;
 }
 
+
+/* ==========================================================================
+   4. UTILITAS
+   ========================================================================== */
 .hidden {
 	display: none !important;
 }
 
+
+/* ==========================================================================
+   5. LAYOUT UTAMA
+   ========================================================================== */
+
+/* --- Kerangka halaman --- */
 #utama {
 	display: flex;
 	flex: 1;
@@ -165,6 +235,20 @@ input::placeholder, textarea::placeholder {
 	min-width: 0;
 }
 
+.tengah {
+	position: relative;
+	display: flex;
+	flex-direction: column;
+	flex: 1;
+	gap: 16px;
+	width: 100%;
+	min-width: 0;
+	max-width: 1440px;
+	margin: 0 auto;
+	padding: clamp(10px, 2.5vw, 28px);
+}
+
+/* --- Sidebar kiri --- */
 #kiri {
 	position: fixed;
 	top: 0;
@@ -172,6 +256,7 @@ input::placeholder, textarea::placeholder {
 	z-index: 350;
 	display: flex;
 	flex-direction: column;
+	flex-shrink: 0;
 	gap: 4px;
 	width: min(200px, 86vw);
 	height: 100vh;
@@ -182,7 +267,6 @@ input::placeholder, textarea::placeholder {
 	box-shadow: var(--shadow);
 	overflow-y: auto;
 	overscroll-behavior: contain;
-	flex-shrink: 0;
 	animation: slideLeft .25s ease both;
 }
 
@@ -245,6 +329,7 @@ input::placeholder, textarea::placeholder {
 	color: #FFFFFF;
 }
 
+/* --- Sub menu sidebar --- */
 .sub {
 	display: flex;
 	flex-direction: column;
@@ -265,12 +350,11 @@ input::placeholder, textarea::placeholder {
 	margin: 0;
 	padding: 9px 10px;
 	background: transparent;
-	border-radius: var(--radius-sm);
+	color: var(--border);
 	font-size: .9rem;
 	font-weight: 400;
 	text-align: left;
-	color: var(--border);
-	background: transparent;
+	border-radius: var(--radius-sm);
 }
 
 .sub button:hover {
@@ -283,17 +367,18 @@ input::placeholder, textarea::placeholder {
 	color: var(--text);
 }
 
+/* --- Bar atas --- */
 .atas {
 	position: sticky;
 	top: 0;
 	z-index: 50;
 	display: flex;
+	flex-wrap: wrap;
 	align-items: center;
 	gap: 8px;
 	min-height: var(--atas-h);
 	padding: 6px 12px;
 	background: var(--kiri-bg);
-	flex-wrap: wrap;
 	border-bottom: 1px solid var(--border);
 }
 
@@ -378,6 +463,7 @@ input::placeholder, textarea::placeholder {
 	border-color: transparent;
 }
 
+/* --- Bar tengah (filter / pencarian) --- */
 .atas-tengah {
 	z-index: 40;
 	display: flex;
@@ -403,12 +489,14 @@ input::placeholder, textarea::placeholder {
 	min-width: min(100%, 260px);
 }
 
+/* --- Bar bawah --- */
 .bawah {
 	position: sticky;
 	bottom: 0;
 	z-index: 50;
 	display: flex;
 	align-items: center;
+	justify-content: flex-start;
 	gap: 6px;
 	width: 100%;
 	padding: 8px 10px calc(8px + env(safe-area-inset-bottom));
@@ -422,14 +510,6 @@ input::placeholder, textarea::placeholder {
 	display: none;
 }
 
-.bawah > :first-child {
-	margin-left: auto;
-}
-
-.bawah > :last-child {
-	margin-right: auto;
-}
-
 .bawah button {
 	flex-shrink: 0;
 	min-height: 44px;
@@ -438,8 +518,8 @@ input::placeholder, textarea::placeholder {
 	color: var(--text);
 	font-size: .88rem;
 	font-weight: 600;
-	border-radius: 12px;
 	white-space: nowrap;
+	border-radius: 12px;
 	transition: background .15s ease, color .15s ease;
 }
 
@@ -453,19 +533,10 @@ input::placeholder, textarea::placeholder {
 	color: var(--text-on-primary);
 }
 
-.tengah {
-	position: relative;
-	display: flex;
-	flex-direction: column;
-	flex: 1;
-	gap: 16px;
-	width: 100%;
-	min-width: 0;
-	max-width: 1440px;
-	margin: 0 auto;
-	padding: clamp(10px, 2.5vw, 28px);
-}
 
+/* ==========================================================================
+   6. WADAH
+   ========================================================================== */
 .big-container {
 	display: flex;
 	flex-wrap: wrap;
@@ -541,11 +612,7 @@ input::placeholder, textarea::placeholder {
 	border: 1px solid var(--border);
 	border-radius: var(--radius);
 	overflow-x: auto;
-	animation: showUp 0.3s ease forwards;
-}
-
-.field > *, .container > * {
-	min-width: 0;
+	animation: showUp .3s ease forwards;
 }
 
 .container-horizontal {
@@ -560,7 +627,12 @@ input::placeholder, textarea::placeholder {
 	border: 1px solid var(--border);
 	border-radius: var(--radius);
 	overflow-x: auto;
-	animation: showUp 0.3s ease forwards;
+	animation: showUp .3s ease forwards;
+}
+
+.field > *,
+.container > * {
+	min-width: 0;
 }
 
 .container-horizontal > * {
@@ -581,22 +653,33 @@ input::placeholder, textarea::placeholder {
 	margin: 0;
 }
 
-.editor {
-	display: grid;
-	grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr));
-	gap: 14px;
-}
-
 .value-frame {
 	min-width: 0;
 	gap: 8px;
 	border-radius: var(--radius);
 }
 
-.frame {
-	display: grid;
-	grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr));
+
+/* ==========================================================================
+   7. DAFTAR ITEM
+   Dasarnya flex column (1 kolom, cocok untuk HP).
+   Grid multi-kolom diatur di bagian @media (12.2 - 12.4).
+   ========================================================================== */
+.editor,
+.frame,
+.frame-khusus-produk,
+.prt {
+	display: flex;
+	flex-direction: column;
 	gap: 12px;
+	min-width: 0;
+}
+
+.editor {
+	gap: 14px;
+}
+
+.frame {
 	width: 100%;
 	padding: 10px;
 	background: var(--surface);
@@ -604,12 +687,7 @@ input::placeholder, textarea::placeholder {
 }
 
 .frame-khusus-produk {
-	display: grid;
-	grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr));
-	align-content: start;
-	gap: 12px;
 	flex: 3 1 420px;
-	min-width: 0;
 	width: 100%;
 	padding: 10px;
 	background: var(--surface);
@@ -617,13 +695,16 @@ input::placeholder, textarea::placeholder {
 }
 
 .prt {
-	display: grid;
-	grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-	gap: 12px;
 	padding: 12px;
 	border-radius: var(--radius);
 }
 
+
+/* ==========================================================================
+   8. KOMPONEN
+   ========================================================================== */
+
+/* --- Input dengan ikon --- */
 .inp {
 	position: relative;
 	display: flex;
@@ -653,6 +734,41 @@ input::placeholder, textarea::placeholder {
 	box-shadow: none;
 }
 
+.entry,
+.combo {
+	display: block;
+	margin: 0;
+	font-size: 1rem;
+}
+
+.combo {
+	padding-right: 38px;
+	appearance: none;
+	-webkit-appearance: none;
+	background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%237A8E93' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'><path d='M6 9l6 6 6-6'/></svg>");
+	background-repeat: no-repeat;
+	background-position: right 12px center;
+	cursor: pointer;
+}
+
+.invisible-input {
+	width: 100%;
+	min-height: 40px;
+	padding: 8px;
+	background: transparent;
+	color: var(--text);
+	font-size: 1rem;
+	font-weight: 500;
+	border: none;
+	border-radius: 8px;
+}
+
+.invisible-input:focus {
+	background: var(--surface-alt);
+	box-shadow: none;
+}
+
+/* --- Ikon & gambar --- */
 .icon {
 	width: 25px;
 	height: 25px;
@@ -686,6 +802,26 @@ input::placeholder, textarea::placeholder {
 	border-radius: var(--radius-sm);
 }
 
+.profil-gambar {
+	position: relative;
+	display: flex;
+	justify-content: center;
+	align-self: center;
+	width: 100%;
+	margin-bottom: 4px;
+}
+
+.gambar-profil {
+	width: clamp(96px, 50%, 180px);
+	aspect-ratio: 1;
+	margin: 8px;
+	object-fit: cover;
+	background: var(--surface-alt);
+	border: 4px solid var(--accent);
+	border-radius: 50%;
+}
+
+/* --- Tombol --- */
 .btn {
 	position: relative;
 	display: flex;
@@ -822,45 +958,7 @@ input::placeholder, textarea::placeholder {
 	background: var(--border);
 }
 
-.invisible-input {
-	width: 100%;
-	min-height: 40px;
-	padding: 8px;
-	background: transparent;
-	color: var(--text);
-	font-size: 1rem;
-	font-weight: 500;
-	border: none;
-	border-radius: 8px;
-}
-
-.invisible-input:focus {
-	background: var(--surface-alt);
-	box-shadow: none;
-}
-
-.entry {
-	display: block;
-	margin: 0;
-	font-size: 1rem;
-}
-
-.combo {
-	display: block;
-	margin: 0;
-	font-size: 1rem;
-}
-
-.combo {
-	padding-right: 38px;
-	appearance: none;
-	-webkit-appearance: none;
-	background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%237A8E93' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'><path d='M6 9l6 6 6-6'/></svg>");
-	background-repeat: no-repeat;
-	background-position: right 12px center;
-	cursor: pointer;
-}
-
+/* --- Teks & label --- */
 .input-title {
 	margin: 4px 0 -4px;
 	font-size: .85rem;
@@ -871,74 +969,6 @@ input::placeholder, textarea::placeholder {
 
 .input-title::first-letter {
 	text-transform: uppercase;
-}
-
-.total {
-	width: 100%;
-	margin: 0;
-	padding: 12px 20px;
-	background: transparent;
-	color: var(--primary);
-	font-family: var(--font-display);
-	font-size: clamp(1.9rem, 6.5vw, 3rem);
-	font-weight: 800;
-	line-height: 1.15;
-	text-align: center;
-	letter-spacing: .01em;
-	font-variant-numeric: tabular-nums;
-	border-radius: var(--radius);
-	box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .08);
-	cursor: default;
-	overflow-wrap: anywhere;
-}
-
-.tot, .change {
-	padding: 12px 16px;
-	background: var(--surface-alt);
-	color: var(--text);
-	font-family: var(--font-display);
-	font-size: 1.6rem;
-	font-weight: 700;
-	text-align: right;
-	font-variant-numeric: tabular-nums;
-	border: 1px solid var(--border);
-	border-radius: var(--radius-sm);
-}
-
-.badge {
-	position: absolute;
-	z-index: 200;
-	top: -6px;
-	right: -6px;
-	min-width: 20px;
-	padding: 4px 6px;
-	background: var(--danger);
-	color: #FFFFFF;
-	font-size: .75rem;
-	font-weight: 700;
-	line-height: 1;
-	text-align: center;
-	border: 2px solid var(--surface);
-	border-radius: 20px;
-}
-
-.profil-gambar {
-	position: relative;
-	display: flex;
-	justify-content: center;
-	align-self: center;
-	width: 100%;
-	margin-bottom: 4px;
-}
-
-.gambar-profil {
-	width: clamp(96px, 50%, 180px);
-	aspect-ratio: 1;
-	margin: 8px;
-	object-fit: cover;
-	background: var(--surface-alt);
-	border: 4px solid var(--accent);
-	border-radius: 50%;
 }
 
 .nama {
@@ -967,13 +997,13 @@ input::placeholder, textarea::placeholder {
 
 .label-data {
 	position: relative;
+	flex-shrink: 0;
 	padding: 11px 46px 11px 14px;
 	background: var(--surface-alt);
 	font-size: .95rem;
 	white-space: pre-line;
 	border-left: 4px solid var(--primary);
 	border-radius: var(--radius-sm);
-	flex-shrink: 0;
 }
 
 .cek {
@@ -1028,6 +1058,64 @@ input::placeholder, textarea::placeholder {
 	white-space: pre-line;
 }
 
+.slide {
+	font-size: 1rem;
+	font-weight: 400;
+}
+
+/* --- Angka total --- */
+.total {
+	width: 100%;
+	margin: 0;
+	padding: 12px 20px;
+	background: transparent;
+	color: var(--primary);
+	font-family: var(--font-display);
+	font-size: clamp(1.9rem, 6.5vw, 3rem);
+	font-weight: 800;
+	line-height: 1.15;
+	text-align: center;
+	letter-spacing: .01em;
+	font-variant-numeric: tabular-nums;
+	border-radius: var(--radius);
+	box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .08);
+	cursor: default;
+	overflow-wrap: anywhere;
+}
+
+.tot,
+.change {
+	padding: 12px 16px;
+	background: var(--surface-alt);
+	color: var(--text);
+	font-family: var(--font-display);
+	font-size: 1.6rem;
+	font-weight: 700;
+	text-align: right;
+	font-variant-numeric: tabular-nums;
+	border: 1px solid var(--border);
+	border-radius: var(--radius-sm);
+}
+
+/* --- Badge --- */
+.badge {
+	position: absolute;
+	z-index: 200;
+	top: -6px;
+	right: -6px;
+	min-width: 20px;
+	padding: 4px 6px;
+	background: var(--danger);
+	color: #FFFFFF;
+	font-size: .75rem;
+	font-weight: 700;
+	line-height: 1;
+	text-align: center;
+	border: 2px solid var(--surface);
+	border-radius: 20px;
+}
+
+/* --- Tabel produk --- */
 .table-produk {
 	width: 100%;
 	min-width: 520px;
@@ -1091,12 +1179,26 @@ input::placeholder, textarea::placeholder {
 	text-align: center;
 }
 
-.table-produk .btn, .table-produk .btn-cancel {
+.table-produk .btn,
+.table-produk .btn-cancel {
 	min-height: unset;
 	margin: 2px;
 	padding: 8px 12px;
 }
 
+/* --- Grafik --- */
+.chart-wrap {
+	position: relative;
+	width: 100%;
+	height: 260px;
+}
+
+
+/* ==========================================================================
+   9. OVERLAY
+   ========================================================================== */
+
+/* --- Popup layar penuh (lc) --- */
 .lc {
 	position: fixed;
 	z-index: 301;
@@ -1114,9 +1216,9 @@ input::placeholder, textarea::placeholder {
 	flex-direction: column;
 	gap: 8px;
 	min-width: 300px;
+	max-width: 90%;
 	max-height: 90vh;
 	max-height: 90dvh;
-	max-width: 90%;
 	padding: 24px;
 	background: var(--surface);
 	border: 2px solid var(--border);
@@ -1138,6 +1240,7 @@ input::placeholder, textarea::placeholder {
 	color: var(--text);
 }
 
+/* --- Modal konfirmasi --- */
 .custom-modal {
 	position: fixed;
 	inset: 0;
@@ -1188,6 +1291,7 @@ input::placeholder, textarea::placeholder {
 	margin: 0;
 }
 
+/* --- Loading --- */
 .load-container {
 	position: fixed;
 	inset: 0;
@@ -1204,12 +1308,12 @@ input::placeholder, textarea::placeholder {
 .laptop {
 	width: 70px;
 	height: 70px;
-	border: 10px solid var(--primary-soft);
-	border-top: 10px solid var(--primary);
-	border-bottom: 10px solid var(--primary);
-	border-radius: 50%;
 	margin-bottom: 20px;
 	background: transparent;
+	border: 10px solid var(--primary-soft);
+	border-top-color: var(--primary);
+	border-bottom-color: var(--primary);
+	border-radius: 50%;
 	animation: roll .8s ease-in-out infinite;
 }
 
@@ -1221,6 +1325,7 @@ input::placeholder, textarea::placeholder {
 	color: var(--text);
 }
 
+/* --- Scanner --- */
 .scanner {
 	position: fixed;
 	bottom: 12px;
@@ -1238,6 +1343,7 @@ input::placeholder, textarea::placeholder {
 	transform: translateX(-50%);
 }
 
+/* --- Popup, dropdown, menu --- */
 .produk-pop {
 	position: fixed;
 	z-index: 200;
@@ -1254,9 +1360,9 @@ input::placeholder, textarea::placeholder {
 	overflow: auto;
 }
 
-.mdl {
+.mdl,
+.dropdown-overlay {
 	display: none;
-	position: fixed;
 	z-index: 300;
 	gap: 2px;
 	min-width: 180px;
@@ -1269,19 +1375,12 @@ input::placeholder, textarea::placeholder {
 	animation: showUp .15s ease both;
 }
 
+.mdl {
+	position: fixed;
+}
+
 .dropdown-overlay {
-	display: none;
 	position: absolute;
-	z-index: 300;
-	gap: 2px;
-	min-width: 180px;
-	max-width: calc(100vw - 16px);
-	padding: 6px;
-	background: var(--surface);
-	border: 1px solid var(--border);
-	border-radius: var(--radius);
-	box-shadow: var(--shadow);
-	animation: showUp .15s ease both;
 }
 
 .menu-titik-tiga {
@@ -1325,17 +1424,10 @@ input::placeholder, textarea::placeholder {
 	cursor: grab;
 }
 
-.slide {
-	font-size: 1rem;
-	font-weight: 400;
-}
 
-.chart-wrap {
-	position: relative;
-	width: 100%;
-	height: 260px;
-}
-
+/* ==========================================================================
+   10. STRUK
+   ========================================================================== */
 #struk {
 	display: flex;
 	flex-direction: column;
@@ -1351,86 +1443,51 @@ input::placeholder, textarea::placeholder {
 	color: #000000;
 }
 
+
+/* ==========================================================================
+   11. ANIMASI
+   ========================================================================== */
 @keyframes roll {
 	from { transform: rotate(0); }
-	to { transform: rotate(180deg); }
+	to   { transform: rotate(180deg); }
 }
 
 @keyframes showUp {
 	from { opacity: 0; transform: scale(.96); }
-	to { opacity: 1; transform: scale(1); }
+	to   { opacity: 1; transform: scale(1); }
 }
 
 @keyframes sheetUp {
 	from { opacity: 0; transform: translateY(28px); }
-	to { opacity: 1; transform: translateY(0); }
+	to   { opacity: 1; transform: translateY(0); }
 }
 
 @keyframes slideLeft {
 	from { opacity: 0; transform: translateX(-24px); }
-	to { opacity: 1; transform: translateX(0); }
+	to   { opacity: 1; transform: translateX(0); }
 }
 
 @keyframes happy {
 	0%, 100% { transform: translateY(0); }
-	50% { transform: translateY(-10px); }
+	50%      { transform: translateY(-10px); }
 }
 
-@media (min-width: 720px) {
-	.laptop {
-		width: 100px;
-		height: 100px;
-	}
-	
-	.atas {
-		padding: 6px 20px;
-	}
 
-	.atas-tengah {
-		position: sticky;
-		top: var(--atas-h);
-		padding: 10px 20px;
-	}
+/* ==========================================================================
+   12. RESPONSIF (@media)
+   Urutan: phone -> tablet -> desktop -> lebar -> preferensi pengguna -> print
+   Daftar item (.editor, .frame, .frame-khusus-produk, .prt) berubah dari
+   flex column (phone) menjadi grid multi-kolom di breakpoint yang lebih besar.
+   ========================================================================== */
 
-	.bawah {
-		padding-left: 20px;
-		padding-right: 20px;
-	}
-
-	.chart-wrap {
-		height: 300px;
-	}
-}
-
-@media (min-width: 900px) {
-	.laptop {
-		width: 150px;
-		height: 150px;
-	}
-	
-	.profil-container {
-		flex: 0 0 340px;
-		position: sticky;
-		top: calc(var(--atas-h) + 16px);
-		max-height: calc(100vh - var(--atas-h) - 32px);
-		max-height: calc(100dvh - var(--atas-h) - 32px);
-		overflow-y: auto;
-	}
-
-	.big-container > .field {
-		flex-basis: 100%;
-	}
-
-	.lc-content {
-		padding: 28px;
-	}
-}
-
+/* --------------------------------------------------------------------------
+   12.1 PHONE (maks 600px)
+   -------------------------------------------------------------------------- */
 @media (max-width: 600px) {
 	.lc {
 		padding: 0;
 	}
-	
+
 	.produk-pop {
 		right: 8px;
 		left: 8px !important;
@@ -1446,14 +1503,103 @@ input::placeholder, textarea::placeholder {
 	}
 }
 
+/* --------------------------------------------------------------------------
+   12.2 TABLET (min 720px) : grid 2 kolom
+   -------------------------------------------------------------------------- */
+@media (min-width: 720px) {
+	/* Layout */
+	.atas {
+		padding: 6px 20px;
+	}
+
+	.atas-tengah {
+		position: sticky;
+		top: var(--atas-h);
+		padding: 10px 20px;
+	}
+
+	.bawah {
+		padding-left: 20px;
+		padding-right: 20px;
+	}
+
+	/* Daftar item -> grid 2 kolom */
+	.editor,
+	.frame,
+	.frame-khusus-produk,
+	.prt {
+		display: grid;
+		grid-template-columns: repeat(2, 1fr);
+	}
+
+	.frame-khusus-produk {
+		align-content: start;
+	}
+
+	/* Komponen */
+	.laptop {
+		width: 100px;
+		height: 100px;
+	}
+
+	.chart-wrap {
+		height: 300px;
+	}
+}
+
+/* --------------------------------------------------------------------------
+   12.3 DESKTOP (min 900px) : sidebar profil + .prt 3 kolom
+   -------------------------------------------------------------------------- */
+@media (min-width: 900px) {
+	.profil-container {
+		position: sticky;
+		top: calc(var(--atas-h) + 16px);
+		flex: 0 0 340px;
+		max-height: calc(100vh - var(--atas-h) - 32px);
+		max-height: calc(100dvh - var(--atas-h) - 32px);
+		overflow-y: auto;
+	}
+
+	.prt {
+		grid-template-columns: repeat(3, 1fr);
+	}
+
+	.lc-content {
+		padding: 28px;
+	}
+
+	.laptop {
+		width: 150px;
+		height: 150px;
+	}
+}
+
+/* --------------------------------------------------------------------------
+   12.4 LEBAR (min 1200px) : grid 3-4 kolom
+   -------------------------------------------------------------------------- */
+@media (min-width: 1200px) {
+	.editor,
+	.frame-khusus-produk {
+		grid-template-columns: repeat(3, 1fr);
+	}
+	.frame {
+		grid-template-columns: repeat(2,1fr);
+	}
+
+	.prt {
+		grid-template-columns: repeat(4, 1fr);
+	}
+}
+
+/* --------------------------------------------------------------------------
+   12.5 DARK MODE
+   -------------------------------------------------------------------------- */
 @media (prefers-color-scheme: dark) {
 	:root {
-		--kiri-bg: #101E33;
 		--primary: #5AA3E8;
 		--primary-hover: #82BBF0;
 		--primary-soft: #17304F;
 		--accent: #F2B21F;
-		--rail: #08121F;
 		--success: #4CC38A;
 		--success-soft: #14352A;
 		--danger: #EE7B73;
@@ -1466,6 +1612,8 @@ input::placeholder, textarea::placeholder {
 		--surface-alt: #16273F;
 		--header-bg: #101E33;
 		--footer-bg: #101E33;
+		--kiri-bg: #101E33;
+		--rail: #08121F;
 		--text: #E2EAF4;
 		--text-on-primary: #04182E;
 		--text-muted: #94A8C0;
@@ -1477,41 +1625,60 @@ input::placeholder, textarea::placeholder {
 		--shadow: 0 14px 36px rgba(0, 0, 0, .55);
 	}
 
-	.icon, button img {
+	.icon,
+	button img {
 		padding: 2px;
 		background: rgba(255, 255, 255, .9);
 		border-radius: 6px;
 	}
 
-	.icon-halo, #app img {
+	.icon-halo,
+	#app img {
 		padding: 0;
 		background: transparent;
 		border-radius: 50%;
 	}
 
-	#kiri #keluar:hover, .badge {
+	#kiri #keluar:hover,
+	.badge {
 		color: #1A0807;
 	}
 }
 
+/* --------------------------------------------------------------------------
+   12.6 REDUCED MOTION
+   -------------------------------------------------------------------------- */
 @media (prefers-reduced-motion: reduce) {
-	*, *::before, *::after {
+	*,
+	*::before,
+	*::after {
 		animation-duration: .01ms !important;
 		animation-iteration-count: 1 !important;
 		transition-duration: .01ms !important;
 	}
 }
 
+/* --------------------------------------------------------------------------
+   12.7 PRINT
+   -------------------------------------------------------------------------- */
 @media print {
-	body * { visibility: hidden; }
-	.cetak, .cetak * { visibility: visible; }
+	body * {
+		visibility: hidden;
+	}
+
+	.cetak,
+	.cetak * {
+		visibility: visible;
+	}
+
 	.cetak {
-		display: block !important;
 		position: absolute;
 		top: 0;
 		left: 0;
+		display: block !important;
 		margin: 20px 0 0 20px;
 	}
+
 	.cetak #voucher-div {
 		display: block !important;
 	}
