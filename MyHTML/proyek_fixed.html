@@ -3385,7 +3385,6 @@ class Produk {
 
 	setKiri() {
 		const div = pembuatField(this.kiri, "STATISTIK PRODUK");
-		div.style.background = "white";
 		const jual = this.produk.reduce((sum, b) => sum + b.harga_jual * b.jumlah, 0);
 		const modal = this.produk.reduce((sum, b) => sum + b.harga_modal * b.jumlah, 0);
 		const untung = jual - modal;
@@ -3413,7 +3412,6 @@ class Produk {
 		}
 
 		const divMenu = pembuatField(this.kiri, "Menu utama produk");
-		divMenu.style.background = "white";
 		pembuatButtonGambar(divMenu, [
 				["invisible-btn", "Tambah produk baru", () => this.tambahProdukBaru(), "Pictures/produk_baru.png"],
 				["invisible-btn", "Daftar produk", () => this.daftarProduk(), "Pictures/daftar_produk.png"],
