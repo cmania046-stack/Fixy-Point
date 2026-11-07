@@ -655,11 +655,8 @@ textarea::placeholder {
 	animation: showUp .3s ease forwards;
 }
 
-.field .container,
-.field .container-horizontal {
+.field > * {
 	box-shadow: none;
-	border: none;
-	background: transparent;
 }
 
 .field > *,

@@ -934,9 +934,9 @@ class Pengguna {
 			
 			const frameBtn = makeParent("container-horizontal",frame);
 			pembuatButtonGambar(frameBtn, [
-				["btn btn-cancel", "Edit", () => this.editUser(p.inisial_code), "Pictures/edit.png"],
-				["btn btn-cancel", "Perbarui QR", () => this.perbaruiQr(p.inisial_code), "Pictures/qr-code.png"],
-				["btn btn-cancel", "Hapus", () => this.hapusUser(p.inisial_code), "Pictures/hapus.png"]
+				["btns", "Edit", () => this.editUser(p.inisial_code), "Pictures/edit.png"],
+				["btns", "Perbarui QR", () => this.perbaruiQr(p.inisial_code), "Pictures/qr-code.png"],
+				["btns", "Hapus", () => this.hapusUser(p.inisial_code), "Pictures/hapus.png"]
 			]);
 		}
 		this.bawah.appendChild(mainContainer);
@@ -2257,7 +2257,7 @@ class Pengeluaran {
 		
 		const infoButton = [
 			["invisible-btn", "Edit pengeluaran", () => this.editPengeluaran(item), "Pictures/edit.png"],
-			["invisible-btn", "Hapus pengeluaran", () => this.hapusPengeluaran(item), "Pictures/hehehe.png"]
+			["invisible-btn", "Hapus pengeluaran", () => this.hapusPengeluaran(item), "Pictures/hapus.png"]
 		]
 		pembuatButtonGambar(parent, infoButton);
 		document.body.appendChild(parent);
@@ -8452,7 +8452,7 @@ class ProdukDigital {
 		this.content.style.gap = "20px";
 		
 		const saldo = makeButton("invisible-btn",
-			formatMataUang(this.dataProfil.balance),
+			formatMataUang(this.dataProfil.balance ?? 0),
 			null,
 			"Pictures/banknotes.png"
 		);

@@ -509,3 +509,13 @@
 					keranjang = excluded.keranjang
 2026-11-07 22:56:03.773 WIT [13328] LOG:  checkpoint starting: time
 2026-11-07 22:56:04.366 WIT [13328] LOG:  checkpoint complete: wrote 5 buffers (0.0%), wrote 1 SLRU buffers; 0 WAL file(s) added, 0 removed, 0 recycled; write=0.523 s, sync=0.009 s, total=0.593 s; sync files=6, longest=0.007 s, average=0.002 s; distance=1 kB, estimate=16 kB; lsn=0/22F3678, redo lsn=0/22F3620
+2026-11-07 23:01:03.467 WIT [13328] LOG:  checkpoint starting: time
+2026-11-07 23:01:03.646 WIT [13328] LOG:  checkpoint complete: wrote 1 buffers (0.0%), wrote 0 SLRU buffers; 0 WAL file(s) added, 0 removed, 0 recycled; write=0.110 s, sync=0.002 s, total=0.179 s; sync files=1, longest=0.002 s, average=0.002 s; distance=1 kB, estimate=14 kB; lsn=0/22F3B68, redo lsn=0/22F3B10
+2026-11-08 06:05:58.204 WIT [13328] LOG:  checkpoint starting: time
+2026-11-08 06:05:59.900 WIT [13328] LOG:  checkpoint complete: wrote 16 buffers (0.1%), wrote 1 SLRU buffers; 0 WAL file(s) added, 0 removed, 0 recycled; write=1.647 s, sync=0.008 s, total=1.703 s; sync files=17, longest=0.003 s, average=0.001 s; distance=26 kB, estimate=26 kB; lsn=0/22FA430, redo lsn=0/22FA3D8
+2026-11-08 07:31:36.570 WIT [13328] LOG:  checkpoint starting: time
+2026-11-08 07:31:37.035 WIT [13328] LOG:  checkpoint complete: wrote 4 buffers (0.0%), wrote 1 SLRU buffers; 0 WAL file(s) added, 0 removed, 0 recycled; write=0.415 s, sync=0.004 s, total=0.466 s; sync files=5, longest=0.002 s, average=0.001 s; distance=7 kB, estimate=24 kB; lsn=0/22FC1C8, redo lsn=0/22FC170
+2026-11-08 07:36:36.134 WIT [13328] LOG:  checkpoint starting: time
+2026-11-08 07:36:37.722 WIT [13328] LOG:  checkpoint complete: wrote 15 buffers (0.1%), wrote 1 SLRU buffers; 0 WAL file(s) added, 0 removed, 0 recycled; write=1.541 s, sync=0.007 s, total=1.589 s; sync files=15, longest=0.002 s, average=0.001 s; distance=12 kB, estimate=23 kB; lsn=0/22FF5A0, redo lsn=0/22FF548
+2026-11-08 07:41:36.820 WIT [13328] LOG:  checkpoint starting: time
+2026-11-08 07:41:36.982 WIT [13328] LOG:  checkpoint complete: wrote 1 buffers (0.0%), wrote 0 SLRU buffers; 0 WAL file(s) added, 0 removed, 0 recycled; write=0.112 s, sync=0.002 s, total=0.163 s; sync files=1, longest=0.002 s, average=0.002 s; distance=1 kB, estimate=21 kB; lsn=0/22FFC38, redo lsn=0/22FFBE0
