@@ -1,4 +1,11 @@
 /* ==========================================================================
+   GAYA: FLAT DESIGN
+   Prinsip: warna solid, tanpa bayangan, tanpa gradasi, tanpa blur.
+   Pemisah antar elemen memakai border tipis dan perbedaan warna.
+   Border radius maksimal 10px di semua elemen.
+   Catatan: semua properti layout/posisi sama persis dengan versi sebelumnya.
+   Backup: style-neumorphism.css, style-material.css
+
    DAFTAR ISI
    1.  Font & Variabel (design tokens)
    2.  Reset & Elemen Dasar
@@ -25,60 +32,67 @@
 /* ==========================================================================
    1. FONT & VARIABEL
    ========================================================================== */
-@import url('https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600;700;800&family=Figtree:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
 :root {
 	/* Warna utama */
-	--primary: #1E3C5A;
-	--primary-hover: #142B42;
-	--primary-soft: #DCE8EF;
-	--accent: #F2A900;
-	--accent-hover: #D99700;
+	--primary: #1D4E89;
+	--primary-hover: #163C6B;
+	--primary-soft: #E1EAF5;
+	--primary-soft-hover: #CFDDEE;
+	--accent: #D98E04;
+	--accent-hover: #B87803;
 	--accent-ink: #2B1D00;
 
 	/* Warna status */
-	--success: #1E5F7F;
-	--success-soft: #DDEBF2;
-	--danger: #B83A34;
-	--danger-soft: #FADFDD;
-	--danger-hover: #962B26;
-	--warning: #9A5B00;
-	--warning-soft: #FBEBCB;
+	--success: #1E7B4F;
+	--success-soft: #DDF1E6;
+	--danger: #B42318;
+	--danger-soft: #FBE4E1;
+	--danger-hover: #8E1B12;
+	--warning: #9A6700;
+	--warning-soft: #FBEFCF;
 
 	/* Permukaan */
-	--bg: #EDF2F4;
+	--bg: #F3F5F8;
 	--surface: #FFFFFF;
-	--surface-alt: #F2F6F8;
+	--surface-alt: #F7F8FA;
 	--header-bg: #FFFFFF;
-	--footer-bg: #FFFFFF;
-	--kiri-bg: #142B42;
-	--rail: #0E2233;
-	--tab-btn: #A2C4D9;
+	--footer-bg: #F7F8FA;
+	--kiri-bg: #FFFFFF;
+	--rail: #E4E8EE;
+	--tab-btn: #475569;
+
+	/* Bar atas */
+	--bar-bg: #1D4E89;
+	--bar-text: #FFFFFF;
+	--bar-state: rgba(255, 255, 255, .14);
 
 	/* Teks */
-	--text: #0F1E2A;
-	--text-muted: #5A6F70;
+	--text: #1F2933;
+	--text-muted: #5F6B7A;
 	--text-on-primary: #FFFFFF;
 	--white-text: #FFFFFF;
 
 	/* Garis & efek */
-	--border: #D0DEE0;
-	--border-strong: #AFC4C7;
-	--ring: rgba(30, 60, 90, .24);
-	--overlay: rgba(162, 196, 217, .3);
-	--overlay-soft: rgba(255, 255, 255, .5);
-	--shadow-sm: 0 1px 2px rgba(14, 34, 51, .08);
-	--shadow: 0 14px 36px rgba(14, 34, 51, .2);
+	--border: #D9DEE5;
+	--border-strong: #AEB7C2;
+	--overlay: rgba(15, 23, 32, .45);
+	--overlay-soft: rgba(243, 245, 248, .85);
 
-	/* Bentuk & ukuran */
-	--radius-sm: 8px;
+	/* State (hover / press) */
+	--state-hover: #EDF1F6;
+	--state-press: #E1E7EF;
+
+	/* Bentuk & ukuran (maks 10px) */
+	--radius-sm: 6px;
 	--radius: 8px;
 	--radius-lg: 10px;
 	--atas-h: 56px;
 
 	/* Font */
-	--font: 'Figtree', system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-	--font-display: 'Bricolage Grotesque', 'Figtree', system-ui, sans-serif;
+	--font: 'Inter', system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+	--font-display: 'Inter', system-ui, sans-serif;
 	--font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, "Courier New", monospace;
 }
 
@@ -154,7 +168,7 @@ textarea {
 	color: var(--text);
 	border: 1.5px solid var(--border);
 	border-radius: var(--radius-sm);
-	transition: border-color .15s ease, box-shadow .15s ease;
+	transition: border-color .15s ease, background .15s ease;
 }
 
 textarea {
@@ -173,7 +187,6 @@ select:focus,
 textarea:focus {
 	outline: none;
 	border-color: var(--primary);
-	box-shadow: 0 0 0 3px var(--ring);
 }
 
 input[type="checkbox"],
@@ -194,7 +207,7 @@ input[type="file"]::file-selector-button {
 	margin-right: 12px;
 	padding: 8px 14px;
 	border: none;
-	border-radius: 8px;
+	border-radius: var(--radius-sm);
 	background: var(--primary);
 	color: var(--text-on-primary);
 	font: inherit;
@@ -264,7 +277,7 @@ textarea::placeholder {
 	padding: 14px 12px calc(14px + env(safe-area-inset-bottom));
 	background: var(--kiri-bg);
 	border-radius: 0;
-	box-shadow: var(--shadow);
+	outline: 1px solid var(--border);
 	overflow-y: auto;
 	overscroll-behavior: contain;
 	animation: slideLeft .25s ease both;
@@ -292,11 +305,11 @@ textarea::placeholder {
 	object-fit: cover;
 	background: var(--surface);
 	border: 3px solid var(--accent);
-	border-radius: 50%;
+	border-radius: var(--radius-lg);
 }
 
 #kiri .invisible-btn {
-	color: var(--border);
+	color: var(--text);
 	font-size: .95rem;
 	font-weight: 500;
 }
@@ -308,13 +321,13 @@ textarea::placeholder {
 }
 
 #kiri .invisible-btn:hover {
-	background: var(--primary-soft);
-	color: var(--text);
+	background: var(--state-hover);
+	color: var(--primary);
 }
 
 #kiri .invisible-btn:active {
 	background: var(--primary);
-	color: var(--text);
+	color: var(--text-on-primary);
 }
 
 #kiri #keluar {
@@ -350,7 +363,7 @@ textarea::placeholder {
 	margin: 0;
 	padding: 9px 10px;
 	background: transparent;
-	color: var(--border);
+	color: var(--text-muted);
 	font-size: .9rem;
 	font-weight: 400;
 	text-align: left;
@@ -358,13 +371,13 @@ textarea::placeholder {
 }
 
 .sub button:hover {
-	background: var(--primary-soft);
-	color: var(--text);
+	background: var(--state-hover);
+	color: var(--primary);
 }
 
 .sub button:active {
 	background: var(--primary);
-	color: var(--text);
+	color: var(--text-on-primary);
 }
 
 /* --- Bar atas --- */
@@ -378,8 +391,9 @@ textarea::placeholder {
 	gap: 8px;
 	min-height: var(--atas-h);
 	padding: 6px 12px;
-	background: var(--kiri-bg);
-	border-bottom: 1px solid var(--border);
+	background: var(--bar-bg);
+	border-bottom: 1px solid var(--bar-bg);
+	border-radius: 0 0 10px 10px;
 }
 
 .tt {
@@ -391,21 +405,21 @@ textarea::placeholder {
 	height: 44px;
 	font-size: 1.3rem;
 	line-height: 1;
-	color: var(--surface);
+	color: var(--bar-text);
 	background: transparent;
-	border-radius: 12px;
+	border-radius: var(--radius-lg);
 	cursor: pointer;
 	user-select: none;
 	transition: background .15s ease;
 }
 
 .tt:hover {
-	background: var(--primary-soft);
+	background: var(--bar-state);
 }
 
 .tt:active {
-	background: var(--primary);
-	color: var(--text-on-primary);
+	background: var(--primary-hover);
+	color: var(--bar-text);
 }
 
 .greet {
@@ -419,7 +433,7 @@ textarea::placeholder {
 	font-size: .95rem;
 	font-weight: 600;
 	white-space: nowrap;
-	color: var(--surface);
+	color: var(--bar-text);
 }
 
 .greet .icon-halo {
@@ -443,7 +457,7 @@ textarea::placeholder {
 	text-align: right;
 	text-overflow: ellipsis;
 	white-space: nowrap;
-	color: var(--surface);
+	color: var(--bar-text);
 }
 
 .atas .btns {
@@ -456,10 +470,11 @@ textarea::placeholder {
 	padding: 0;
 	border-color: transparent;
 	background: transparent;
+	color: var(--bar-text);
 }
 
 .atas .btns:hover {
-	background: var(--primary-soft);
+	background: var(--bar-state);
 	border-color: transparent;
 }
 
@@ -490,20 +505,23 @@ textarea::placeholder {
 }
 
 /* --- Bar bawah --- */
+
 .bawah {
 	position: sticky;
 	bottom: 0;
 	z-index: 50;
 	display: flex;
-	align-items: center;
+	background: var(--footer-bg);
+	padding: 10px 20px;
 	justify-content: flex-start;
-	gap: 6px;
-	width: 100%;
-	padding: 8px 10px calc(8px + env(safe-area-inset-bottom));
-	background: var(--surface);
-	border-top: 1px solid var(--border);
+	gap: 10px;
 	overflow-x: auto;
-	scrollbar-width: none;
+	border-top: 1px solid var(--border);
+	border-radius: 10px 10px 0 0;
+}
+
+.bawah img:first-child {
+	margin-left: auto;
 }
 
 .bawah::-webkit-scrollbar {
@@ -514,12 +532,13 @@ textarea::placeholder {
 	flex-shrink: 0;
 	min-height: 44px;
 	padding: 10px 16px;
-	background: var(--surface-alt);
+	background: var(--surface);
 	color: var(--text);
 	font-size: .88rem;
 	font-weight: 600;
 	white-space: nowrap;
-	border-radius: 12px;
+	border: 1px solid var(--border);
+	border-radius: var(--radius);
 	transition: background .15s ease, color .15s ease;
 }
 
@@ -532,7 +551,6 @@ textarea::placeholder {
 	background: var(--primary);
 	color: var(--text-on-primary);
 }
-
 
 /* ==========================================================================
    6. WADAH
@@ -717,12 +735,15 @@ textarea::placeholder {
 	border: 1.5px solid var(--border);
 	border-radius: var(--radius-sm);
 	overflow: hidden;
-	transition: border-color .15s ease, box-shadow .15s ease;
+	transition: border-color .15s ease;
+}
+
+.inp:hover {
+	border-color: var(--border-strong);
 }
 
 .inp:focus-within {
 	border-color: var(--primary);
-	box-shadow: 0 0 0 3px var(--ring);
 }
 
 .inp input {
@@ -760,7 +781,7 @@ textarea::placeholder {
 	font-size: 1rem;
 	font-weight: 500;
 	border: none;
-	border-radius: 8px;
+	border-radius: var(--radius-sm);
 }
 
 .invisible-input:focus {
@@ -780,7 +801,7 @@ textarea::placeholder {
 .icon-halo {
 	width: 48px;
 	height: 48px;
-	border-radius: 50%;
+	border-radius: var(--radius-lg);
 }
 
 .image {
@@ -818,7 +839,7 @@ textarea::placeholder {
 	object-fit: cover;
 	background: var(--surface-alt);
 	border: 4px solid var(--accent);
-	border-radius: 50%;
+	border-radius: var(--radius-lg);
 }
 
 /* --- Tombol --- */
@@ -835,7 +856,7 @@ textarea::placeholder {
 	background: var(--primary);
 	color: var(--text-on-primary);
 	font-size: .95rem;
-	font-weight: 500;
+	font-weight: 600;
 	border-radius: var(--radius-sm);
 	transition: background .15s ease, transform .1s ease;
 }
@@ -855,18 +876,18 @@ textarea::placeholder {
 }
 
 .btn-cancel {
-	background: var(--surface-alt);
+	background: var(--surface);
 	color: var(--text);
 	border: 2px solid var(--border);
 }
 
 .btn-cancel:hover {
-	background: var(--primary-soft);
+	background: var(--state-hover);
 	color: var(--text);
 }
 
 .btn-cancel:active {
-	background: var(--border);
+	background: var(--state-press);
 	color: var(--text);
 }
 
@@ -893,7 +914,7 @@ textarea::placeholder {
 }
 
 .btns:active {
-	background: var(--border);
+	background: var(--primary-soft-hover);
 }
 
 .btns2 {
@@ -906,14 +927,14 @@ textarea::placeholder {
 	margin: 2px 4px;
 	padding: 10px;
 	background: var(--primary-soft);
-	color: var(--text);
+	color: var(--primary);
 	font-size: .9rem;
 	border-radius: var(--radius-sm);
 	transition: background .05s ease;
 }
 
 .btns2:hover {
-	background: var(--border);
+	background: var(--primary-soft-hover);
 }
 
 .btns2:active {
@@ -931,7 +952,7 @@ textarea::placeholder {
 }
 
 .btn-khusus-popup:hover {
-	background: var(--primary-soft);
+	background: var(--state-hover);
 	color: var(--text);
 }
 
@@ -951,11 +972,11 @@ textarea::placeholder {
 }
 
 .invisible-btn:hover {
-	background: var(--primary-soft);
+	background: var(--state-hover);
 }
 
 .invisible-btn:active {
-	background: var(--border);
+	background: var(--state-press);
 }
 
 /* --- Teks & label --- */
@@ -989,7 +1010,7 @@ textarea::placeholder {
 	padding: 8px;
 	font-family: var(--font-display);
 	font-size: 1.3rem;
-	font-weight: 800;
+	font-weight: 700;
 	line-height: 1.2;
 	text-align: center;
 	overflow-wrap: anywhere;
@@ -1026,7 +1047,7 @@ textarea::placeholder {
 }
 
 .daftar:hover {
-	background: var(--surface-alt);
+	background: var(--state-hover);
 }
 
 .daftar:active {
@@ -1068,17 +1089,16 @@ textarea::placeholder {
 	width: 100%;
 	margin: 0;
 	padding: 12px 20px;
-	background: transparent;
+	background: var(--primary-soft);
 	color: var(--primary);
 	font-family: var(--font-display);
 	font-size: clamp(1.9rem, 6.5vw, 3rem);
-	font-weight: 800;
+	font-weight: 700;
 	line-height: 1.15;
 	text-align: center;
 	letter-spacing: .01em;
 	font-variant-numeric: tabular-nums;
 	border-radius: var(--radius);
-	box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .08);
 	cursor: default;
 	overflow-wrap: anywhere;
 }
@@ -1090,7 +1110,7 @@ textarea::placeholder {
 	color: var(--text);
 	font-family: var(--font-display);
 	font-size: 1.6rem;
-	font-weight: 700;
+	font-weight: 600;
 	text-align: right;
 	font-variant-numeric: tabular-nums;
 	border: 1px solid var(--border);
@@ -1112,7 +1132,7 @@ textarea::placeholder {
 	line-height: 1;
 	text-align: center;
 	border: 2px solid var(--surface);
-	border-radius: 20px;
+	border-radius: var(--radius-lg);
 }
 
 /* --- Tabel produk --- */
@@ -1208,7 +1228,6 @@ textarea::placeholder {
 	justify-content: center;
 	padding: 16px;
 	background: var(--overlay);
-	backdrop-filter: blur(4px);
 }
 
 .lc-content {
@@ -1223,7 +1242,6 @@ textarea::placeholder {
 	background: var(--surface);
 	border: 2px solid var(--border);
 	border-radius: var(--radius-lg);
-	box-shadow: var(--shadow);
 	overflow: auto;
 	animation: showUp .22s ease both;
 }
@@ -1236,6 +1254,7 @@ textarea::placeholder {
 	margin-bottom: 4px;
 	font-family: var(--font-display);
 	font-size: 1.25rem;
+	font-weight: 700;
 	text-align: center;
 	color: var(--text);
 }
@@ -1250,7 +1269,6 @@ textarea::placeholder {
 	justify-content: center;
 	padding: 16px;
 	background: var(--overlay);
-	backdrop-filter: blur(4px);
 }
 
 .custom-modal-content {
@@ -1263,7 +1281,6 @@ textarea::placeholder {
 	background: var(--surface);
 	border: 2px solid var(--border);
 	border-radius: var(--radius-lg);
-	box-shadow: var(--shadow);
 	animation: showUp .22s ease both;
 }
 
@@ -1301,8 +1318,6 @@ textarea::placeholder {
 	align-items: center;
 	justify-content: center;
 	background: var(--overlay-soft);
-	backdrop-filter: blur(1px);
-	-webkit-backdrop-filter: blur(1px);
 }
 
 .laptop {
@@ -1313,7 +1328,7 @@ textarea::placeholder {
 	border: 10px solid var(--primary-soft);
 	border-top-color: var(--primary);
 	border-bottom-color: var(--primary);
-	border-radius: 50%;
+	border-radius: var(--radius-lg);
 	animation: roll .8s ease-in-out infinite;
 }
 
@@ -1337,9 +1352,8 @@ textarea::placeholder {
 	width: min(360px, 94vw);
 	padding: 12px;
 	background: var(--surface);
-	border: 1px solid var(--border);
+	border: 1px solid var(--border-strong);
 	border-radius: var(--radius-lg);
-	box-shadow: var(--shadow);
 	transform: translateX(-50%);
 }
 
@@ -1354,9 +1368,8 @@ textarea::placeholder {
 	max-height: 50dvh;
 	padding: 8px;
 	background: var(--surface);
-	border: 1px solid var(--border);
+	border: 1px solid var(--border-strong);
 	border-radius: var(--radius);
-	box-shadow: var(--shadow);
 	overflow: auto;
 }
 
@@ -1369,9 +1382,8 @@ textarea::placeholder {
 	max-width: calc(100vw - 16px);
 	padding: 6px;
 	background: var(--surface);
-	border: 1px solid var(--border);
+	border: 1px solid var(--border-strong);
 	border-radius: var(--radius);
-	box-shadow: var(--shadow);
 	animation: showUp .15s ease both;
 }
 
@@ -1391,9 +1403,8 @@ textarea::placeholder {
 	display: none;
 	padding: 6px;
 	background: var(--surface);
-	border: 1px solid var(--border);
+	border: 1px solid var(--border-strong);
 	border-radius: var(--radius-sm);
-	box-shadow: var(--shadow);
 }
 
 .menu-titik-tiga.tampil {
@@ -1416,10 +1427,9 @@ textarea::placeholder {
 	height: fit-content;
 	max-height: 80vh;
 	padding: 12px;
-	background: var(--kiri-bg);
-	border: 1px solid var(--border);
+	background: var(--surface);
+	border: 1px solid var(--border-strong);
 	border-radius: var(--radius);
-	box-shadow: var(--shadow);
 	overflow: auto;
 	cursor: grab;
 }
@@ -1592,37 +1602,49 @@ textarea::placeholder {
 }
 
 /* --------------------------------------------------------------------------
-   12.5 DARK MODE
+   12.5 DARK MODE (flat gelap)
    -------------------------------------------------------------------------- */
 @media (prefers-color-scheme: dark) {
 	:root {
-		--primary: #5AA3E8;
-		--primary-hover: #82BBF0;
-		--primary-soft: #17304F;
-		--accent: #F2B21F;
-		--success: #4CC38A;
-		--success-soft: #14352A;
-		--danger: #EE7B73;
-		--danger-soft: #3A1C1B;
+		--primary: #5B9BD5;
+		--primary-hover: #7FB2E3;
+		--primary-soft: #1B2F47;
+		--primary-soft-hover: #243D5A;
+		--accent: #E0A100;
+		--success: #4CB782;
+		--success-soft: #12372A;
+		--danger: #F07167;
+		--danger-soft: #3F1D1A;
 		--danger-hover: #F59B94;
 		--warning: #E3A33B;
 		--warning-soft: #382A0E;
-		--bg: #0A1424;
-		--surface: #101E33;
-		--surface-alt: #16273F;
-		--header-bg: #101E33;
-		--footer-bg: #101E33;
-		--kiri-bg: #101E33;
-		--rail: #08121F;
-		--text: #E2EAF4;
-		--text-on-primary: #04182E;
-		--text-muted: #94A8C0;
-		--border: #223A58;
-		--border-strong: #31507A;
-		--ring: rgba(90, 163, 232, .32);
-		--overlay: rgba(0, 0, 0, .62);
-		--overlay-soft: rgba(10, 20, 36, .72);
-		--shadow: 0 14px 36px rgba(0, 0, 0, .55);
+		--bg: #0F1720;
+		--surface: #17212C;
+		--surface-alt: #1D2936;
+		--header-bg: #17212C;
+		--footer-bg: #1D2936;
+		--kiri-bg: #17212C;
+		--rail: #0B121A;
+		--bar-bg: #1D2936;
+		--bar-text: #E6EBF1;
+		--bar-state: rgba(91, 155, 213, .18);
+		--text: #E6EBF1;
+		--text-on-primary: #0B1D33;
+		--text-muted: #9AA8B8;
+		--border: #2C3A4A;
+		--border-strong: #3E4F63;
+		--overlay: rgba(0, 0, 0, .6);
+		--overlay-soft: rgba(15, 23, 32, .85);
+		--state-hover: #1F2D3C;
+		--state-press: #28394B;
+	}
+
+	.atas {
+		border-bottom-color: var(--border);
+	}
+
+	.tt:active {
+		background: var(--state-press);
 	}
 
 	.icon,
@@ -1636,7 +1658,7 @@ textarea::placeholder {
 	#app img {
 		padding: 0;
 		background: transparent;
-		border-radius: 50%;
+		border-radius: var(--radius-lg);
 	}
 
 	#kiri #keluar:hover,

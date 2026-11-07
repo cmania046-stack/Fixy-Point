@@ -105,13 +105,13 @@
 			<h3 onclick="showPopup()" class="tt" id=".3">&#x2630;</h3>
 			<h3 id="sapa" class="greet"></h2>
 			<h3 class="judul" id="jdl"></h3>
-			<img id="imgType" alt="Cetak" class="icon">
-			<img class="icon" alt="" id="kalk">
-		
 		</div>
 		<div class="atas-tengah hidden" id="ateng"></div>
 		<div class="tengah" id="tgh"></div>
-		<div class="bawah hidden" id="bwh"></div>
+		<div class="bawah" id="bwh">
+			<img id="imgType" alt="Cetak" style="width: 25px; height: 25px; display: block">
+			<img alt="" id="kalk" style="width: 25px; height: 25px; display: block">
+		</div>
 	</div>
 </div>
   
@@ -1757,7 +1757,7 @@ class Dashboard {
 			["btn", "Bulan ini", () => this.setup("bulan_ini")]
 		]);
 		
-		document.getElementById("bwh").innerHTML = "";
+		//document.getElementById("bwh").innerHTML = "";
 		resetJudul("Dashboard");
 		document.getElementById("sapa").innerHTML = `<img src="${url}Pictures/wave.gif" alt="Halo..." class="icon-halo"> Halo, ${user}`;
 		this.tengah.querySelectorAll(".field").forEach(item => {
@@ -8839,7 +8839,7 @@ class Voucher {
 		this.produk = await getData("produk");
 		const tengah = document.getElementById("tgh");
 		tengah.innerHTML = "";
-		this.atas = makeParent("frame");
+		this.atas = makeParent("frame-khusus-produk");
 		const btn = makeButton("btn", "Terbitkan voucher", () => this.terbitkanVoucher(btn));
 		for (const i of [this.atas, btn]) tengah.appendChild(i);
 		this.tampilkanDataVoucher();
