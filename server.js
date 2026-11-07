@@ -23,6 +23,8 @@ const listTanggal = [
 const listWaktu = ["H:m:s", "H/m/s", "H.m.s", "H:m", "H/m", "H.m"];
 
 const allowedMethods = [
+	"pulihkan_tabel",
+	"backup_tabel",
 	"pulihkan_seluruh_data",
 	"backup_seluruh_data",
 	"periksa_jawaban",
@@ -1989,7 +1991,6 @@ app.post("/beli_produk", async (req, res) => {
 async function bulkInsert(cl, tabel, rows) {
 	if (!rows || rows.length === 0) return;
 	const columns = Object.keys(rows[0]);
-	const colCount = columns.length;
 	const rowPlaceholders = [], params = [];
 	let idx = 1;
 	for (const row of rows) {
@@ -2000,9 +2001,20 @@ async function bulkInsert(cl, tabel, rows) {
 		}
 		rowPlaceholders.push(`(${placeholders.join(', ')})`);
 	}
+
+	const updateCols = columns
+		.filter(c => c !== 'id')
+		.map(c => `"${c}" = EXCLUDED."${c}"`)
+		.join(', ');
+
+	const conflictClause = updateCols
+		? `ON CONFLICT(id) DO UPDATE SET ${updateCols}`
+		: `ON CONFLICT(id) DO NOTHING`;
+
 	const sql = `
 		INSERT INTO ${tabel} (${columns.map(c => `"${c}"`).join(', ')})
 		VALUES ${rowPlaceholders.join(', ')}
+		${conflictClause}
 	`;
 	await cl.query(sql, params);
 }
@@ -2011,6 +2023,50 @@ class PostData {
 	constructor(data, req) {
 		this.data = data;
 		this.req = req;
+	}
+	
+	async pulihkan_tabel() {
+		const n = this.data.nama ?? "";
+		if (kosong(n)) return [{
+			stat: "Gagal",
+			pesan: "Tabel diperlukan untuk melakukan pemulihan data"
+		}, 400];
+		try {
+			const data = openJson(path.join(folderBackup, "Database.json"), {});
+			if (kosong(data)) return [{
+				stat: "Gagal",
+				pesan: `Data cadangan kosong`
+			}, 400];
+			const cadangan = data[n];
+			if (kosong(cadangan)) return [{
+				stat: "Gagal",
+				pesan: `Data ${n} kosong`
+			}, 400]; 
+			await bulkInsert(pool, n, data[n]);
+			return [{
+				stat: "Berhasil",
+				pesan: `Data ${n.replaceAll("_"," ")} telah dipulihkan`
+			}, 200];
+		} catch (e) { return errorReturn(e); }
+	}
+	
+	async backup_tabel() {
+		const n = this.data.nama ?? "";
+		if (kosong(n)) return [{
+			stat: "Gagal",
+			pesan: "Tabel diperlukan untuk melakukan backup"
+		}, 400];
+		try {
+			const { rows: data } = await pool.query(`SELECT * FROM ${n}`);
+			const pathFile = path.join(folderBackup, "Database.json");
+			const cadangan = openJson(pathFile, {});
+			cadangan[n] = data;
+			simpanSemua(pathFile, cadangan);
+			return [{
+				stat: "Berhasil",
+				pesan: `Data ${n.replaceAll("_"," ")} berhasil di backup`
+			}, 200];
+		} catch (e) { return errorReturn(e); }
 	}
 	
 	async pulihkan_seluruh_data() {

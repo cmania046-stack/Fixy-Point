@@ -462,3 +462,33 @@
 2026-11-06 19:46:33.479 WIT [11663] LOG:  checkpoint starting: shutdown immediate
 2026-11-06 19:46:34.109 WIT [11663] LOG:  checkpoint complete: wrote 1131 buffers (6.9%), wrote 3 SLRU buffers; 0 WAL file(s) added, 0 removed, 1 recycled; write=0.333 s, sync=0.252 s, total=0.633 s; sync files=525, longest=0.002 s, average=0.001 s; distance=5578 kB, estimate=5578 kB; lsn=0/22A8358, redo lsn=0/22A8358
 2026-11-06 19:46:34.162 WIT [11654] LOG:  database system is shut down
+2026-11-07 19:25:16.300 WIT [12377] LOG:  starting PostgreSQL 18.6 on arm-unknown-linux-androideabi, compiled by Android (16134705, +pgo, +bolt, +lto, +mlgo, based on r574158c) clang version 21.0.0 (https://android.googlesource.com/toolchain/llvm-project 9f872551d3c681d06fd303b36f16ed5c274735eb), 32-bit
+2026-11-07 19:25:16.302 WIT [12377] LOG:  listening on IPv4 address "127.0.0.1", port 5432
+2026-11-07 19:25:16.304 WIT [12377] LOG:  listening on Unix socket "/data/data/com.termux/files/usr/tmp/.s.PGSQL.5432"
+2026-11-07 19:25:16.389 WIT [12391] LOG:  database system was interrupted; last known up at 2026-11-07 17:19:32 WIT
+2026-11-07 19:25:16.551 WIT [12391] LOG:  database system was not properly shut down; automatic recovery in progress
+2026-11-07 19:25:16.558 WIT [12391] LOG:  redo starts at 0/22D3038
+2026-11-07 19:25:16.558 WIT [12391] LOG:  invalid record length at 0/22D3140: expected at least 24, got 0
+2026-11-07 19:25:16.558 WIT [12391] LOG:  redo done at 0/22D3108 system usage: CPU: user: 0.00 s, system: 0.00 s, elapsed: 0.00 s
+2026-11-07 19:25:16.572 WIT [12389] LOG:  checkpoint starting: end-of-recovery immediate wait
+2026-11-07 19:25:16.587 WIT [12389] LOG:  checkpoint complete: wrote 0 buffers (0.0%), wrote 3 SLRU buffers; 0 WAL file(s) added, 0 removed, 0 recycled; write=0.006 s, sync=0.002 s, total=0.017 s; sync files=2, longest=0.001 s, average=0.001 s; distance=0 kB, estimate=0 kB; lsn=0/22D3140, redo lsn=0/22D3140
+2026-11-07 19:25:16.593 WIT [12377] LOG:  database system is ready to accept connections
+2026-11-07 19:30:16.687 WIT [12389] LOG:  checkpoint starting: time
+2026-11-07 19:30:20.844 WIT [12389] LOG:  checkpoint complete: wrote 40 buffers (0.2%), wrote 1 SLRU buffers; 0 WAL file(s) added, 0 removed, 0 recycled; write=4.094 s, sync=0.014 s, total=4.157 s; sync files=42, longest=0.002 s, average=0.001 s; distance=98 kB, estimate=98 kB; lsn=0/22EBC08, redo lsn=0/22EBBB0
+2026-11-07 21:20:42.258 WIT [12389] LOG:  checkpoint starting: time
+2026-11-07 21:20:42.427 WIT [12389] LOG:  checkpoint complete: wrote 1 buffers (0.0%), wrote 0 SLRU buffers; 0 WAL file(s) added, 0 removed, 0 recycled; write=0.112 s, sync=0.002 s, total=0.170 s; sync files=1, longest=0.002 s, average=0.002 s; distance=0 kB, estimate=88 kB; lsn=0/22EBF10, redo lsn=0/22EBEB8
+2026-11-07 21:25:42.533 WIT [12389] LOG:  checkpoint starting: time
+2026-11-07 21:25:42.871 WIT [12389] LOG:  checkpoint complete: wrote 3 buffers (0.0%), wrote 1 SLRU buffers; 0 WAL file(s) added, 0 removed, 0 recycled; write=0.316 s, sync=0.003 s, total=0.345 s; sync files=4, longest=0.002 s, average=0.001 s; distance=2 kB, estimate=80 kB; lsn=0/22EC870, redo lsn=0/22EC818
+2026-11-07 22:23:59.397 WIT [13320] LOG:  starting PostgreSQL 18.6 on arm-unknown-linux-androideabi, compiled by Android (16134705, +pgo, +bolt, +lto, +mlgo, based on r574158c) clang version 21.0.0 (https://android.googlesource.com/toolchain/llvm-project 9f872551d3c681d06fd303b36f16ed5c274735eb), 32-bit
+2026-11-07 22:23:59.400 WIT [13320] LOG:  listening on IPv4 address "127.0.0.1", port 5432
+2026-11-07 22:23:59.405 WIT [13320] LOG:  listening on Unix socket "/data/data/com.termux/files/usr/tmp/.s.PGSQL.5432"
+2026-11-07 22:23:59.492 WIT [13330] LOG:  database system was interrupted; last known up at 2026-11-07 21:25:42 WIT
+2026-11-07 22:23:59.647 WIT [13330] LOG:  database system was not properly shut down; automatic recovery in progress
+2026-11-07 22:23:59.655 WIT [13330] LOG:  redo starts at 0/22EC818
+2026-11-07 22:23:59.656 WIT [13330] LOG:  invalid record length at 0/22EC920: expected at least 24, got 0
+2026-11-07 22:23:59.656 WIT [13330] LOG:  redo done at 0/22EC8E8 system usage: CPU: user: 0.00 s, system: 0.00 s, elapsed: 0.00 s
+2026-11-07 22:23:59.668 WIT [13328] LOG:  checkpoint starting: end-of-recovery immediate wait
+2026-11-07 22:23:59.683 WIT [13328] LOG:  checkpoint complete: wrote 0 buffers (0.0%), wrote 3 SLRU buffers; 0 WAL file(s) added, 0 removed, 0 recycled; write=0.005 s, sync=0.001 s, total=0.016 s; sync files=2, longest=0.001 s, average=0.001 s; distance=0 kB, estimate=0 kB; lsn=0/22EC920, redo lsn=0/22EC920
+2026-11-07 22:23:59.689 WIT [13320] LOG:  database system is ready to accept connections
+2026-11-07 22:33:59.884 WIT [13328] LOG:  checkpoint starting: time
+2026-11-07 22:34:01.563 WIT [13328] LOG:  checkpoint complete: wrote 16 buffers (0.1%), wrote 1 SLRU buffers; 0 WAL file(s) added, 0 removed, 0 recycled; write=1.628 s, sync=0.014 s, total=1.680 s; sync files=17, longest=0.004 s, average=0.001 s; distance=21 kB, estimate=21 kB; lsn=0/22F1F98, redo lsn=0/22F1F40

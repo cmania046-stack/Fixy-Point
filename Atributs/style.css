@@ -35,60 +35,61 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
 :root {
-	/* Warna utama */
-	--primary: #1D4E89;
-	--primary-hover: #163C6B;
-	--primary-soft: #E1EAF5;
-	--primary-soft-hover: #CFDDEE;
-	--accent: #D98E04;
-	--accent-hover: #B87803;
-	--accent-ink: #2B1D00;
+	/* Warna utama (Diambil dari header & tabel) */
+	--primary: #1A427B;          /* Biru pastel dari header tabel "Aspek / Value" */
+	--primary-hover: #6696AD;    /* Biru pastel sedikit lebih gelap */
+	--primary-soft: #D6E5EB;     /* Latar biru sangat muda (area sapaan) */
+	--primary-soft-hover: #C4D8E1;
+	--accent: #25D366;           /* Hijau WhatsApp dari ikon telepon */
+	--accent-hover: #1EBE5A;
+	--accent-ink: #0B2E14;
 
 	/* Warna status */
-	--success: #1E7B4F;
-	--success-soft: #DDF1E6;
-	--danger: #B42318;
-	--danger-soft: #FBE4E1;
-	--danger-hover: #8E1B12;
-	--warning: #9A6700;
-	--warning-soft: #FBEFCF;
+	--success: #25D366;
+	--success-soft: #DCF8C6;
+	--danger: #D32F2F;           /* Merah dari badge notifikasi keranjang */
+	--danger-soft: #FDECEA;
+	--danger-hover: #B71C1C;
+	--warning: #F5A623;
+	--warning-soft: #FEF3C7;
 
-	/* Permukaan */
-	--bg: #F3F5F8;
-	--surface: #FFFFFF;
-	--surface-alt: #F7F8FA;
+	/* Permukaan (Berdasarkan latar belakang aplikasi & kartu) */
+	--bg: #F1F5F8;               /* Abu-abu kebiruan sangat terang di background */
+	--surface: #FFFFFF;          /* Putih bersih untuk kartu & search bar */
+	--surface-alt: #F7FAFC;      /* Latar zebra-stripe tabel */
 	--header-bg: #FFFFFF;
-	--footer-bg: #F7F8FA;
+	--footer-bg: #F7F9FA;        /* Latar menu bawah (Bagikan, Edit, dll) */
 	--kiri-bg: #FFFFFF;
-	--rail: #E4E8EE;
-	--tab-btn: #475569;
+	--rail: #E2E8F0;             /* Garis pemisah */
+	--tab-btn: #4A5568;
 
-	/* Bar atas */
-	--bar-bg: #1D4E89;
-	--bar-text: #FFFFFF;
-	--bar-state: rgba(255, 255, 255, .14);
+	/* Bar atas (Mengikuti warna header atas aplikasi) */
+	--bar-bg: #FFFFFF;           /* Tanggal 05 Okt 2026 berlatarkan putih */
+	--bar-text: #1A202C;
+	--bar-state: rgba(0, 0, 0, .05);
 
 	/* Teks */
-	--text: #1F2933;
-	--text-muted: #5F6B7A;
-	--text-on-primary: #FFFFFF;
+	--text: #1E293B;             /* Biru arang gelap untuk teks utama (Angka, Nama) */
+	--text-muted: #64748B;       /* Abu-abu kebiruan untuk teks sekunder */
+	--text-on-primary: #FFFFFF;  /* Teks putih di atas header tabel biru */
 	--white-text: #FFFFFF;
 
 	/* Garis & efek */
-	--border: #D9DEE5;
-	--border-strong: #AEB7C2;
-	--overlay: rgba(15, 23, 32, .45);
-	--overlay-soft: rgba(243, 245, 248, .85);
+	--border: #E2E8F0;
+	--border-strong: #CBD5E1;
+	--overlay: rgba(15, 23, 42, .45);
+	--overlay-soft: rgba(241, 245, 248, .85);
 
 	/* State (hover / press) */
-	--state-hover: #EDF1F6;
-	--state-press: #E1E7EF;
+	--state-hover: #E6F0F5;      /* Biru sangat muda untuk hover di list tabel */
+	--state-press: #D6E5EB;
 
-	/* Bentuk & ukuran (maks 10px) */
-	--radius-sm: 16px;
-	--radius: 18px;
+	/* Bentuk & ukuran */
+	--radius-sm: 15px;            /* Radius search bar & kartu terlihat membulat */
+	--radius: 18px;              /* Kartu utama (Ringkasan transaksi) */
 	--radius-lg: 20px;
-	--atas-h: 56px;
+	--atas-h: 64px;
+	--shadow: 0 0 10px rgba(0,0,0,0.1);
 
 	/* Font */
 	--font: 'Inter', system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
@@ -350,11 +351,10 @@ textarea::placeholder {
 	gap: 2px;
 	width: calc(100% - 18px);
 	margin: 0 0 4px 18px;
-	padding-left: 10px;
-	border-left: 2px solid var(--border);
-	border-bottom: 2px solid var(--border);
+	padding: 5px 5px 5px 10px;
 	border-radius: var(--radius);
 	animation: slideLeft .2s ease both;
+	box-shadow: var(--shadow);
 }
 
 .sub button {
@@ -393,7 +393,13 @@ textarea::placeholder {
 	padding: 6px 12px;
 	background: var(--bar-bg);
 	border-bottom: 1px solid var(--bar-bg);
-	border-radius: 0 0 10px 10px;
+	border-radius: 0 0 15px 15px;
+	box-shadow: var(--shadow);
+}
+
+.container,
+.container-horizontal {
+	box-shadow: var(--shadow);
 }
 
 .tt {
@@ -511,13 +517,13 @@ textarea::placeholder {
 	bottom: 0;
 	z-index: 50;
 	display: flex;
-	background: var(--footer-bg);
+	background: var(--bar-bg);
 	padding: 10px 20px;
 	justify-content: flex-start;
 	gap: 10px;
 	overflow-x: auto;
 	border-top: 1px solid var(--border);
-	border-radius: 10px 10px 0 0;
+	border-radius: 15px 15px 0 0;
 }
 
 .bawah img:first-child {
@@ -609,6 +615,7 @@ textarea::placeholder {
 	border: 1px solid var(--border);
 	border-radius: var(--radius);
 	overflow: auto;
+	box-shadow: var(--shadow);
 }
 
 .field legend {
@@ -691,6 +698,7 @@ textarea::placeholder {
 	flex-direction: column;
 	gap: 12px;
 	min-width: 0;
+	box-shadow: var(--shadow);
 }
 
 .editor {
@@ -813,6 +821,7 @@ textarea::placeholder {
 	object-fit: cover;
 	background: var(--surface-alt);
 	border-radius: var(--radius);
+	box-shadow: var(--shadow);
 }
 
 #preview {

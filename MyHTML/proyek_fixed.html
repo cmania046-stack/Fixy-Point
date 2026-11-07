@@ -932,11 +932,7 @@ class Pengguna {
 			img.className = "image";
 			frame.appendChild(img);
 			
-			const frameBtn = makeParent("container-horizontal");
-			frameBtn.style.justifyContent = "center";
-			frameBtn.style.border = "none";
-			frameBtn.style.boxShadow = "none";
-			frame.appendChild(frameBtn);
+			const frameBtn = makeParent("container-horizontal",frame);
 			pembuatButtonGambar(frameBtn, [
 				["btn btn-cancel", "Edit", () => this.editUser(p.inisial_code), "Pictures/edit.png"],
 				["btn btn-cancel", "Perbarui QR", () => this.perbaruiQr(p.inisial_code), "Pictures/qr-code.png"],
@@ -6629,6 +6625,22 @@ class Lainnya {
 		]);
 	}
 	
+	async pulihkanTable(item) {
+		if (await modalShow(confirm, `Pulihkan ${item} sekarang?`)) {
+			const post = await postDataKedua("pulihkan_tabel", {nama: item});
+			await message(post);
+			this.backup();
+		}
+	}
+	
+	async backupTable(item) {
+		if (await modalShow(confirm, `Backup ${item} sekarang?`)) {
+			const post = await postDataKedua("backup_tabel", {nama: item});
+			await message(post);
+			this.backup();
+		}
+	}
+	
 	async backupSeluruhTabel() {
 		if (await modalShow(confirm, "Backup seluruh data dari database kedalam file JSON?")) {
 			const post = await postDataKedua("backup_seluruh_data", {a:0});
@@ -7750,10 +7762,10 @@ class CommandPrompt {
 		cont.style.overflow = "auto";
 		cont.style.background = "transparent";
 		cont.style.border = "none";
+		cont.style.flexWrap = "nowrap";
 		parent.appendChild(cont);
 		pembuatButtonGambar(cont, [
 			["btn", "Submit", () => this.submitCommand(this.qad), null],
-			["btns", "Query umum", () => this.commonQuery(), "Pictures/edit.png"],
 			["btns", "Hapus data", () => { this.qad.data.value = ""; }, "Pictures/hapus.png"],
 			["btns", "Hapus query", () => { this.qad.query.value = ""; }, "Pictures/hapus.png"]
 		]);
