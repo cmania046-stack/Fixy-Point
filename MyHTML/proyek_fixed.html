@@ -109,7 +109,7 @@
 		<div class="atas" id="ats">
 			<h3 onclick="showPopup()" class="tt" id=".3">&#x2630;</h3>
 			<h3 id="sapa" class="greet"></h2>
-			<h3 class="judul" id="jdl"></h3>
+			<h3 class="judul-opsi" id="judul-opsi"></h3>
 		</div>
 		<div class="atas-tengah hidden" id="ateng"></div>
 		<div class="tengah" id="tgh"></div>
@@ -552,7 +552,7 @@ async function message(hasil) {
 }
 
 function resetJudul(teks) {
-	document.getElementById("jdl").textContent = teks
+	document.getElementById("judul-opsi").textContent = teks
 }
 function createNo() {
 	const tipe1 = String(inisialCode).slice(0,1).toUpperCase();
@@ -8909,6 +8909,8 @@ async function setProfil() {
 	}
 	toko = nama;
 	const labelNama = makeLabel(nama.toUpperCase(), "jdl");
+	labelNama.style.color = "white";
+	labelNama.style.fontWeight = "600";
 	parent.appendChild(image);
 	parent.appendChild(labelNama);
 }
