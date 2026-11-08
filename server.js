@@ -1659,30 +1659,25 @@ app.get("/backup", async (req,res) => {
 
 app.get("/unduh_file", async (req, res) => {
     try {
-        const rawPath = req.query.path || "";
-
-        const pathFile = path.resolve(decodeURIComponent(rawPath));
-        const fileName = path.basename(pathFile);
+        const rawPath = decodeURIComponent(req.query.path || "");
+        const pathFile = path.resolve(rawPath);
 
         if (!fs.existsSync(pathFile)) {
-            console.error(`[ERROR] File tidak ada di lokasi: ${pathFile}`);
             return res.status(404).send("File tidak ditemukan di server Termux.");
         }
 
-        const fileBuffer = fs.readFileSync(pathFile);
+        if (!fs.statSync(pathFile).isFile()) {
+            return res.status(400).send("Path bukan sebuah file.");
+        }
 
-        res.setHeader('Content-Disposition', `attachment; filename="${encodeURIComponent(fileName)}"`);
-        res.setHeader('Content-Type', 'application/json');
-        res.setHeader('Content-Length', fileBuffer.length);
-
-        return res.end(fileBuffer);
+        return res.download(pathFile, path.basename(pathFile));
 
     } catch (error) {
-        console.error("Terjadi kesalahan fatal pada endpoint unduhan:", error);
-        if (!res.headersSent) {
-            return res.status(500).send("Gagal memproses unduhan di server.");
-        }
-    } finally { await catatLog(req.path, res.statusCode); }
+        console.error("Error unduhan:", error);
+        if (!res.headersSent) return res.status(500).send("Gagal memproses unduhan.");
+    } finally {
+        await catatLog(req.path, res.statusCode);
+    }
 });
 
 app.get("/delete_file", async (req,res) => {

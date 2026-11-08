@@ -519,3 +519,20 @@
 2026-11-08 07:36:37.722 WIT [13328] LOG:  checkpoint complete: wrote 15 buffers (0.1%), wrote 1 SLRU buffers; 0 WAL file(s) added, 0 removed, 0 recycled; write=1.541 s, sync=0.007 s, total=1.589 s; sync files=15, longest=0.002 s, average=0.001 s; distance=12 kB, estimate=23 kB; lsn=0/22FF5A0, redo lsn=0/22FF548
 2026-11-08 07:41:36.820 WIT [13328] LOG:  checkpoint starting: time
 2026-11-08 07:41:36.982 WIT [13328] LOG:  checkpoint complete: wrote 1 buffers (0.0%), wrote 0 SLRU buffers; 0 WAL file(s) added, 0 removed, 0 recycled; write=0.112 s, sync=0.002 s, total=0.163 s; sync files=1, longest=0.002 s, average=0.002 s; distance=1 kB, estimate=21 kB; lsn=0/22FFC38, redo lsn=0/22FFBE0
+2026-11-08 08:35:41.837 WIT [13328] LOG:  checkpoint starting: time
+2026-11-08 08:35:48.969 WIT [13328] LOG:  checkpoint complete: wrote 70 buffers (0.4%), wrote 1 SLRU buffers; 0 WAL file(s) added, 0 removed, 0 recycled; write=7.071 s, sync=0.004 s, total=7.132 s; sync files=6, longest=0.002 s, average=0.001 s; distance=533 kB, estimate=533 kB; lsn=0/2385270, redo lsn=0/2385218
+2026-11-08 12:21:59.453 WIT [13328] LOG:  checkpoint starting: time
+2026-11-08 12:21:59.591 WIT [13328] LOG:  checkpoint complete: wrote 1 buffers (0.0%), wrote 0 SLRU buffers; 0 WAL file(s) added, 0 removed, 0 recycled; write=0.112 s, sync=0.002 s, total=0.139 s; sync files=1, longest=0.002 s, average=0.002 s; distance=0 kB, estimate=480 kB; lsn=0/2385660, redo lsn=0/2385608
+2026-11-08 14:12:44.868 WIT [13328] LOG:  checkpoint starting: time
+2026-11-08 14:12:45.371 WIT [13328] LOG:  checkpoint complete: wrote 4 buffers (0.0%), wrote 1 SLRU buffers; 0 WAL file(s) added, 0 removed, 0 recycled; write=0.420 s, sync=0.004 s, total=0.505 s; sync files=5, longest=0.002 s, average=0.001 s; distance=8 kB, estimate=433 kB; lsn=0/23877C0, redo lsn=0/2387768
+2026-11-08 14:27:44.686 WIT [13328] LOG:  checkpoint starting: time
+2026-11-08 14:27:45.334 WIT [13328] LOG:  checkpoint complete: wrote 5 buffers (0.0%), wrote 1 SLRU buffers; 0 WAL file(s) added, 0 removed, 0 recycled; write=0.548 s, sync=0.006 s, total=0.651 s; sync files=6, longest=0.002 s, average=0.001 s; distance=8 kB, estimate=390 kB; lsn=0/23898A0, redo lsn=0/2389810
+2026-11-08 17:07:25.959 WIT [13328] LOG:  checkpoint starting: time
+2026-11-08 17:07:26.140 WIT [13328] LOG:  checkpoint complete: wrote 1 buffers (0.0%), wrote 0 SLRU buffers; 0 WAL file(s) added, 0 removed, 0 recycled; write=0.126 s, sync=0.002 s, total=0.182 s; sync files=1, longest=0.002 s, average=0.002 s; distance=4 kB, estimate=351 kB; lsn=0/238A9F0, redo lsn=0/238A998
+2026-11-08 17:45:08.290 WIT [13320] LOG:  received fast shutdown request
+2026-11-08 17:45:08.321 WIT [13320] LOG:  aborting any active transactions
+2026-11-08 17:45:08.348 WIT [13320] LOG:  background worker "logical replication launcher" (PID 13333) exited with exit code 1
+2026-11-08 17:45:08.349 WIT [13328] LOG:  shutting down
+2026-11-08 17:45:08.353 WIT [13328] LOG:  checkpoint starting: shutdown immediate
+2026-11-08 17:45:08.440 WIT [13328] LOG:  checkpoint complete: wrote 0 buffers (0.0%), wrote 0 SLRU buffers; 0 WAL file(s) added, 0 removed, 0 recycled; write=0.018 s, sync=0.001 s, total=0.091 s; sync files=0, longest=0.000 s, average=0.000 s; distance=0 kB, estimate=316 kB; lsn=0/238AAA0, redo lsn=0/238AAA0
+2026-11-08 17:45:08.492 WIT [13320] LOG:  database system is shut down

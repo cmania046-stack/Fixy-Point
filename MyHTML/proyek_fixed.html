@@ -8,10 +8,15 @@
   <title>Dashboard pos</title>
   <script>
     let url = "http://localhost:3000/";
+    const temaWeb = localStorage.getItem("tema") ?? "terang";
+    if (temaWeb.toLowerCase() === "gelap") {
+    	document.write(`<link rel="stylesheet" href="${url}style_gelap.css">`);    	
+    } else {
+    	document.write(`<link rel="stylesheet" href="${url}style_terang.css">`);
+    }
     document.write(`<script src="${url}chart.js"><\/script>`);
     document.write(`<script src="${url}eruda.js"><\/script>`);
     document.write(`<script src="${url}string-math.min.js"><\/script>`);
-    document.write(`<link rel="stylesheet" href="${url}style.css">`);
     document.write(`<link rel="manifest" href="${url}manifest.json">`);
     document.write(`<link rel="apple-touch-icon" href="${url}logo-192.png">`);
     document.write(`<link rel="icon" type="image/png" href="${url}logo-192.png">`);
@@ -24,9 +29,7 @@
 	<div class="file-field hidden"></div>
 	<div class="produk-pop hidden"></div>
 	<div class="load-container" style="display: none;">
-		<div class="laptop">
-			<div class="child-lap"></div>
-		</div>
+		<div class="laptop"></div>
 		<p class="proses" id="proses">Processing...</p>
 	</div>
 	
@@ -111,6 +114,7 @@
 		<div class="atas-tengah hidden" id="ateng"></div>
 		<div class="tengah" id="tgh"></div>
 		<div class="bawah" id="bwh">
+			<img id="tema" alt="Tema" style="width: 25px; height: 25px; display: block">
 			<img id="imgType" alt="Cetak" style="width: 25px; height: 25px; display: block">
 			<img alt="" id="kalk" style="width: 25px; height: 25px; display: block">
 		</div>
@@ -153,6 +157,11 @@ type.onclick = () => command.setup();
 const kalk = document.getElementById("kalk");
 kalk.src = "Pictures/kalkulator.png";
 kalk.onclick = () => kalkulator.setup();
+
+const gambarTema = document.getElementById("tema");
+const tm = localStorage.getItem("tema") ?? "terang";
+if (tm.toLowerCase() === "gelap") { gambarTema.src = "Pictures/gelap.png"; }
+else { gambarTema.src = "Pictures/terang.png"; }
 
 function pecahObject(data) {
 	let hasil = {};
@@ -1737,8 +1746,7 @@ class Dashboard {
 		this.tengah = document.getElementById("tgh");
 		this.tengah.innerHTML = "";
 		this.induk = makeParent("frame");
-		this.induk.style.background = "white";
-		this.induk.style.padding = "20px";
+		this.induk.style.gap = "10px";
 		
 		this.tengah.appendChild(this.induk);
 		
@@ -6458,8 +6466,7 @@ class Lainnya {
 		wadah.innerHTML = "";
 		const pemutar = document.createElement(tipe);
 		const jdl = makeLabel(judul, "biasa");
-		jdl.style.color = primarySoft;
-		
+	
 		const badge = makeLabel("x", "badge");
 		badge.style.right = "10px";
 		badge.style.top = "10px";
@@ -9017,6 +9024,17 @@ async function cekIzin(izin) {
 	} else {
 		await modalShow(gagal, "Anda tidak diizinkan untuk membuka fitur ini");
 		return false;
+	}
+}
+
+gambarTema.onclick = async () => {
+	const nowTheme = localStorage.getItem("tema") ?? "terang";
+	if (nowTheme.toLowerCase() === "terang") {
+		localStorage.setItem("tema", "gelap");
+		await modalShow(berhasil, "Tema telah diset ke gelap. Silahkan refresh untuk melihat perubahan");
+	} else {
+		localStorage.setItem("tema", "terang");
+		await modalShow(berhasil, "Tema telah diset ke terang. Silahkan refresh untuk melihat perubahan");
 	}
 }
 
