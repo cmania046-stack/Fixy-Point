@@ -5327,7 +5327,7 @@ class TransaksiCepat {
 	}
 
 	prepareFrames() {
-		this.labelTotal = document.getElementById("jdl");
+		this.labelTotal = document.getElementById("judul-opsi");
 		this.labelTotal.textContent = "Total: " + formatMataUang(this.totalBelanja);
 
 		const atas = makeParent("container-horizontal");
@@ -7481,7 +7481,7 @@ class Login {
 		const logParent = makeParent("container", p);
 		logParent.style.backgroundColor = "#ffffff";
 		logParent.style.borderRadius = "12px";
-		logParent.style.boxShadow = "0 8px 24px rgba(0, 0, 0, 0.1)";
+		logParent.style.boxShadow = "0 8px 24px rgba(0, 0, 0, 0.3)";
 		logParent.style.padding = "40px 30px";
 		logParent.style.gap = "5px";
 		logParent.style.width = "90%";

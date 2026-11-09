@@ -356,6 +356,7 @@ textarea::placeholder {
 	background: var(--bar-bg);
 	color: var(--bar-text);
 	border-bottom: 2px solid var(--bar-border);
+	border-radius: 0 0 10px 10px;
 }
 
 .container,
@@ -488,6 +489,7 @@ textarea::placeholder {
 	gap: 10px;
 	overflow-x: auto;
 	border-top: 2px solid var(--bar-border);
+	border-radius: 10px 10px 0 0;
 }
 
 .bawah img:first-child {
@@ -1498,6 +1500,7 @@ textarea::placeholder {
 		width: 150px;
 		height: 150px;
 	}
+	.atas, .bawah { border-radius: 0; }
 }
 
 @media (min-width: 1200px) {
@@ -1514,6 +1517,9 @@ textarea::placeholder {
 
 	.prt {
 		grid-template-columns: repeat(4, 1fr);
+	}
+	.atas, .bawah {
+		border-radius: 0;
 	}
 }
 
