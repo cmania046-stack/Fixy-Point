@@ -538,3 +538,10 @@
 2026-11-08 17:45:08.492 WIT [13320] LOG:  database system is shut down
 2026-11-10 13:30:44.240 WIT [28830] FATAL:  lock file "postmaster.pid" already exists
 2026-11-10 13:30:44.240 WIT [28830] HINT:  Is another postmaster (PID 25978) running in data directory "/data/data/com.termux/files/usr/var/lib/postgresql"?
+2026-11-10 16:04:49.626 WIT [5651] LOG:  starting PostgreSQL 18.6 on arm-unknown-linux-androideabi, compiled by Android (16134705, +pgo, +bolt, +lto, +mlgo, based on r574158c) clang version 21.0.0 (https://android.googlesource.com/toolchain/llvm-project 9f872551d3c681d06fd303b36f16ed5c274735eb), 32-bit
+2026-11-10 16:04:49.630 WIT [5651] LOG:  listening on IPv4 address "127.0.0.1", port 5432
+2026-11-10 16:04:49.633 WIT [5651] LOG:  listening on Unix socket "/data/data/com.termux/files/usr/tmp/.s.PGSQL.5432"
+2026-11-10 16:04:49.700 WIT [5661] LOG:  database system was shut down at 2026-11-10 14:02:09 WIT
+2026-11-10 16:04:49.721 WIT [5651] LOG:  database system is ready to accept connections
+2026-11-10 16:09:49.723 WIT [5659] LOG:  checkpoint starting: time
+2026-11-10 16:09:50.209 WIT [5659] LOG:  checkpoint complete: wrote 4 buffers (0.0%), wrote 3 SLRU buffers; 0 WAL file(s) added, 0 removed, 0 recycled; write=0.442 s, sync=0.004 s, total=0.487 s; sync files=6, longest=0.002 s, average=0.001 s; distance=11 kB, estimate=11 kB; lsn=0/239E708, redo lsn=0/239E6B0
