@@ -545,3 +545,12 @@
 2026-11-10 16:04:49.721 WIT [5651] LOG:  database system is ready to accept connections
 2026-11-10 16:09:49.723 WIT [5659] LOG:  checkpoint starting: time
 2026-11-10 16:09:50.209 WIT [5659] LOG:  checkpoint complete: wrote 4 buffers (0.0%), wrote 3 SLRU buffers; 0 WAL file(s) added, 0 removed, 0 recycled; write=0.442 s, sync=0.004 s, total=0.487 s; sync files=6, longest=0.002 s, average=0.001 s; distance=11 kB, estimate=11 kB; lsn=0/239E708, redo lsn=0/239E6B0
+2026-11-10 16:55:00.301 WIT [5659] LOG:  checkpoint starting: time
+2026-11-10 16:55:00.762 WIT [5659] LOG:  checkpoint complete: wrote 4 buffers (0.0%), wrote 1 SLRU buffers; 0 WAL file(s) added, 0 removed, 0 recycled; write=0.424 s, sync=0.004 s, total=0.463 s; sync files=5, longest=0.002 s, average=0.001 s; distance=12 kB, estimate=12 kB; lsn=0/23A17E0, redo lsn=0/23A1788
+2026-11-10 17:39:21.037 WIT [5651] LOG:  received fast shutdown request
+2026-11-10 17:39:21.039 WIT [5651] LOG:  aborting any active transactions
+2026-11-10 17:39:21.055 WIT [5651] LOG:  background worker "logical replication launcher" (PID 5664) exited with exit code 1
+2026-11-10 17:39:21.056 WIT [5659] LOG:  shutting down
+2026-11-10 17:39:21.058 WIT [5659] LOG:  checkpoint starting: shutdown immediate
+2026-11-10 17:39:21.086 WIT [5659] LOG:  checkpoint complete: wrote 0 buffers (0.0%), wrote 0 SLRU buffers; 0 WAL file(s) added, 0 removed, 0 recycled; write=0.010 s, sync=0.001 s, total=0.031 s; sync files=0, longest=0.000 s, average=0.000 s; distance=0 kB, estimate=11 kB; lsn=0/23A1890, redo lsn=0/23A1890
+2026-11-10 17:39:21.117 WIT [5651] LOG:  database system is shut down

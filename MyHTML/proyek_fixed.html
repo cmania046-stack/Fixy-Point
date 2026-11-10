@@ -4182,6 +4182,9 @@ class Transaksi {
 				["btns2", "Refresh", () => this.doRefresh(), "Pictures/refresh.png"],
 				["btns2", "Kembali", async () => { try { await fetch(url); window.location.href = url; } catch { await modalShow(gagal, "Koneksi server tidak aktif. Anda akan tetap di menu transaksi"); }}, "Pictures/kembali.png"]
 		]);
+		this.atas.querySelectorAll(".label-data").forEach(item => {
+			item.style.color = "black";
+		});
 	}
 	
 	doRefresh() {
