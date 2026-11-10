@@ -536,3 +536,5 @@
 2026-11-08 17:45:08.353 WIT [13328] LOG:  checkpoint starting: shutdown immediate
 2026-11-08 17:45:08.440 WIT [13328] LOG:  checkpoint complete: wrote 0 buffers (0.0%), wrote 0 SLRU buffers; 0 WAL file(s) added, 0 removed, 0 recycled; write=0.018 s, sync=0.001 s, total=0.091 s; sync files=0, longest=0.000 s, average=0.000 s; distance=0 kB, estimate=316 kB; lsn=0/238AAA0, redo lsn=0/238AAA0
 2026-11-08 17:45:08.492 WIT [13320] LOG:  database system is shut down
+2026-11-10 13:30:44.240 WIT [28830] FATAL:  lock file "postmaster.pid" already exists
+2026-11-10 13:30:44.240 WIT [28830] HINT:  Is another postmaster (PID 25978) running in data directory "/data/data/com.termux/files/usr/var/lib/postgresql"?
