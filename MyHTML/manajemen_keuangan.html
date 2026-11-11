@@ -8,12 +8,57 @@
 		let url = "http://localhost:3000/";
 		document.write(`<script src="${url}chart.js"><\/script>`);
 		document.write(`<script src="${url}eruda.js"><\/script>`);
-		document.write(`<link rel="stylesheet" href="${url}style.css">`);
+		document.write(`<link rel="stylesheet" href="${url}style_terang.css">`);
 	</script>
 	<script>eruda.init();</script>
 </head>
 
 <body>
+<div class="atas" id="atas"></div>
+<div class="tengah" id="tengah"></div>
+<div class="bawah" id="bawah"></div>
+
+<script>
+
+function makeButton(parent, kelas, teks, gambar=null, command=null) {
+	const btn = document.createElement("button");
+	btn.className = kelas;
+	
+	if (gambar) {
+		btn.style.display = "flex";
+		btn.style.alignItems = "center";
+		btn.style.gap = "6px";
+		const img = document.createElement("img");
+		img.src = gambar;
+		img.style.width = "25px";
+		img.style.height = "25px";
+		img.alt = "";
+		btn.appendChild(img);
+		btn.appendChild(document.createTextNode(teks));
+	} else { btn.textContent = teks; }
+	btn.onclick = function() {
+		setTimeout(command, 300);
+	}
+	parent.appendChild(btn);
+	return btn;
+}
+
+function setButtonBawah() {
+	const parent = document.getElementById("bawah");
+	const info = [
+		["Tambah investor", "Pictures/add.png", null],
+		["Lainnya", "Pictures/daftar.png", null]
+	]
+	for (const [teks, gambar, command] of info) {
+		makeButton(parent, "btn", teks, gambar, command);
+	}
+}
+
+window.onload = async function() {
+	setButtonBawah();
+}
+
+</script>
 	
 </body>
 </html>

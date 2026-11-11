@@ -645,7 +645,7 @@ app.get("/", (req,res) => {
 });
 
 app.get("/dashboard_admin", (req,res) => { res.sendFile(path.join(folderHtml, "proyek_fixed.html")); });
-app.get("/lain", (req,res) => { res.sendFile(path.join(folderHtml, "tictactoe.html")); });
+app.get("/lain", (req,res) => { res.sendFile(path.join(folderHtml, "mylampion.html")); });
 app.get("/manajemen_keuangan", (req,res) => { res.sendFile(path.join(folderHtml, "manajemen_keuangan.html")); });
 
 app.get("/tabel_tabel", (req, res) => {
