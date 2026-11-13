@@ -24,7 +24,7 @@ def create_table(name, table_header):
 		)
 	""")
 	
-create_table("investor", "id_investor TEXT, nama TEXT, alamat TEXT, kontak TEXT, email TEXT, status TEXT, tanggal_gabung TEXT, catatan TEXT")
+create_table("investor", "id_investor TEXT, nama TEXT, alamat TEXT, kontak TEXT, email TEXT, status TEXT, tanggal_gabung TEXT, catatan TEXT, informasi_rekening TEXT")
 create_table("data_saham", "id_investor TEXT, nama TEXT, saldo REAL, profit REAL, tanggal_update TEXT, keterangan TEXT")
 create_table("riwayat_saldo", "id_investor TEXT, tanggal TEXT, saldo_lama REAL, saldo_baru REAL, profit_lama REAL, profit_baru REAL, keterangan TEXT")
 create_table("persentase", "persen REAL")
@@ -79,6 +79,7 @@ class MainMenu:
 			"alamat": "",
 			"kontak": "",
 			"email": "",
+			"informasi rekening": "",
 			"catatan": ""
 		}
 		
@@ -94,12 +95,12 @@ class MainMenu:
 				INSERT INTO investor (
 					id_investor, nama, alamat,
 					kontak, email, status,
-					tanggal_gabung, catatan
-				) VALUES (?, ?, ?, ?, ?, ?, ?, ?)""",
+					tanggal_gabung, catatan, informasi_rekening
+				) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)""",
 				[
 					id, d["nama"], d["alamat"],
 					d["kontak"], d["email"], "non-active",
-					helper.now(), d["catatan"]
+					helper.now(), d["catatan"], d["informasi rekening"]
 				]
 			)
 			db.commit()
@@ -208,6 +209,7 @@ class MainMenu:
 		tabel = Table(title="Daftar saham dan investor", style=color)
 		for i, (teks, warna) in enumerate([
 			("No.", "white"),
+			("Id investor", "white"),
 			("Nama", "bold blue"),
 			("Saldo", "bold red"),
 			("Profit", "bold yellow")
@@ -216,7 +218,7 @@ class MainMenu:
 			tabel.add_column(teks, justify=rata, style=warna)
 		
 		for i, p in enumerate(data):
-			tabel.add_row(str(i+1), p["nama"], helper.format_uang(p["saldo"]), helper.format_uang(p["profit"]))
+			tabel.add_row(str(i+1), p["id_investor"], p["nama"], helper.format_uang(p["saldo"]), helper.format_uang(p["profit"]))
 		
 		print()
 		console.print(tabel)
@@ -389,6 +391,40 @@ class MainMenu:
 			import traceback
 			traceback.print_exc()
 			input(f"Gagal: {e}")
+			
+	def riwayat_saldo(self):
+		data = helper.open_data("riwayat_saldo");
+		print()
+		tabel = Table(title="Riwayat saldo", style=color)
+		for row in ["No.", "Aksi"]:
+			tabel.add_column(row, justify="left", style=color)
+		
+		for i, item in enumerate(data):
+			teks_panel = f"{'Tanggal':<15}: {item['tanggal']}\n"
+			id = item["id_investor"]
+			cursor.execute("SELECT nama FROM data_saham WHERE id_investor = ?", (id,))
+			n = cursor.fetchone()
+			nama = n["nama"] if n is not None else ""
+			teks_panel += f"{'Nama investor':<15}: {nama}\n"
+			for key, value in item.items():
+				val = helper.format_uang(value) if key.lower() in ["saldo_lama", "saldo_baru", "profit_lama", "profit_baru"] else str(value)
+				teks_panel += f"{key.replace("_"," ").capitalize():<15}: {val}\n"
+			teks_panel += "\n"
+			tabel.add_row(str(i+1), teks_panel)		 
+		print()
+		console.print(tabel)
+		input()
+		
+	def daftar_investor(self):
+		data = helper.open_data("investor");
+		tabel = Table(title="INVESTOR", style=color)
+		for t in ["No.", "Nama", "Alamat", "Kontak", "Email"]:
+			tabel.add_column(t, justify="left")
+		for i, p in enumerate(data):
+			tabel.add_row(str(i+1), p["nama"], p["alamat"], p["kontak"], p["email"])
+		print()
+		console.print(tabel)
+		input()
 																
 	def menu_utama(self):
 		while True:
@@ -410,7 +446,8 @@ class MainMenu:
 			
 			teks_menu = f"\n{'1. Tambah investor':<20} 2. Terbitkan saham"
 			teks_menu += f"\n{'3. Data saham':<20} 4. Pengaturan"
-			teks_menu += f"\n{'5. Profit usaha':<20}"
+			teks_menu += f"\n{'5. Profit usaha':<20} 6. Riwayat saldo"
+			teks_menu += f"\n{'7. Daftar investor':<20}"
 			teks_menu += f"\n{'9. Keluar':<20}"
 			panel_menu = Panel(
 				teks_menu,
@@ -425,6 +462,8 @@ class MainMenu:
 				"3": self.data_saham,
 				"4": self.pengaturan,
 				"5": self.profit_usaha,
+				"6": self.riwayat_saldo,
+				"7": self.daftar_investor,
 				"9": sys.exit
 			}
 			
