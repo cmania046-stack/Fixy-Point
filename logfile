@@ -580,3 +580,23 @@
 2026-11-12 22:57:38.057 WIT [9984] LOG:  database system is ready to accept connections
 2026-11-12 23:02:38.137 WIT [9990] LOG:  checkpoint starting: time
 2026-11-12 23:02:38.182 WIT [9990] LOG:  checkpoint complete: wrote 0 buffers (0.0%), wrote 3 SLRU buffers; 0 WAL file(s) added, 0 removed, 0 recycled; write=0.013 s, sync=0.002 s, total=0.047 s; sync files=2, longest=0.001 s, average=0.001 s; distance=0 kB, estimate=0 kB; lsn=0/23B7E78, redo lsn=0/23B7E20
+2026-11-13 20:38:03.696 WIT [21256] LOG:  starting PostgreSQL 18.6 on arm-unknown-linux-androideabi, compiled by Android (16134705, +pgo, +bolt, +lto, +mlgo, based on r574158c) clang version 21.0.0 (https://android.googlesource.com/toolchain/llvm-project 9f872551d3c681d06fd303b36f16ed5c274735eb), 32-bit
+2026-11-13 20:38:03.703 WIT [21256] LOG:  listening on IPv4 address "127.0.0.1", port 5432
+2026-11-13 20:38:03.705 WIT [21256] LOG:  listening on Unix socket "/data/data/com.termux/files/usr/tmp/.s.PGSQL.5432"
+2026-11-13 20:38:03.769 WIT [21264] LOG:  database system was interrupted; last known up at 2026-11-12 23:02:38 WIT
+2026-11-13 20:38:04.111 WIT [21264] LOG:  database system was not properly shut down; automatic recovery in progress
+2026-11-13 20:38:04.119 WIT [21264] LOG:  redo starts at 0/23B7E20
+2026-11-13 20:38:04.119 WIT [21264] LOG:  invalid record length at 0/23B7F28: expected at least 24, got 0
+2026-11-13 20:38:04.119 WIT [21264] LOG:  redo done at 0/23B7EF0 system usage: CPU: user: 0.00 s, system: 0.00 s, elapsed: 0.00 s
+2026-11-13 20:38:04.131 WIT [21262] LOG:  checkpoint starting: end-of-recovery immediate wait
+2026-11-13 20:38:04.146 WIT [21262] LOG:  checkpoint complete: wrote 0 buffers (0.0%), wrote 3 SLRU buffers; 0 WAL file(s) added, 0 removed, 0 recycled; write=0.005 s, sync=0.002 s, total=0.016 s; sync files=2, longest=0.001 s, average=0.001 s; distance=0 kB, estimate=0 kB; lsn=0/23B7F28, redo lsn=0/23B7F28
+2026-11-13 20:38:04.151 WIT [21256] LOG:  database system is ready to accept connections
+2026-11-13 20:46:52.140 WIT [21256] LOG:  received fast shutdown request
+2026-11-13 20:46:52.143 WIT [21256] LOG:  aborting any active transactions
+2026-11-13 20:46:52.152 WIT [21256] LOG:  background worker "logical replication launcher" (PID 21267) exited with exit code 1
+2026-11-13 20:46:52.157 WIT [21262] LOG:  shutting down
+2026-11-13 20:46:52.160 WIT [21262] LOG:  checkpoint starting: shutdown immediate
+2026-11-13 20:46:52.185 WIT [21262] LOG:  checkpoint complete: wrote 0 buffers (0.0%), wrote 0 SLRU buffers; 0 WAL file(s) added, 0 removed, 0 recycled; write=0.009 s, sync=0.001 s, total=0.028 s; sync files=0, longest=0.000 s, average=0.000 s; distance=0 kB, estimate=0 kB; lsn=0/23B7FD8, redo lsn=0/23B7FD8
+2026-11-13 20:46:52.215 WIT [21256] LOG:  database system is shut down
+2026-11-13 22:26:50.658 WIT [23606] FATAL:  lock file "postmaster.pid" already exists
+2026-11-13 22:26:50.658 WIT [23606] HINT:  Is another postmaster (PID 30300) running in data directory "/data/data/com.termux/files/usr/var/lib/postgresql"?

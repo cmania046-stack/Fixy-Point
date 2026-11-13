@@ -58,9 +58,11 @@ def cari_lagu():
 			
 def main_menu():
 	while True:
-		teks_panel = ""
+		print()
+		teks_panel = "\n"
 		for i, key in enumerate(list(musics.keys())):
-			teks_panel += f"{i+1}. {key}\n"
+			t = key[:30] + "..." if len(key) > 30 else key
+			teks_panel += f"{i+1}. {t}\n"
 			
 		panel = Panel(teks_panel, title="My Musics", border_style="bold red")
 		print()

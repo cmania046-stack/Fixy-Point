@@ -110,7 +110,7 @@ const allowedMethods = [
 ];
 
 const existedTable = [
-	"vouchers_data", "ketentuan_voucher", "stok_flow", "users", "vipayment", "info_admin", "pin", "keuangan_lengkap", "aset_lain", "kewajiban", "Pengeluaran", "profil", "produk", "riwayat_utama", "margin", "produk_diskon", "keuangan", "operator",
+	"riwayat_profit", "persentase", "riwayat_saldo", "data_saham", "investor", "vouchers_data", "ketentuan_voucher", "stok_flow", "users", "vipayment", "info_admin", "pin", "keuangan_lengkap", "aset_lain", "kewajiban", "Pengeluaran", "profil", "produk", "riwayat_utama", "margin", "produk_diskon", "keuangan", "operator",
 	"device", "customer", "supplier", "pajak", "riwayat_pajak", "riwayat_penjualan_campuran",
 	"media_bayar", "cadangan_keranjang", "hak_akses", "status_qr", "riwayat_login", "shift",
 	"produk_tingkat", "tingkat_a", "tingkat_b", "validasi_owner", "pengaturan_nota", "riwayat_retur",
@@ -198,7 +198,35 @@ const pool = new Pool({
 	max: 10
 });
 
+const poolInvest = new Pool({
+	host: "localhost",
+	user: process.env.INVEST_USER,
+	password: process.env.INVEST_PASSWORD,
+	database: process.env.DATABASE_KEDUA,
+	max: 10
+});
+
 class Database {
+	async createUser(cl, user, us, pw) {
+		const cekUser = await cl.query("SELECT 1 FROM pg_roles WHERE rolname=$1", [user])
+		if (cekUser.rows.length === 0) {
+			await cl.query(`CREATE USER ${us} WITH PASSWORD ${pw}`);
+			console.log(`User ${user} telah ditambahkan`);
+		} else {
+			console.log(`User ${user} telah ada. Proses dilewati`)
+		}
+	}
+	
+	async createDB(cl, database, db, us) {
+		const cekDb = await cl.query("SELECT 1 FROM pg_database WHERE datname = $1", [database])
+		if (cekDb.rows.length === 0) {
+			await cl.query(`CREATE DATABASE ${db} OWNER ${us}`);
+			console.log(`Database ${database} telah dibuat`);
+		} else {
+			console.log(`Database ${database} sudah ada. Proses dilewati`);
+		}
+	}
+	
 	async setupDatabase() {
 		const client = new Client({
 			host: "localhost",
@@ -211,22 +239,17 @@ class Database {
 		const us = escapeIdentifier(process.env.USER_POSTGRE);
 		const pw = escapeLiteral(process.env.PASSWORD_POSTGRE);
 		const db = escapeIdentifier(process.env.DATABASE);
-
-		const cekUser = await client.query("SELECT 1 FROM pg_roles WHERE rolname=$1", [process.env.USER_POSTGRE]);
-		if (cekUser.rows.length === 0) {
-			await client.query(`CREATE USER ${us} WITH PASSWORD ${pw}`);
-			console.log("User baru telah ditambahkan");
-		} else {
-			console.log("User sudah ada. Proses dilewati...");
-		}
-
-		const cekDb = await client.query(`SELECT 1 FROM pg_database WHERE datname=$1`, [process.env.DATABASE]);
-		if (cekDb.rows.length === 0) {
-			await client.query(`CREATE DATABASE ${db} OWNER ${us}`);
-			console.log(`Database telah dibuat. Owner: ${process.env.USER_POSTGRE}`);
-		} else {
-			console.log("Database sudah ada. Proses dilewati...");
-		}
+		
+		const investDB = escapeIdentifier(process.env.DATABASE_KEDUA);
+		const investUS = escapeIdentifier(process.env.INVEST_USER);
+		const investPW = escapeLiteral(process.env.INVEST_PASSWORD);
+	
+		await this.createUser(client, process.env.USER_POSTGRE, us, pw);
+		await this.createUser(client, process.env.INVEST_USER, investUS, investPW);
+	
+		await this.createDB(client, process.env.DATABASE, db, us);
+		await this.createDB(client, process.env.DATABASE_KEDUA, investDB, investUS);
+		
 		await client.end();
 		console.log(`\nInisialisasi database berhasil`);
 	}
@@ -249,6 +272,32 @@ class Database {
 		const result = await cl.query(`SELECT COUNT(*) AS total FROM ${table}`);
 		const total = Number(result.rows[0].total);
 		if (total === 0) await cl.query(`INSERT INTO ${table} DEFAULT VALUES`);
+	}
+	
+	async createTablesInvest() {
+		console.log("\n\nMemulai pembuatan tabel invest...\n");
+		const cl = new Client({
+			host: "localhost",
+			user: process.env.INVEST_USER,
+			password: process.env.INVEST_PASSWORD,
+			database: process.env.DATABASE_KEDUA
+		});
+		await cl.connect();
+		await cl.query("BEGIN");
+		try {
+			await this.createTable(cl, "investor", "id_investor TEXT, nama TEXT, alamat TEXT, kontak TEXT, email TEXT, status TEXT, tanggal_gabung TEXT, catatan TEXT, informasi_rekening TEXT");
+			await this.createTable(cl, "data_saham", "id_investor TEXT, nama TEXT, saldo REAL, profit REAL, tanggal_update TEXT, keterangan TEXT");
+			await this.createTable(cl, "riwayat_saldo", "id_investor TEXT, tanggal TEXT, saldo_lama REAL, saldo_baru REAL, profit_lama REAL, profit_baru REAL, keterangan TEXT");
+			await this.createTable(cl, "persentase", "persen REAL");
+			await this.createTable(cl, "riwayat_profit", "id_profit TEXT, nilai REAL, tanggal TEXT, data_pembagian TEXT, potongan_proporsional REAL");
+			await cl.query("COMMIT");
+		} catch (err) {
+			await cl.query("ROLLBACK");
+			console.error(err.message);
+		} finally {
+			console.log("\nPembuatan tabel berhasil");
+			await cl.end();
+		}
 	}
 
 	async createTables() {
@@ -805,6 +854,29 @@ app.get("/permintaan_pendaftaran_user", async (req,res) => {
 	} finally { await catatLog(req.path, res.statusCode); }
 });
 
+app.get("/lihat_data_invest", async (req,res) => {
+	try {
+		const tabel = req.query.tabel;
+		const token = req.cookies.SESSION_TOKEN;
+		if (!token) throw new Error("Token diperlukan. Silahkan login terlebih dahulu untuk mendapatkan token");
+		if (!(periksaToken(token))) throw new Error(`Token Anda palsu atau kadaluarsa. Akses ditolak\nUser tried to access ${tabel}`);
+
+		if (!existedTable.includes(tabel)) throw new Error(`Tabel ${tabel} tidak tersedia`);
+		const { rows: data } = await poolInvest.query(`SELECT * FROM ${tabel}`);
+		if (data.length) {
+			const firstData = Object.keys(data[0]);
+			const keyKolom = firstData.includes("waktu") ? "waktu" : "tanggal";
+			if (firstData.includes("waktu") || firstData.includes("tanggal")) {
+				return res.json(data.sort((a,b) => parseDate(b[keyKolom]) - parseDate(a[keyKolom])));
+			}
+			return res.json(data);
+		}
+		return res.json([]);
+	} catch (err) {
+		console.error(err.message);
+		res.json([]);
+	} finally { await catatLog(req.path + "/" + req.query.tabel, res.statusCode); }
+});
 
 app.get("/lihat_data", async (req,res) => {
 	try {
@@ -4492,6 +4564,8 @@ const init = new Database();
 app.listen(3000, async () => {
 	await init.setupDatabase();
 	await init.createTables();
+	await init.createTablesInvest();
+	
 	const garis = c.bold + c.cyan + "═".repeat(45) + c.reset;
 	console.log(`
 ${garis}

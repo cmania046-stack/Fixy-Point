@@ -14,13 +14,86 @@
 </head>
 
 <body>
-<div class="atas" id="atas"></div>
+
+<div class="load-container" style="display: none;">
+	<div class="laptop"></div>
+	<p class="proses" id="proses">Processing...</p>
+</div>
+
+<div class="lc hidden" id="logincontainer">
+  <div class="lc-content"></div>
+</div>
+
+<div id="customModal" class="custom-modal hidden">
+	<div class="custom-modal-content">
+	    <h3 id="modalTitle">Judul</h3>
+	    <p id="modalMessage">Pesan</p>
+	    <input type="text" id="modalInput" placeholder="Masukkan sesuatu..." class="hidden">
+	    <div class="modal-actions">
+	        <button id="modalBtnOK" class="btn">OK</button>
+	        <button id="modalBtnCancel" class="btn btn-cancel">Batal</button>
+    	</div>
+	</div>
+</div>	
+	
+<div class="atas" id="atas">
+	<h5 class="judul-opsi" id="judul-atas"></h5>
+</div>
 <div class="tengah" id="tengah"></div>
 <div class="bawah" id="bawah"></div>
 
 <script>
 
-function makeButton(parent, kelas, teks, gambar=null, command=null) {
+let idDevice;
+let user;
+let inisialCode;
+let status;
+let formatUang = ["Rp", "kiri", ".", ",", "2"];
+
+const judulAtas = document.getElementById("judul-atas");
+judulAtas.style.marginLeft = "10px";
+document.getElementById("tengah").style.overflowX = "auto";
+
+function formatMataUang(uang) {
+	if (formatUang[1] === "kiri") {
+		return formatUang[0] + uang.toString().replace(/\B(?=(\d{3})+(?!\d))/g, formatUang[2]);
+	} else {
+		return uang.toString().replace(/\B(?=(\d{3})+(?!\d))/g, formatUang[2]) + formatUang[0];
+	}
+}
+
+function makeButton(kelas, teks, command, image=null, parent=null, bg=null, fg=null, fw=null) {
+	const btn = document.createElement("button");
+	btn.className = kelas;
+	
+	if (bg && fg && fw) {
+		btn.style.background = bg;
+		btn.style.color = fg;
+		btn.style.fontWeight = fw;
+	}
+
+	if (image) {
+		btn.style.display = "flex";
+		btn.style.alignItems = "center";
+		btn.style.gap = "6px";
+		const img = document.createElement("img");
+		img.src = url + image;
+		img.style.width = "25px";
+		img.style.height = "25px";
+		img.alt = "";
+		btn.appendChild(img);
+		btn.appendChild(document.createTextNode(teks));
+	} else {
+		btn.textContent = teks;
+	}
+	btn.onclick = function() {
+		setTimeout(command, 300);
+	}
+	if (parent) parent.appendChild(btn);
+	return btn;
+}
+
+function newmakeButton(parent, kelas, teks, gambar=null, command=null) {
 	const btn = document.createElement("button");
 	btn.className = kelas;
 	
@@ -30,8 +103,8 @@ function makeButton(parent, kelas, teks, gambar=null, command=null) {
 		btn.style.gap = "6px";
 		const img = document.createElement("img");
 		img.src = gambar;
-		img.style.width = "25px";
-		img.style.height = "25px";
+		img.style.width = "30px";
+		img.style.height = "30px";
 		img.alt = "";
 		btn.appendChild(img);
 		btn.appendChild(document.createTextNode(teks));
@@ -46,16 +119,514 @@ function makeButton(parent, kelas, teks, gambar=null, command=null) {
 function setButtonBawah() {
 	const parent = document.getElementById("bawah");
 	const info = [
-		["Tambah investor", "Pictures/add.png", null],
-		["Lainnya", "Pictures/daftar.png", null]
+		["Investor", "Pictures/investor.png", null],
+		["Saham", "Pictures/saham.png", null]
 	]
 	for (const [teks, gambar, command] of info) {
-		makeButton(parent, "btn", teks, gambar, command);
+		newmakeButton(parent, "btn", teks, gambar, command);
+	}
+	parent.querySelectorAll("button").forEach(item => {
+		item.style.display = "flex";
+		item.style.flexDirection = "column";
+		item.style.border = "none";
+		item.style.background = "transparent";
+		item.style.boxShadow = "none";
+		item.style.justifyContent = "center";
+		item.style.alignItems = "center";
+	});
+}
+
+async function prepareIdDevice() {
+	const idev = localStorage.getItem("id_device") ?? "";
+	if (!idev.length) {
+		const id = await getDt("make_id_device");
+		localStorage.setItem("id_device", id.id);
+		idDevice = id.id;		
+	}
+	idDevice = idev;
+}
+
+function resetJudul(teks) {
+	judulAtas.textContent = teks;
+}
+
+function makeParent(kelas, parent=null) {
+	const div = document.createElement("div");
+	div.className = kelas;
+	if (parent) parent.appendChild(div);
+	return div
+}
+
+function makeLabel(teks, kelas, parent=null) {
+	const lbl = document.createElement("p");
+	lbl.textContent = teks;
+	lbl.className = kelas;
+	if (parent) parent.appendChild(lbl);
+	return lbl;
+}
+
+function entryMaker(placeholder, tipe, gambar, parent){
+	const fr = document.createElement("div");
+	fr.className = "inp";
+	fr.style.position = "relative";
+	
+	const image = document.createElement("img");
+	image.src = url + gambar;
+	image.style.display = "block";
+	image.style.width = "25px";
+	image.style.height = "25px";
+	image.style.flexShrink = "0";
+	image.style.flexGrow = "0";
+	image.style.border = "none";
+	image.style.borderRadius = "0";
+	image.style.background = "transparent";
+	fr.appendChild(image);
+
+	const entry = document.createElement("input");
+	entry.placeholder = placeholder;
+	entry.type = tipe;
+	entry.style.border = "none";
+	entry.style.outline = "none";
+	entry.style.height = "100%";
+	entry.style.flex = "1";
+	entry.style.minWidth = "0";
+	entry.style.boxSizing = "border-box";
+	fr.appendChild(entry);
+
+	parent.appendChild(fr);
+	return entry;
+}
+
+function pwMaker(placeholder, tipe, gambar, parent){
+	const fr = document.createElement("div");
+	fr.className = "inp";
+	fr.style.position = "relative";
+	
+	const image = document.createElement("img");
+	image.src = url + gambar;
+	image.style.display = "block";
+	image.style.width = "25px";
+	image.style.height = "25px";
+	image.style.flexShrink = "0";
+	image.style.flexGrow = "0";
+	image.style.border = "none";
+	image.style.borderRadius = "0";
+	image.style.background = "transparent";
+	fr.appendChild(image);
+
+	const entry = document.createElement("input");
+	entry.placeholder = placeholder;
+	entry.type = tipe;
+	entry.style.border = "none";
+	entry.style.outline = "none";
+	entry.style.height = "100%";
+	entry.style.flex = "1";
+	entry.style.minWidth = "0";
+	entry.style.boxSizing = "border-box";
+	fr.appendChild(entry);
+
+	parent.appendChild(fr);
+	return [fr, entry];
+}
+
+
+async function postDataKedua(endpoint, data) {
+	showPopupLoading();
+	try {
+		const res = await fetch(url + "post_data/" + endpoint, {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json",
+				},
+				body: JSON.stringify(data),
+				credentials: "include"
+		});
+		const d = await res.json();
+		hidePopupLoading();
+		return d;
+	} catch (error) {
+		hidePopupLoading();
+		mainkanBeep(300,0.3);
+		await modalShow(gagal, "Gagal upload data ke server");
+		return null;
+	};
+}
+
+async function postData(endpoint, data) {
+	showPopupLoading();
+	try {
+		const res = await fetch(url + endpoint, {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json",
+				},
+				body: JSON.stringify(data),
+				credentials: "include"
+		});
+		const d = await res.json();
+		hidePopupLoading();
+		return d;
+	} catch (error) {
+		hidePopupLoading();
+		mainkanBeep(300,0.3);
+		await modalShow(gagal, "Gagal upload data ke server");
+		return null;
+	};
+}
+
+async function getDt(endpoint) {
+	try {
+		const response = await fetch(url + endpoint, {
+			method: "GET",
+			credentials: "include"
+		});
+		const data = await response.json();
+		return data;
+	} catch (e) {
+		await modalShow(error, e);
+		return null
 	}
 }
 
+async function getData(endpoint, cache=false) {
+	showPopupLoading(`Menyiapkan data ${endpoint.replace(/_/g, " ")}...`);
+	try {
+		const URL = `lihat_data_invest?tabel=${encodeURIComponent(endpoint)}`;
+		const res = await fetch(url + URL, {
+			method: "GET",
+			headers: {
+				"Accept": "application/json"
+			},
+			credentials: "include"
+		});
+		if (res.status === 401) {
+			hidePopupLoading();
+			return [];
+		}
+		const data = await res.json();
+		if (cache) localStorage.setItem(endpoint, JSON.stringify(data));
+		hidePopupLoading();
+		return data;
+	} catch {
+		hidePopupLoading();
+		await modalShow(gagal, "Koneksi server tidak aktif. Data memakai cadangan data", false);
+		const data = localStorage.getItem(endpoint);
+		return data ? JSON.parse(data) : [];
+	}
+}
+
+function showPopupLoading(judul="Processing...") {
+	document.getElementById("proses").textContent = judul;
+	document.querySelector(".load-container").style.display = "flex";
+}
+function hidePopupLoading() {
+	document.querySelector(".load-container").style.display = "none";
+}
+
+let _modalResolve = null;
+
+function modalShow(title, message, showInput = false) {
+    if (_modalResolve) {
+        const prev = _modalResolve;
+        _modalResolve = null;
+        prev(null);
+    }
+
+    return new Promise((resolve) => {
+        _modalResolve = resolve;
+
+        const modal     = document.getElementById("customModal");
+        const elTitle   = document.getElementById("modalTitle");
+        const elMessage = document.getElementById("modalMessage");
+        const input     = document.getElementById("modalInput");
+        const btnOK     = document.getElementById("modalBtnOK");
+        const btnCancel = document.getElementById("modalBtnCancel");
+
+        elTitle.textContent   = title;
+        elMessage.textContent = message;
+
+        input.value = "";
+        input.classList.toggle("hidden", !showInput);
+
+        btnOK.onclick     = null;
+        btnCancel.onclick = null;
+        input.onkeydown   = null;
+        input.onkeyup     = null;
+
+        modal.classList.remove("hidden");
+
+        if (showInput) {
+            setTimeout(() => input.focus(), 0);
+        } else {
+            if (document.activeElement && document.activeElement.blur) {
+                document.activeElement.blur();
+            }
+        }
+
+        const selesai = (value) => {
+            if (_modalResolve !== resolve) return;
+            _modalResolve = null;
+
+            modal.classList.add("hidden");
+
+            btnOK.onclick     = null;
+            btnCancel.onclick = null;
+            input.onkeydown   = null;
+            input.onkeyup     = null;
+
+            input.blur();
+            input.value = "";
+
+            resolve(value);
+        };
+
+        btnOK.onclick = () => {
+            if (showInput) {
+                const val = input.value ?? "";
+                selesai(val);
+            } else {
+                selesai(true);
+            }
+        };
+
+        btnCancel.onclick = () => selesai(null);
+
+        if (showInput) {
+            input.onkeydown = (e) => {
+                if (e.key === "Enter") {
+                    e.preventDefault();
+                    btnOK.click();
+                }
+                if (e.key === "Escape") {
+                    e.preventDefault();
+                    btnCancel.click();
+                }
+            };
+        } else {
+            const escHandler = (e) => {
+                if (e.key === "Escape") {
+                    e.preventDefault();
+                    document.removeEventListener("keydown", escHandler, true);
+                    btnCancel.click();
+                }
+            };
+            document.addEventListener("keydown", escHandler, true);
+        }
+    });
+}
+
+function pieMaker(parent, jdl, subjdl, lbls, data, warna = null) {
+	const wadah = document.createElement("div");
+	wadah.className = "container";
+	const judul = document.createElement("h3");
+	judul.className = "teks";
+	judul.textContent = jdl;
+	const subjudul = document.createElement("p");
+	subjudul.className = "biasa";
+	subjudul.textContent = subjdl;
+	const subparent = document.createElement("div");
+	subparent.className = "chart-wrap";
+	const canvas = document.createElement("canvas");
+	subparent.appendChild(canvas);
+
+	const dataset = { data: data };
+	if (warna) dataset.backgroundColor = warna;
+
+	new Chart(canvas, {
+		type: "pie",
+		data: {
+			labels: lbls,
+			datasets: [dataset]
+		},
+		options: {
+			responsive: true,
+			maintainAspectRatio: false,
+			plugins: {
+				legend: { display: true, position: "bottom" }
+			}
+		}
+	});
+
+	for (const item of [judul, subjudul, subparent]) {
+		wadah.appendChild(item);
+	}
+	parent.appendChild(wadah);
+}
+
+function makeTable(head) {
+	const table = document.createElement("table");
+	table.className = "table-produk";
+
+	const thead = document.createElement("thead");
+	thead.innerHTML = head;
+
+	const tbody = document.createElement("tbody");
+
+	table.appendChild(thead);
+	table.appendChild(tbody);
+
+	const originalAppend = table.appendChild.bind(table);
+
+	table.appendChild = function(child) {
+		if (child.tagName === "TR") {
+			return tbody.appendChild(child);
+		}
+		return originalAppend(child);
+	};
+
+	return table;
+}
+
+class Login {
+	constructor() {
+		this.data = null;
+	}
+	
+	makeJudul(teks, parent) {
+		const jdl = makeLabel(teks, "jdl", parent);
+		jdl.style.alignSelf = "center";
+		jdl.style.fontSize = "24px";
+		jdl.style.fontWeight = "700";
+		jdl.style.color = "#1a1a1a";
+		jdl.style.letterSpacing = "1px";
+		jdl.style.marginBottom = "10px";
+	}
+	
+	makeTombol(teks, parent) {
+		const btn = makeButton("invisible-btn", teks, null, null, parent);
+		btn.style.display = "block";
+		btn.style.textAlign = "center";
+		return btn;
+	}
+	
+	async validasi(form){
+		const id = localStorage.getItem("id_device");
+		const us = form.username.value.trim();
+		const pw = form.password.value;
+		const hasil = await postDataKedua("periksa_login_web", {username: us, password: pw, idDevice: id});
+		if (hasil.stat.toLowerCase() == "berhasil"){
+			user = hasil.nama;
+			inisialCode = hasil.id;
+			status = hasil.status;
+			setButtonBawah();
+			dash.setup();
+		} else {
+			await modalShow(hasil.stat, hasil.pesan);
+		}
+	}
+	
+	buildFrames() {
+		const p = makeParent("container", this.tengah);
+		p.style.width = "100%";
+		p.style.height = "100%";
+		p.style.justifyContent = "center";
+		p.style.alignItems = "center";
+		p.style.backgroundColor = "transparent";
+		p.style.border = "none";
+		
+		const logParent = makeParent("container", p);
+		logParent.style.backgroundColor = "#ffffff";
+		logParent.style.borderRadius = "12px";
+		logParent.style.boxShadow = "0 8px 24px rgba(0, 0, 0, 0.3)";
+		logParent.style.padding = "40px 30px";
+		logParent.style.gap = "5px";
+		logParent.style.width = "90%";
+		logParent.style.maxWidth = "400px";
+		logParent.style.border = "none";
+		
+		this.makeJudul("LOGIN FORM", logParent);
+		const form = this.pembuatHalamanLogin(logParent);
+		form["username"].focus();
+		form["password"].addEventListener("keydown", (e) => {
+			if (e.key === "Enter") this.validasi(form);
+		});
+		const btnLogin = makeButton("btn", "Login", () => this.validasi(form), null, logParent);
+	}
+	
+	pembuatHalamanLogin(p) {
+		makeLabel("Username", "teks", p);
+		const us = entryMaker("Masukkan nama pengguna...", "text", "Pictures/username.png", p);
+		makeLabel("Password", "teks", p);
+		const [prt, pw] = pwMaker("Masukkan kata sandi...", "password", "Pictures/eyebrow.png", p);
+		const img = prt.querySelector("img");
+		img.onclick = () => {
+			if (pw.type === "password") {
+				img.src = "Pictures/see.png";
+				pw.type = "text";
+			} else {
+				img.src = "Pictures/eyebrow.png";
+				pw.type = "password";
+			}
+		}
+		return { username: us, password: pw }
+	}
+	
+	async setup() {
+		resetJudul("HALAMAN LOGIN");
+		this.tengah = document.getElementById("tengah");
+		this.tengah.innerHTML = "";
+		this.buildFrames();
+	}
+}
+
+class Dashboard {
+	tampilkanSaham() {
+		this.tengah.innerHTML = "";
+		const totalModal = this.dataSaham.reduce((item, b) => item + b.saldo,0);
+		makeLabel(`Total keseluruhan investasi: ${formatMataUang(totalModal)}`, "label-data", this.tengah);
+		
+		const namaInvestor = [], persenSaham = [];
+		for (const p of this.dataSaham) {
+			namaInvestor.push(p.nama);
+			const persentase = p.saldo / totalModal * 100;
+			persenSaham.push(Math.round(persentase));
+		}	
+		pieMaker(this.tengah, "Persentase saham", "Persentase saham investor", namaInvestor, persenSaham);
+		
+		const tabel = makeTable(`
+			<tr>
+				<th>Id investor</th>
+				<th>Nama investor</th>
+				<th>Saldo investasi</th>
+				<th>Profit tersedia</th>
+				<th>Tanggal update</th>
+				<th>Keterangan</th>
+			</tr>
+		`);
+		this.tengah.appendChild(tabel);
+		for (const item of this.dataSaham) {
+			const tr = document.createElement("tr");
+			tr.innerHTML = `
+				<td>${item.id_investor}</td>
+				<td>${item.nama}</td>
+				<td>${formatMataUang(item.saldo)}</td>
+				<td>${formatMataUang(item.profit)}</td>
+				<td>${item.tanggal_update}</td>
+				<td>${item.keterangan}</td>
+			`;
+			tabel.appendChild(tr);
+		}
+	}
+	
+	async setup() {
+		resetJudul("BERANDA")
+		this.tengah = document.getElementById("tengah");
+		this.tengah.innerHTML = "";
+		this.dataSaham = await getData("data_saham");
+		this.tampilkanSaham();
+	}
+}
+
+const login = new Login();
+const dash = new Dashboard()
+
 window.onload = async function() {
+	prepareIdDevice();
+	resetJudul("Manajemen keuangan dan saham");
+	//login.setup();
 	setButtonBawah();
+	dash.setup();
+	
 }
 
 </script>

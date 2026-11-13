@@ -492,7 +492,7 @@ textarea::placeholder {
 	border-radius: 2px 2px 0 0;
 }
 
-.bawah img:first-child {
+.bawah > img:first-child {
 	margin-left: auto;
 }
 
@@ -516,7 +516,6 @@ textarea::placeholder {
 
 .bawah button:hover {
 	background: var(--primary-soft);
-	color: var(--primary);
 }
 
 .bawah button:active {
