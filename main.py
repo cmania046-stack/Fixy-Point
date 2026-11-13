@@ -4,7 +4,7 @@ from rich.console import Console
 from rich.panel import Panel
 from rich.table import Table
 
-color = "bold cyan"
+color = "bold green"
 warna_teks = "\033[1;36m"
 reset = "\033[0m"
 
@@ -223,7 +223,8 @@ class MainMenu:
 		print()
 		console.print(tabel)
 		teks_panel = "1. Detail - <det> <nomor>\n2. Edit - <edit> <nomor>\n"
-		teks_panel += "3. Tambah profit - <add> <nomor>\n4. Potong profit - <cut> <nomor>"
+		teks_panel += "3. Tambah profit - <add> <nomor>\n4. Potong profit - <cut> <nomor>\n"
+		teks_panel += "5. Cairkan - <take> <nomor>"
 		panel_menu = Panel(teks_panel, title="Menu lanjutan", border_style=color)
 		print()
 		console.print(panel_menu)
@@ -242,7 +243,8 @@ class MainMenu:
 			"det": self.detail,
 			"edit": self.edit,
 			"add": self.tambah,
-			"cut": self.potong
+			"cut": self.potong,
+			"take": self.cairkan_profit
 		}
 		data = dt[int(nm) - 1]
 		map_command[cm](data)
@@ -258,6 +260,19 @@ class MainMenu:
 		print()
 		console.print(panel_info)
 		input()
+		
+	def cairkan_profit(self, data):
+		helper.judul("Informasi investor", 10)
+		for key, value in data.items():
+			val = str(value) if key.lower() not in ["saldo", "profit"] else helper.format_uang(value)
+			print(f"{key.capitalize().replace('_',' '):<20}: {val}")
+		cursor.execute(f"SELECT informasi_rekening FROM investor WHERE id_investor = ?", (data.get("id_investor",""),))
+		rekening = cursor.fetchone()
+		nomor_rekening = rekening["informasi_rekening"] if rekening is not None else ""
+		konfirmasi = input(f"\nAnda akan mencairkan profit milik {data['nama']} senilai {helper.format_uang(data['profit'])}. Silahkan masukkan nilai dan transfer ke {nomor_rekening}\n ")
+		if not konfirmasi.isdigit():
+			print("Input tidak valid")
+			return
 		
 	def edit(self, data):
 		pass
