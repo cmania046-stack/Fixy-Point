@@ -23,6 +23,8 @@ const listTanggal = [
 const listWaktu = ["H:m:s", "H/m/s", "H.m.s", "H:m", "H/m", "H.m"];
 
 const allowedMethods = [
+	"terbitkan_saham",
+	"tambah_investor",
 	"pulihkan_tabel",
 	"backup_tabel",
 	"pulihkan_seluruh_data",
@@ -2090,6 +2092,91 @@ class PostData {
 	constructor(data, req) {
 		this.data = data;
 		this.req = req;
+	}
+	
+	async terbitkan_saham() {
+		const d = this.data;
+		const investor = (d.investor ?? "").split(" - ");
+		const id = investor[0], nama = investor[1];
+		const modal = d.modal ?? 0;
+		const client = await poolInvest.connect();
+		try {
+			await client.query("BEGIN");
+	
+			const { rows: [data = {}] } = await client.query(
+				"SELECT id, saldo, profit FROM data_saham WHERE id_investor = $1", [id]
+			);
+			const saldoTerakhir = data.saldo ?? 0;
+			const profit = data.profit ?? 0;
+			const saldoBaru = saldoTerakhir + modal;
+	
+			await client.query(`
+				INSERT INTO data_saham (
+					id, id_investor, nama, saldo, profit,
+					tanggal_update, keterangan
+				) VALUES (
+					COALESCE($1::int, nextval(pg_get_serial_sequence('data_saham', 'id'))),
+					$2, $3, $4, $5, $6, $7
+				)
+				ON CONFLICT(id) DO UPDATE SET
+					id_investor = excluded.id_investor,
+					nama = excluded.nama,
+					saldo = excluded.saldo,
+					profit = excluded.profit,
+					tanggal_update = excluded.tanggal_update,
+					keterangan = excluded.keterangan
+				`, [
+					data.id ?? null, id, nama, saldoBaru, 0,
+					await nowStr(), d.keterangan ?? ""
+				]
+			);
+	
+			await client.query(`
+				INSERT INTO riwayat_saldo (
+					id_investor, tanggal, saldo_lama, saldo_baru,
+					profit_lama, profit_baru, keterangan
+				) VALUES ($1, $2, $3, $4, $5, $6, $7)`, [
+					id, await nowStr(), saldoTerakhir, saldoBaru,
+					profit, profit, "Penerbitan saham baru"
+				]
+			);
+			
+			await client.query(`
+				UPDATE investor SET status = $1
+				WHERE id_investor = $2`, [
+					"active", id
+				]
+			);
+	
+			await client.query("COMMIT");
+			return [{
+				stat: "Berhasil",
+				pesan: `Saham untuk ${nama} senilai ${modal} telah disimpan`
+			}, 200];
+		} catch (err) {
+			await client.query("ROLLBACK");
+			return errorReturn(err);
+		} finally { client.release(); }
+	}
+	
+	async tambah_investor() {
+		const d = this.data;
+		try {
+			await poolInvest.query(`
+				INSERT INTO investor (
+					id_investor, nama, alamat, kontak, email,
+					status, tanggal_gabung, catatan, informasi_rekening
+				) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`, [
+					crypto.randomUUID().slice(0,10).replaceAll("-","").toUpperCase(),
+					d.nama || "", d.alamat || "", d.kontak || "", d.email || "",
+					"non-active", await nowStr(), d.catatan || "", d["informasi rekening"] || ""
+				]
+			);
+			return [{
+				stat: "Berhasil",
+				pesan: `Investor ${d.nama || "-"} telah ditambahkan`
+			}, 200];	
+		} catch (e) { return errorReturn(e); }
 	}
 	
 	async pulihkan_tabel() {
