@@ -23,6 +23,7 @@ const listTanggal = [
 const listWaktu = ["H:m:s", "H/m/s", "H.m.s", "H:m", "H/m", "H.m"];
 
 const allowedMethods = [
+	"tambah_proporsi_saham",
 	"terbitkan_saham",
 	"tambah_investor",
 	"pulihkan_tabel",
@@ -698,6 +699,7 @@ app.get("/", (req,res) => {
 app.get("/dashboard_admin", (req,res) => { res.sendFile(path.join(folderHtml, "proyek_fixed.html")); });
 app.get("/lain", (req,res) => { res.sendFile(path.join(folderHtml, "mylampion.html")); });
 app.get("/manajemen_keuangan", (req,res) => { res.sendFile(path.join(folderHtml, "manajemen_keuangan.html")); });
+app.get("/customer", (req,res) => { res.sendFile(path.join(folderHtml, "Customer2.html")); });
 
 app.get("/tabel_tabel", (req, res) => {
 	res.json(existedTable);
@@ -2092,6 +2094,47 @@ class PostData {
 	constructor(data, req) {
 		this.data = data;
 		this.req = req;
+	}
+	
+	async tambah_proporsi_saham() {
+		const d = this.data;
+		const data = d.data ?? {};
+		if (kosong(data)) return [{
+			stat: "Gagal",
+			pesan: "Data info investor diperlukan"
+		}, 400];
+		const client = await poolInvest.connect();
+		try {
+			await client.query("BEGIN");
+			const saldoBaru = (data.saldo ?? 0) + (d.tambahan ?? 0);
+			await client.query(`
+				INSERT INTO riwayat_saldo (
+					id_investor, tanggal, saldo_lama, saldo_baru,
+					profit_lama, profit_baru, keterangan
+				) VALUES ($1, $2, $3, $4, $5, $6, $7)`, [
+					data.id_investor ?? "", await nowStr(), data.saldo ?? 0, saldoBaru,
+					data.profit ?? 0, data.profit ?? 0, "Tambah proporsi saham"
+				]
+			);
+			
+			await client.query(`
+				UPDATE data_saham SET
+					saldo = $1,
+					tanggal_update = $2,
+					keterangan = $3
+				WHERE id_investor = $4`, [
+					saldoBaru, await nowStr(), "Penambahan proporsi saham",
+					data.id_investor ?? ""
+				]
+			);
+			
+			await client.query("COMMIT");
+			return [{
+				stat: "Berhasil",
+				pesan: `Saldo ${data.nama ?? ""} telah ditambahkan`
+			}, 200];
+		} catch (e) { await client.query("ROLLBACK"); return errorReturn(e); }
+		finally { client.release(); }
 	}
 	
 	async terbitkan_saham() {

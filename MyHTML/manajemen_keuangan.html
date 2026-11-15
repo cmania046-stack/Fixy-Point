@@ -379,7 +379,6 @@ class Investor {
 		tengah.innerHTML = "";
 		this.atas = makeParent("container-horizontal", tengah);
 		this.bawah = makeParent("container", tengah);
-		for (const item of [this.atas, this.bawah]) item.style.border = "none";
 		this.setAtas();
 		this.setBawah();
 	}
@@ -420,6 +419,44 @@ class Saham {
 		}
 	}
 	
+	async tambahProporsiSaham(d) {
+		const tambahan = await modalShow("Tambahan nilai", `Masukkan tambahan nilai saham untuk ${d.nama}`, true);
+		if (!tambahan) return;
+		const t = safeFloat(tambahan);
+		setTimeout(async () => {
+			const dataTambah = {
+				tambahan: t,
+				data: d
+			}
+			if (await modalShow(confirm, "Data telah siap. Simpan sekarang?")) {
+				const res = await postDataKedua("tambah_proporsi_saham", dataTambah);
+				await message(res);
+				this.setup();
+			}
+		}, 0);
+	}
+	
+	async cairkanProfit(d) {
+		if (d.profit < 50000) {
+			await modalShow(gagal, `Profit yang dimiliki oleh ${d.nama} belum bisa dicairkan`);
+			return;
+		}
+		const nilai = await modalShow("Jumlah", "Masukkan jumlah yang akan ditarik...", true);
+		if (!nilai) return;
+		const nilaiTarik = safeFloat(nilai);
+		const data = {
+			nilai: nilaiTarik,
+			data: d
+		}
+		setTimeout(async () => {
+			if (await modalShow(confirm, `Anda akan menarik profit milik ${d.nama} senilai ${formatMataUang(nilaiTarik)}. Lanjutkan?`)) {
+				const res = await postDataKedua("tarik_profit", data);
+				await message(res);
+				this.setup();
+			}
+		}, 0);
+	}
+	
 	async tampilkanSaham() {
 	    this.atas.innerHTML = "";
 	    const dt = await getData("data_saham");
@@ -438,31 +475,14 @@ class Saham {
 	    	</tr>
 	    `);
 	    pra.appendChild(tabel);
+	    const names = [], values = [];
 	    for (const item of data) {
-	        const prt = makeParent("container", prm);
-	        prt.style.border = `1px solid ${border}`;
-	        prt.style.gap = "0";
-	
-	        const saldo = item.saldo ?? 0;
-	        const persen = totalSaldo ? (saldo / totalSaldo) * 100 : 0;
-	
-	        const label = makeButton("invisible-btn", item.nama, null, "Pictures/investor.png", prt);
-	        const prtBar = makeParent("container-horizontal", prt);
-	        prtBar.style.border = "none";
-	        prtBar.style.overflowX = "hidden";
-	
-	        await new Promise(r => requestAnimationFrame(r));
-	        const max = prtBar.offsetWidth || 300;
-	        const panjang = (persen / 100) * max;
-	
-	        const bar = document.createElement("div");
-	        bar.style.height = "30px";
-	        bar.style.width = `${Math.floor(panjang)}px`;
-	        bar.style.background = primary;
-	        bar.style.borderRadius = "5px";
-	        prtBar.appendChild(bar);	
-	        makeLabel(`${persen.toFixed(2)}%`, "teks", prtBar);
-	        
+	    	const n = item.nama.split(" ");
+	    	names.push(n[0]);
+	    	const saldo = item.saldo ?? 0;
+	    	const persen = totalSaldo ? (saldo / totalSaldo) * 100 : 0;
+	    	values.push(persen);
+	    
 	        const tr = document.createElement("tr");
 	        tr.innerHTML = `
 	        	<td>${item.id_investor}</td>
@@ -473,14 +493,27 @@ class Saham {
 	        `;
 	        tr.onclick = (e) => {
 	        	const p = makeFlyParent(e);
+	        	pembuatButtonGambar(p, [
+	        		["btns", "Tambah proporsi saham", () => this.tambahProporsiSaham(item), "Pictures/add.png"],
+	        		["btns", "Cairkan profit", () => this.cairkanProfit(item), "Pictures/banknotes.png"],
+	        		["btns", "Hapus saham", null, "Pictures/hapus.png"]
+	        	]);
 	        	
 	        }
 	        tabel.appendChild(tr);
 	    }
+	    grafikMaker(
+	    	prm,
+	    	"Grafik Persentase Kepemilikan Saham",
+	    	"Berdasarkan acuan saldo per total saldo keseluruhan",
+	    	names,
+	    	"Nilai saham",
+	    	values
+	    );
 	}
 	
 	setup() {
-		resetJudul("Pengelolaan saham");
+		resetJudul("PENGELOLAAN SAHAM");
 		const tengah = document.getElementById("tengah");
 		tengah.innerHTML = "";
 		this.atas = makeParent("container", tengah);

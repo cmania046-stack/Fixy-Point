@@ -546,21 +546,6 @@ function makeCekTrx(parent, label) {
 	return cek;
 }
 
-function pembuatButtonGambar(parent, btn) {
-	for (const p of btn) {
-		const [kelas, teks, command, image] = p;
-		const button = makeButton(kelas, teks, command, image);
-		parent.appendChild(button);
-	}
-}
-function pembuatButton(parent, btn) {
-	for (const p of btn) {
-		const [kelas, teks, command] = p;
-		const button = makeButton(kelas, teks, command);
-		parent.appendChild(button);
-	}
-}
-
 function pembuatTextArea(parent, obj) {
 	let area = {};
 	obj.forEach(([key, placeholder, teks], i) => {

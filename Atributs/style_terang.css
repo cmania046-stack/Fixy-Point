@@ -32,7 +32,7 @@
 	--bar-press: rgba(255, 255, 255, .16);
 
 	--kiri-bg: #F7FAFC;
-	--kiri-panel: #286098;
+	--kiri-panel: #282E36;
 	--kiri-text: #172433;
 	--kiri-muted: #5B6B80;
 	--kiri-border: #DCE4EE;
@@ -354,8 +354,7 @@ textarea::placeholder {
 	min-height: var(--atas-h);
 	padding: 6px 12px;
 	background: var(--bar-bg);
-	color: var(--bar-text);
-	border-bottom: 2px solid var(--bar-border);
+	color: var(--surface);
 	border-radius: 0 0 2px 2px;
 }
 
@@ -488,7 +487,6 @@ textarea::placeholder {
 	justify-content: flex-start;
 	gap: 10px;
 	overflow-x: auto;
-	border-top: 2px solid var(--bar-border);
 	border-radius: 2px 2px 0 0;
 }
 

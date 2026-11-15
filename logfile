@@ -600,3 +600,27 @@
 2026-11-13 20:46:52.215 WIT [21256] LOG:  database system is shut down
 2026-11-13 22:26:50.658 WIT [23606] FATAL:  lock file "postmaster.pid" already exists
 2026-11-13 22:26:50.658 WIT [23606] HINT:  Is another postmaster (PID 30300) running in data directory "/data/data/com.termux/files/usr/var/lib/postgresql"?
+2026-11-14 20:47:26.387 WIT [2536] LOG:  starting PostgreSQL 18.6 on arm-unknown-linux-androideabi, compiled by Android (16134705, +pgo, +bolt, +lto, +mlgo, based on r574158c) clang version 21.0.0 (https://android.googlesource.com/toolchain/llvm-project 9f872551d3c681d06fd303b36f16ed5c274735eb), 32-bit
+2026-11-14 20:47:26.389 WIT [2536] LOG:  listening on IPv4 address "127.0.0.1", port 5432
+2026-11-14 20:47:26.392 WIT [2536] LOG:  listening on Unix socket "/data/data/com.termux/files/usr/tmp/.s.PGSQL.5432"
+2026-11-14 20:47:26.514 WIT [2545] LOG:  database system was interrupted; last known up at 2026-11-14 17:54:43 WIT
+2026-11-14 20:47:26.746 WIT [2545] LOG:  database system was not properly shut down; automatic recovery in progress
+2026-11-14 20:47:26.753 WIT [2545] LOG:  redo starts at 0/2942BA0
+2026-11-14 20:47:26.754 WIT [2545] LOG:  invalid record length at 0/2942CA8: expected at least 24, got 0
+2026-11-14 20:47:26.754 WIT [2545] LOG:  redo done at 0/2942C70 system usage: CPU: user: 0.00 s, system: 0.00 s, elapsed: 0.00 s
+2026-11-14 20:47:26.769 WIT [2543] LOG:  checkpoint starting: end-of-recovery immediate wait
+2026-11-14 20:47:26.785 WIT [2543] LOG:  checkpoint complete: wrote 0 buffers (0.0%), wrote 3 SLRU buffers; 0 WAL file(s) added, 0 removed, 0 recycled; write=0.005 s, sync=0.002 s, total=0.017 s; sync files=2, longest=0.001 s, average=0.001 s; distance=0 kB, estimate=0 kB; lsn=0/2942CA8, redo lsn=0/2942CA8
+2026-11-14 20:47:26.792 WIT [2536] LOG:  database system is ready to accept connections
+2026-11-14 20:52:26.885 WIT [2543] LOG:  checkpoint starting: time
+2026-11-14 20:52:27.485 WIT [2543] LOG:  checkpoint complete: wrote 5 buffers (0.0%), wrote 0 SLRU buffers; 0 WAL file(s) added, 0 removed, 0 recycled; write=0.519 s, sync=0.003 s, total=0.602 s; sync files=2, longest=0.002 s, average=0.002 s; distance=40 kB, estimate=40 kB; lsn=0/294CE48, redo lsn=0/294CDF0
+2026-11-15 00:12:50.273 WIT [15598] ERROR:  bind message supplies 3 parameters, but prepared statement "" requires 4
+2026-11-15 00:12:50.273 WIT [15598] STATEMENT:  
+					UPDATE data_saham SET
+						saldo = $1,
+						tanggal_update = $2,
+						keterangan = $3
+					WHERE id_investor = $4
+2026-11-15 00:14:05.382 WIT [2543] LOG:  checkpoint starting: time
+2026-11-15 00:14:05.729 WIT [2543] LOG:  checkpoint complete: wrote 3 buffers (0.0%), wrote 1 SLRU buffers; 0 WAL file(s) added, 0 removed, 0 recycled; write=0.318 s, sync=0.003 s, total=0.347 s; sync files=4, longest=0.001 s, average=0.001 s; distance=1 kB, estimate=36 kB; lsn=0/294D260, redo lsn=0/294D208
+2026-11-15 00:19:05.831 WIT [2543] LOG:  checkpoint starting: time
+2026-11-15 00:19:06.353 WIT [2543] LOG:  checkpoint complete: wrote 4 buffers (0.0%), wrote 1 SLRU buffers; 0 WAL file(s) added, 0 removed, 0 recycled; write=0.423 s, sync=0.016 s, total=0.523 s; sync files=5, longest=0.010 s, average=0.004 s; distance=1 kB, estimate=32 kB; lsn=0/294D988, redo lsn=0/294D930

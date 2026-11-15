@@ -1,7 +1,76 @@
 
 
 //helper functions
+function grafikMaker(parent, jdl, subjdl, lbls, lbl, data) {
+	const wadah = document.createElement("div");
+	wadah.className = "container";
+	const judul = document.createElement("h3");
+	judul.className = "teks";
+	judul.textContent = jdl;
+	const subjudul = document.createElement("p");
+	subjudul.className = "biasa";
+	subjudul.textContent = subjdl;
+	const subparent = document.createElement("div");
+	subparent.className = "chart-wrap";
+	const canvas = document.createElement("canvas");
+	subparent.appendChild(canvas);
+
+	new Chart(canvas, {
+			type: "bar",
+			data: {
+				labels: lbls,
+				datasets: [{
+						label: lbl,
+						data: data,
+						backgroundColor: primary,
+						borderRadius: 2,
+						maxBarThickness: 40
+				}]
+			},
+			options: {
+				indexAxis: "y",
+				responsive: true,
+				maintainAspectRatio: false,
+				plugins: {
+					legend: { display: false }
+				},
+				scales: {
+					x: {
+						beginAtZero: true,
+						grid: { color: primarySoft }
+					},
+					y: {
+						grid: { display: false }
+					}
+				}
+			}
+	})
+	for (const item of [judul, subjudul, subparent]) {
+		wadah.appendChild(item);
+	}
+	parent.appendChild(wadah);
+}
+
+function pembuatButtonGambar(parent, btn) {
+	for (const p of btn) {
+		const [kelas, teks, command, image] = p;
+		const button = makeButton(kelas, teks, command, image);
+		parent.appendChild(button);
+	}
+}
+
+function pembuatButton(parent, btn) {
+	for (const p of btn) {
+		const [kelas, teks, command] = p;
+		const button = makeButton(kelas, teks, command);
+		parent.appendChild(button);
+	}
+}
+
 function makeFlyParent(e) {
+	document.querySelectorAll(".dropdown-overlay").forEach(item => {
+		item.classList.add("hidden");
+	});
 	const p = makeParent("dropdown-overlay");
 	p.style.display = "flex";
 	p.style.flexDirection = "column";
