@@ -43,11 +43,15 @@
 <div class="bawah" id="bawah"></div>
 <script src="helper_function.js"></script>
 <script>
+
 const berhasil = "✅ Berhasil";
 const gagal = "❌ Gagal";
 const error = "⛔ Error";
 const pesanGagal = "Terjadi kesalahan saat mengunggah data.";
 const confirm = "❓Konfirmasi";
+
+const integ = localStorage.getItem("integ");
+let integrated = integ === "1" ? true : false;
 
 let idDevice;
 let user;
@@ -73,6 +77,25 @@ async function prepareIdDevice() {
 		idDevice = id.id;		
 	}
 	idDevice = idev;
+}
+
+async function takePictures(file="", folder="", age=86400) {
+	try {
+		const info = {
+			file: file,
+			folder: folder,
+			age: age
+		}
+		const payload = JSON.stringify(info);
+		const link = `get_all_pictures/${encodeURIComponent(payload)}`;
+		const res = await fetch(url + link);
+		if (!res.ok) throw new Error(`Status ${res.status}`);
+		const blob = await res.blob();
+		return URL.createObjectURL(blob);
+	} catch (er) {
+		await modalShow(error, er);
+		return null;
+	}
 }
 
 async function postDataKedua(endpoint, data) {
@@ -133,10 +156,10 @@ async function getDt(endpoint) {
 	}
 }
 
-async function getData(endpoint, cache=false) {
+async function getData(endpoint, cache=false, target="lihat_data_invest") {
 	showPopupLoading(`Menyiapkan data ${endpoint.replace(/_/g, " ")}...`);
 	try {
-		const URL = `lihat_data_invest?tabel=${encodeURIComponent(endpoint)}`;
+		const URL = `${target}?tabel=${encodeURIComponent(endpoint)}`;
 		const res = await fetch(url + URL, {
 			method: "GET",
 			headers: {
@@ -307,7 +330,7 @@ class Dashboard {
 class Investor {
 	setAtas() {
 		this.cari = entryMaker("Masukkan nama...", "text", "Pictures/cari.png", this.atas);
-		newmakeButton(this.atas, "btn", "Tambah investor", "Pictures/add.png", () => this.tambahInvestor());
+		newmakeButton(this.atas, "btns", "", "Pictures/add.png", () => this.tambahInvestor());
 	}
 	
 	tambahInvestor() {
@@ -457,6 +480,14 @@ class Saham {
 		}, 0);
 	}
 	
+	async hapusSaham(data) {
+		if (await modalShow(confirm, `Hapus saham ${data.nama} sekarang?`)) {
+			const res = await postDataKedua("hapus_saham", { id: data.id_investor });
+			await message(res);
+			this.setup();
+		}
+	}
+	
 	async tampilkanSaham() {
 	    this.atas.innerHTML = "";
 	    const dt = await getData("data_saham");
@@ -496,7 +527,7 @@ class Saham {
 	        	pembuatButtonGambar(p, [
 	        		["btns", "Tambah proporsi saham", () => this.tambahProporsiSaham(item), "Pictures/add.png"],
 	        		["btns", "Cairkan profit", () => this.cairkanProfit(item), "Pictures/banknotes.png"],
-	        		["btns", "Hapus saham", null, "Pictures/hapus.png"]
+	        		["btns", "Hapus saham", () => this.hapusSaham(item), "Pictures/hapus.png"]
 	        	]);
 	        	
 	        }
@@ -512,13 +543,177 @@ class Saham {
 	    );
 	}
 	
+	async riwayat(tabel) {
+		this.atas.innerHTML = "";
+		const data = await getData(tabel);
+		if (!data.length) {
+			const label = makeLabel(`${tabel.replaceAll("_"," ")} tidak tersedia`, "biasa", this.atas);
+			label.style.color = "red";
+			return;
+		}
+		const prt = makeParent("frame", this.atas);
+		for (const item of data) {
+			const prt2 = makeParent("container", prt);
+			prt2.style.display = "grid";
+			prt2.style.gridTemplateColumns = "repeat(3,1fr)";
+			for (const [key, value] of Object.entries(item)) {
+				if (!["created_at", "id"].includes(key.toLowerCase())) {
+					let val = [
+						"profit_lama", "profit_baru",
+						"saldo_lama", "saldo_baru"
+					].includes(key.toLowerCase()) ? formatMataUang(value) : String(value);
+					makeLabel(key, "biasa", prt2);
+					makeLabel(":", "biasa", prt2);
+					makeLabel(val, "biasa", prt2);
+				}
+			}
+		}
+	}
+	
 	setup() {
 		resetJudul("PENGELOLAAN SAHAM");
 		const tengah = document.getElementById("tengah");
 		tengah.innerHTML = "";
+		const prtButton = makeParent("container-horizontal", tengah);
 		this.atas = makeParent("container", tengah);
-		this.btnTambah = newmakeButton(tengah, "btn", "Terbitkan saham baru", null, () => this.terbitkanSaham());
+		this.btnTambah = newmakeButton(prtButton, "btn", "Terbitkan saham baru", null, () => this.terbitkanSaham());
+		pembuatButton(prtButton, [
+			["btn", "Riwayat saldo", () => this.riwayat("riwayat_saldo")],
+			["btn", "Riwayat profit", () => this.riwayat("riwayat_profit")]
+		]);
 		this.tampilkanSaham(); 
+	}
+}
+
+class Lainnya {
+	async setProfil() {
+		if (integrated) {
+			const profil = await getData("profil", false, "lihat_data");
+			if (!profil.length) {
+				const lbl = makeLabel("Profil belum tersedia", "biasa", this.partProfil);
+				lbl.style.color = "red";
+				return;
+			}
+			const paren = makeParent("container", this.partProfil);
+			const img = document.createElement("img");
+			img.className = "image";
+			img.style.width = "300px";
+			img.style.height = "300px";
+			const pict = await takePictures("foto profil.png", "folder_foto");
+			img.src = pict;
+			img.loading = "lazy";
+			paren.appendChild(img);
+			const integ = makeButton("btn", "Putuskan integrasi", null, null, paren);
+			integ.style.alignSelf = "center";
+			integ.style.width = "fit-content";
+			
+			const parent = makeParent("container", this.partProfil);
+			const pr = profil[0];
+			
+			const namaToko = makeLabel((pr.nama ?? "").toUpperCase(), "jdl", parent);
+			namaToko.style.fontSize = "1.3rem";
+			namaToko.style.fontWeight = "600";
+			pembuatButtonGambar(parent, [
+				["invisible-btn", pr.alamat ?? "", null, "Pictures/lokasi.png"],
+				["invisible-btn", pr.kontak ?? "", null, "Pictures/telepon.png"],
+				["invisible-btn", pr.email ?? "", null, "Pictures/email.png"],
+				["invisible-btn", pr.website ?? "", null, "Pictures/website.png"],
+				["invisible-btn", pr.jenis ?? "", null, "Pictures/jenis_usaha.png"]
+			]);
+			integ.onclick = async () => {
+				localStorage.setItem("integ", 0);
+				location.href = url + "manajemen_keuangan";
+			}
+		} else {
+			const integ = makeButton("btn", "Integrasikan ke server", async () => {
+				localStorage.setItem("integ", 1);
+				location.href = url + "manajemen_keuangan";
+				
+			}, null, this.partProfil);
+			integ.style.alignSelf = "center";
+			integ.style.width = "fit-content";
+		}
+	}
+	
+	async simpanPersenBaru(persen) {
+		if (await modalShow(confirm, "Simpan persentase baru?")) {
+			const res = await postDataKedua("perbarui_persentase", {persen: persen});
+			await message(res);
+			this.setup();
+		}
+	}
+	
+	async tampilkanPersen() {
+		this.dataPersen = await getData("persentase");
+		const persen = this.dataPersen.length !== 0 ? this.dataPersen[0].persen : 0;
+		this.partUmum.innerHTML = "";
+		const pt = makeParent("container", this.partUmum);
+		makeLabel(`Persentase pengambilan profit untuk tambahan saldo: ${persen}%`,
+			"label-data", pt);
+		const fr = makeParent("container-horizontal", pt);
+		const newPersen = entryMaker("Masukkan persentase baru...", "number", "Pictures/persent.png", fr);
+		makeButton("btn", "Simpan", () => this.simpanPersenBaru(safeInt(newPersen.value.trim())), null, fr);
+	}
+	
+	setup() {
+		resetJudul("PENGATURAN LAINNYA");
+		const tengah = document.getElementById("tengah");
+		tengah.innerHTML = "";
+		this.partProfil = makeParent("frame", tengah);
+		this.partUmum = makeParent("container", tengah);
+		this.setProfil();
+		this.tampilkanPersen();
+	}
+}
+
+class Keuangan {
+	siapkanFrames() {
+		const atas = makeParent("container-horizontal", this.tengah);
+		this.bawah = makeParent("container", this.tengah);
+		pembuatButtonGambar(atas, [
+			["btns", "Keuangan", () => this.keuangan(), "Pictures/budget.png"],
+			["btns", "Staff", null, "Pictures/employees.png"]
+		]);
+		atas.querySelectorAll("button").forEach(btn => {
+			btn.style.border = "none";
+		});
+	}
+	
+	async keuangan() {
+		this.bawah.innerHTML = "";
+		if (integrated) {
+			const keuangan = await getDt("get_keuangan");
+			const parent = pembuatField(this.bawah, "Informasi keuangan");
+			
+			const part = makeParent("container", parent);
+			part.style.border = "none";
+			part.style.display = "grid";
+			part.style.gridTemplateColumns = "repeat(3, 1fr)";
+			
+			const info = [
+				["Saldo kas", keuangan.kas ?? 0],
+				["Persediaan stok", keuangan.persediaan ?? 0],
+				["Harga pokok penjualan", keuangan.hpp ?? 0],
+				["Pendapatan", keuangan.pendapatan ?? 0],
+				["Modal", keuangan.modal ?? 0],
+				["Pengeluaran / beban", keuangan.beban ?? 0]
+			];
+			
+			for (const [key, value] of info) {
+				makeLabel(key, "teks", part);
+				makeLabel(":", "teks", part);
+				makeLabel(formatMataUang(value), "teks", part);
+			}
+			part.querySelectorAll(".teks").forEach(teks => {
+				teks.style.fontFamily = "monospace";
+			});
+		}
+	}
+	
+	async setup() {
+		this.tengah = document.getElementById("tengah");
+		this.tengah.innerHTML = "";
+		this.siapkanFrames();
 	}
 }
 
@@ -527,7 +722,9 @@ function setButtonBawah() {
 	const info = [
 		["Beranda", "Pictures/home.png", () => dash.setup()],
 		["Investor", "Pictures/investor.png", () => investor.setup()],
-		["Saham", "Pictures/saham.png", () => saham.setup()]
+		["Saham", "Pictures/saham.png", () => saham.setup()],
+		["Keuangan", "Pictures/riwayat_keuangan.png", () => keuangan.setup()],
+		["Lainnya", "Pictures/owner080102.png", () => lain.setup()]
 	]
 	for (const [teks, gambar, command] of info) {
 		newmakeButton(parent, "btn", teks, gambar, command);
@@ -547,14 +744,15 @@ const login = new Login();
 const dash = new Dashboard()
 const investor = new Investor();
 const saham = new Saham();
+const lain = new Lainnya();
+const keuangan = new Keuangan();
 
 window.onload = async function() {
 	prepareIdDevice();
 	resetJudul("Manajemen keuangan dan saham");
 	//login.setup();
 	setButtonBawah();
-	dash.setup();
-	
+	dash.setup();	
 }
 
 </script>

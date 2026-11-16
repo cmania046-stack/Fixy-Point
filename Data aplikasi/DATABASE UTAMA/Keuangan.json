@@ -1,8 +1,7 @@
 {
-    "kas": 4056800,
-    "persediaan": 116463200,
-    "hpp": 11261000,
-    "pendapatan": 21791000,
-    "modal": 110000000,
+    "kas": 390000,
+    "hpp": 200000,
+    "persediaan": -200000,
+    "pendapatan": 400000,
     "beban": 10000
 }

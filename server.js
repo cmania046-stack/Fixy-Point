@@ -23,6 +23,9 @@ const listTanggal = [
 const listWaktu = ["H:m:s", "H/m/s", "H.m.s", "H:m", "H/m", "H.m"];
 
 const allowedMethods = [
+	"hapus_saham",
+	"perbarui_persentase",
+	"tarik_profit",
 	"tambah_proporsi_saham",
 	"terbitkan_saham",
 	"tambah_investor",
@@ -184,8 +187,6 @@ function openJson(p, def) {
 }
 
 const ips = openJson(fileIps, []);
-let keuangan = openJson(fileKeuangan, {});
-
 //END SYNC
 
 //SINKRONISASI POSTGRESQL//
@@ -1597,10 +1598,6 @@ app.post("/penjualan_campuran", async (req,res) => {
 			0, noTrans
 		]);
 
-		keuangan.kas = (keuangan.kas ?? 0) + masuk;
-		keuangan.hpp = (keuangan.hpp ?? 0) + totalHpp;
-		keuangan.persediaan = (keuangan.persediaan ?? 0) - totalHpp;
-		keuangan.pendapatan = (keuangan.pendapatan ?? 0) + masuk;
 		const dataPromo = data.data_promo;
 		if (!(kosong(dataPromo))) {
 			const hasilUpdate = await client.query(`
@@ -1614,7 +1611,14 @@ app.post("/penjualan_campuran", async (req,res) => {
 		}
 		
 		await client.query("COMMIT");
-		simpanSemua(fileKeuangan, keuangan);
+		try {
+			let keuangan = openJson(fileKeuangan, {});
+			keuangan.kas = (keuangan.kas ?? 0) + masuk;
+			keuangan.hpp = (keuangan.hpp ?? 0) + totalHpp;
+			keuangan.persediaan = (keuangan.persediaan ?? 0) - totalHpp;
+			keuangan.pendapatan = (keuangan.pendapatan ?? 0) + masuk;
+			simpanSemua(fileKeuangan, keuangan);
+		} catch (e) { console.error("Gagal menulis Keuangan.json:", e); }
 		return res.status(200).json({
 			stat:"Berhasil",
 			pesan: "Transaksi berhasil. Cetak struk penjualan?"
@@ -2094,6 +2098,77 @@ class PostData {
 	constructor(data, req) {
 		this.data = data;
 		this.req = req;
+	}
+	
+	async hapus_saham() {
+		const id_investor = this.data.id ?? "";
+		const client = await poolInvest.connect();
+		try {
+			await client.query("BEGIN");
+			await client.query("DELETE FROM data_saham WHERE id_investor = $1", [id_investor]);
+			await client.query("UPDATE investor SET status = 'non-active' WHERE id_investor = $1", [id_investor]);
+			await client.query("COMMIT");
+			return [{
+				stat: "Berhasil",
+				pesan: `Saham milik ${id_investor} telah dihapus`
+			}, 200];
+		} catch (e) { await client.query("ROLLBACK"); return errorReturn(e); }
+		finally { client.release(); }
+	}
+
+	async perbarui_persentase() {
+		const p = this.data.persen ?? 0;
+		try {
+			await poolInvest.query(`
+				INSERT INTO persentase (id, persen) VALUES ($1, $2)
+				ON CONFLICT(id) DO UPDATE SET persen = excluded.persen`, [
+					1, p
+				]
+			);
+			return [{
+				stat: "Berhasil",
+				pesan: `Persentase pengambilan profit diperbarui: ${p}%`
+			}, 200];
+		} catch (e) { return errorReturn(e); }
+	}
+	
+	async tarik_profit() {
+		const d = this.data;
+		const data = d.data ?? {};
+		if ((data.profit ?? 0) < (d.nilai ?? 0)) return [{
+			stat: "Gagal",
+			pesan: `Profit ${data.nama} tidak cukup`
+		}, 400];
+		
+		const client = await poolInvest.connect();
+		try {
+			await client.query("BEGIN");
+			await client.query(`
+				UPDATE data_saham SET
+					profit = profit - $1,
+					tanggal_update = $2,
+					keterangan = $3
+				WHERE id_investor = $4`, [
+					d.nilai ?? 0, await nowStr(), "Penarikan profit oleh investor",
+					data.id_investor ?? ""
+				]
+			);
+			await client.query(`
+				INSERT INTO riwayat_saldo (
+					id_investor, tanggal, saldo_lama, saldo_baru,
+					profit_lama, profit_baru, keterangan
+				) VALUES ($1, $2, $3, $4, $5, $6, $7)`, [
+					data.id_investor ?? "", await nowStr(), data.saldo ?? 0, data.saldo ?? 0,
+					data.profit ?? 0, (data.profit ?? 0) - (d.nilai ?? 0), "Penarikan profit saham"
+				]
+			);
+			await client.query("COMMIT");
+			return [{
+				stat: "Berhasil",
+				pesan: "Penarikan profit berhasil"
+			}, 200];					
+		} catch (e) { await client.query("ROLLBACK"); return errorReturn(e); }
+		finally { client.release(); }
 	}
 	
 	async tambah_proporsi_saham() {
@@ -2712,9 +2787,12 @@ class PostData {
 				d.saldo ?? 0,
 				0, 0, 0, 0, 0, "-"
 			]);
-			keuangan.kas = (keuangan.kas ?? 0) + (d.saldo ?? 0);
-			keuangan.modal = (keuangan.modal ?? 0) + (d.saldo ?? 0);
-			simpanSemua(fileKeuangan, keuangan);
+			try {
+				let keuangan = openJson(fileKeuangan, {});
+				keuangan.kas = (keuangan.kas ?? 0) + (d.saldo ?? 0);
+				keuangan.modal = (keuangan.modal ?? 0) + (d.saldo ?? 0);
+				simpanSemua(fileKeuangan, keuangan);
+			} catch (e) { console.error("Gagal menulis Keuangan.json:", e); }
 			return [{
 				stat: "Berhasil",
 				pesan: "Saldo telah ditambahkan"
@@ -2741,8 +2819,6 @@ class PostData {
 				pesan: "Demi keberlangsungan. Anda tidak diizinkan mengambil lebih dari separuh kas"
 			}, 400];
 
-			keuangan.kas = (keuangan.kas ?? 0) - jumlah;
-			keuangan.pengambilan = (keuangan.pengambilan ?? 0) + jumlah;
 			await pool.query(`INSERT INTO keuangan_lengkap (
 				tanggal,
 				jenis,
@@ -2766,7 +2842,12 @@ class PostData {
 				0,
 				"-"
 			]);
-			simpanSemua(fileKeuangan, keuangan);
+			try {
+				let keuangan = openJson(fileKeuangan, {});
+				keuangan.kas = (keuangan.kas ?? 0) - jumlah;
+				keuangan.pengambilan = (keuangan.pengambilan ?? 0) + jumlah;
+				simpanSemua(fileKeuangan, keuangan);
+			} catch (e) { console.error("Gagal menulis Keuangan.json:", e); }
 			return [{
 				stat: "Berhasil",
 				pesan: `Pengambilan berhasil. Kas telah dikurangi senilai ${jumlah}`
@@ -2853,9 +2934,12 @@ class PostData {
 				"-"
 			]);
 			await client.query("COMMIT");
-			keuangan.aset_lain = (keuangan.aset_lain ?? 0) + (d.nilai ?? 0);
-			keuangan.kas = (keuangan.kas ?? 0) - (d.nilai ?? 0);
-			simpanSemua(fileKeuangan, keuangan);
+			try {
+				let keuangan = openJson(fileKeuangan, {});
+				keuangan.aset_lain = (keuangan.aset_lain ?? 0) + (d.nilai ?? 0);
+				keuangan.kas = (keuangan.kas ?? 0) - (d.nilai ?? 0);
+				simpanSemua(fileKeuangan, keuangan);
+			} catch (e) { console.error("Gagal menulis Keuangan.json:", e); }
 			return [{
 				stat: "Berhasil",
 				pesan: "Data aset lain telah disimpan"
@@ -3106,10 +3190,6 @@ class PostData {
 				-total, modal, 0, -total, -modal, 0, crypto.randomUUID().slice(0,10)
 			]);
 
-			keuangan.kas = (keuangan.kas ?? 0) - total;
-			keuangan.persediaan = (keuangan.persediaan ?? 0) + modal;
-			keuangan.hpp = (keuangan.hpp ?? 0) - modal;
-			keuangan.pendapatan = (keuangan.pendapatan ?? 0) - total;
 
 			await client.query("INSERT INTO riwayat_retur (waktu, no_trans, pembeli, data, alasan) VALUES ($1, $2, $3, $4, $5)", [
 				await nowStr(),
@@ -3131,7 +3211,14 @@ class PostData {
 				crypto.randomUUID().slice(0,5)
 			]);
 			await client.query("COMMIT");
-			simpanSemua(fileKeuangan, keuangan);
+			try {
+				let keuangan = openJson(fileKeuangan, {});
+				keuangan.kas = (keuangan.kas ?? 0) - total;
+				keuangan.persediaan = (keuangan.persediaan ?? 0) + modal;
+				keuangan.hpp = (keuangan.hpp ?? 0) - modal;
+				keuangan.pendapatan = (keuangan.pendapatan ?? 0) - total;
+				simpanSemua(fileKeuangan, keuangan);
+			} catch (e) { console.error("Gagal menulis Keuangan.json:", e); }
 			return [{
 				stat: "Berhasil",
 				pesan: "Proses retur berhasil"
@@ -3188,10 +3275,13 @@ class PostData {
 					"-"
 			]);
 
-			keuangan.kas = (keuangan.kas ?? 0) + (d.total ?? 0);
-			keuangan.beban = (keuangan.beban ?? 0) - (d.total ?? 0);
 			await client.query("COMMIT");
-			simpanSemua(fileKeuangan, keuangan);
+			try {
+				let keuangan = openJson(fileKeuangan, {});
+				keuangan.kas = (keuangan.kas ?? 0) + (d.total ?? 0);
+				keuangan.beban = (keuangan.beban ?? 0) - (d.total ?? 0);
+				simpanSemua(fileKeuangan, keuangan);
+			} catch (e) { console.error("Gagal menulis Keuangan.json:", e); }
 			return [{
 				stat: "Berhasil",
 				pesan: `Pengeluaran dengan id ${d.id ?? 0} telah dihapus`
@@ -3271,8 +3361,6 @@ class PostData {
 					-(totalLama),
 					"-"
 			]);
-			keuangan.kas = (keuangan.kas ?? 0) + totalLama;
-			keuangan.beban = (keuangan.beban ?? 0) - totalLama;
 
 			await client.query(`
 				INSERT INTO keuangan_lengkap (
@@ -3298,10 +3386,15 @@ class PostData {
 					d.total ?? 0,
 					"-"
 			]);
-			keuangan.kas = (keuangan.kas ?? 0) - (d.total ?? 0);
-			keuangan.beban = (keuangan.beban ?? 0) + (d.total ?? 0);
 			await client.query("COMMIT");
-			simpanSemua(fileKeuangan, keuangan);
+			try {
+				let keuangan = openJson(fileKeuangan, {});
+				keuangan.kas = (keuangan.kas ?? 0) + totalLama;
+				keuangan.beban = (keuangan.beban ?? 0) - totalLama;
+				keuangan.kas = (keuangan.kas ?? 0) - (d.total ?? 0);
+				keuangan.beban = (keuangan.beban ?? 0) + (d.total ?? 0);
+				simpanSemua(fileKeuangan, keuangan);
+			} catch (e) { console.error("Gagal menulis Keuangan.json:", e); }
 			return [{
 				stat: "Berhasil",
 				pesan: "Data pengeluaran telah diperbarui"
@@ -3370,10 +3463,13 @@ class PostData {
 				data.total ?? 0,
 				"-"
 			]);
-			keuangan.kas = (keuangan.kas ?? 0) - (data.total ?? 0);
-			keuangan.beban = (keuangan.beban ?? 0) + (data.total ?? 0);
 			await client.query("COMMIT");
-			simpanSemua(fileKeuangan, keuangan);
+			try {
+				let keuangan = openJson(fileKeuangan, {});
+				keuangan.kas = (keuangan.kas ?? 0) - (data.total ?? 0);
+				keuangan.beban = (keuangan.beban ?? 0) + (data.total ?? 0);
+				simpanSemua(fileKeuangan, keuangan);
+			} catch (e) { console.error("Gagal menulis Keuangan.json:", e); }
 			return [{
 				stat: "Berhasil",
 				pesan: `Pengeluaran ${data.nama ?? ""} telah ditambahkan`
@@ -3778,10 +3874,13 @@ class PostData {
 					"Tambah stok", r.operator || "", r.sumber || ""
 				]
 			);
-			keuangan.kas = (keuangan.kas || 0) - totalModal;
-			keuangan.persediaan = (keuangan.persediaan || 0) + totalModal;
 			await client.query("COMMIT");
-			simpanSemua(fileKeuangan, keuangan);
+			try {
+				let keuangan = openJson(fileKeuangan, {});
+				keuangan.kas = (keuangan.kas || 0) - totalModal;
+				keuangan.persediaan = (keuangan.persediaan || 0) + totalModal;
+				simpanSemua(fileKeuangan, keuangan);
+			} catch (e) { console.error("Gagal menulis Keuangan.json:", e); }
 			return [{
 				stat: "Berhasil",
 				pesan: `Stok produk ${r.nama || ''} berhasil ditambahkan sebanyak ${data.tambahan || 0} unit.\n Stok saat ini: ${r.stok_terbaru || 0} unit`
@@ -3871,8 +3970,6 @@ class PostData {
 				0,
 				"-"
 			]);
-			keuangan.kas = (keuangan.kas || 0) + dataLama;
-			keuangan.persediaan = (keuangan.persediaan || 0) - dataLama;
 
 			await client.query(`INSERT INTO keuangan_lengkap (
 				tanggal,
@@ -3910,11 +4007,16 @@ class PostData {
 				]
 			);
 			
-			keuangan.kas = (keuangan.kas || 0) - dataBaru;
-			keuangan.persediaan = (keuangan.persediaan || 0) + dataBaru;
 			await this.addRiwayat(client, r, "Edit produk");
 			await client.query("COMMIT");
-			simpanSemua(fileKeuangan, keuangan);
+			try {
+				let keuangan = openJson(fileKeuangan, {});
+				keuangan.kas = (keuangan.kas || 0) + dataLama;
+				keuangan.persediaan = (keuangan.persediaan || 0) - dataLama;
+				keuangan.kas = (keuangan.kas || 0) - dataBaru;
+				keuangan.persediaan = (keuangan.persediaan || 0) + dataBaru;
+				simpanSemua(fileKeuangan, keuangan);
+			} catch (e) { console.error("Gagal menulis Keuangan.json:", e); }
 			return [{
 				stat: "Berhasil",
 				pesan: `Data produk ${r.nama_lama || ''} telah diperbarui`
@@ -4040,11 +4142,14 @@ class PostData {
 					"Tambah produk baru", d.operator || "", d.sumber || ""
 				]
 			);
-			keuangan.kas = (keuangan.kas || 0) - penyediaan;
-			keuangan.persediaan = (keuangan.persediaan || 0) + penyediaan;
 			
 			await client.query("COMMIT");
-			simpanSemua(fileKeuangan, keuangan);
+			try {
+				let keuangan = openJson(fileKeuangan, {});
+				keuangan.kas = (keuangan.kas || 0) - penyediaan;
+				keuangan.persediaan = (keuangan.persediaan || 0) + penyediaan;
+				simpanSemua(fileKeuangan, keuangan);
+			} catch (e) { console.error("Gagal menulis Keuangan.json:", e); }
 			return [{
 				stat: "Berhasil",
 				pesan: `Produk baru ${d.nama ||''} telah disimpan`
