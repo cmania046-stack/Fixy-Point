@@ -23,6 +23,7 @@ const listTanggal = [
 const listWaktu = ["H:m:s", "H/m/s", "H.m.s", "H:m", "H/m", "H.m"];
 
 const allowedMethods = [
+	"tambah_data_gaji",
 	"tambah_karyawan",
 	"hapus_saham",
 	"perbarui_persentase",
@@ -299,6 +300,10 @@ class Database {
 				`inisial_code TEXT, nama TEXT, status TEXT,
 				tanggal_mulai TEXT, gaji_pokok REAL, info_tunjangan TEXT,
 				info_potongan TEXT, info_rekening TEXT, info_pembayaran TEXT`
+			);
+			await this.createTable(cl, "riwayat_pencatatan_gaji", `
+					id_riwayat TEXT, tanggal TEXT, data TEXT, status TEXT
+				`
 			);
 			await cl.query("COMMIT");
 		} catch (err) {
@@ -2165,6 +2170,49 @@ class PostData {
 	constructor(data, req) {
 		this.data = data;
 		this.req = req;
+	}
+	
+	async tambah_data_gaji() {
+		const d = this.data;
+		const client = await poolInvest.connect();
+		try {
+			const gajiPokok = d.gaji_pokok ?? 0;
+			const tunjangan = JSON.parse(d.info_tunjangan);
+			const potongan = JSON.parse(d.info_potongan);
+			const totalTunjangan = Object.values(tunjangan).reduce((sum, b) => sum + b, 0);
+			const totalPotongan = Object.values(potongan).reduce((sum, b) => sum + b, 0);
+			const gajiBersih = gajiPokok + totalTunjangan - totalPotongan;
+			const infoPembayaran = JSON.parse(d.info_pembayaran);
+			infoPembayaran["gaji_terkumpul"] = (infoPembayaran["gaji_terkumpul"] ?? 0) + gajiBersih;
+			const now = new Date();
+			const stringWaktu = `${now.getFullYear()}-${now.getMonth() + 1}-${now.getDate()}`;
+			infoPembayaran.pembayaran_terakhir = stringWaktu;
+			
+			await client.query("BEGIN");
+			await client.query(`
+				UPDATE data_karyawan SET
+				info_pembayaran = $1 WHERE inisial_code = $2`, [
+					JSON.stringify(infoPembayaran), d.inisial_code ?? ""
+				]
+			);
+			await client.query(`
+				INSERT INTO riwayat_pencatatan_gaji (
+					id_riwayat, tanggal, data, status
+				) VALUES ($1, $2, $3, $4)`, [
+					crypto.randomUUID().slice(0,10).replaceAll("-","").toUpperCase(),
+					await nowStr(), JSON.stringify(d), "collected"
+				]
+			);
+			await client.query("COMMIT");
+			await buatSlipGaji(d, `Slip gaji ${d.nama ?? "-"} ${stringWaktu.replaceAll("-","")}.pdf`, gajiBersih);
+			return [{
+				stat: "Berhasil",
+				pesan: "Data berhasil ditambahkan. Riwayat telah dicatat"
+			}, 200];
+		} catch (err) {
+			await client.query("ROLLBACK");
+			return errorReturn(err);
+		} finally { client.release(); }
 	}
 	
 	async tambah_karyawan() {
@@ -4751,6 +4799,65 @@ app.post("/post_data/:func", async (req,res) => {
 
 //API END
 
+function buatSlipGaji(data, filename, gajiBersih) {
+	const content = [
+		{ text: "SLIP GAJI", style: "header" },
+		{ text: "\n" }
+	];
+	const ip = JSON.parse(data.info_pembayaran);
+	content.push(
+		{ text: `Tanggal: ${ip.pembayaran_terakhir}`, style: "judul" }
+	);
+	const data1 = [];
+	data1.push(
+		[{ text: "Gaji pokok" }, ":", prettyMoney(data.gaji_pokok)]
+	);
+	const tunjangan = JSON.parse(data.info_tunjangan);
+	for (const [key, value] of Object.entries(tunjangan)) {
+		data1.push([
+			{ text: key.replaceAll("_"," ").replace(/^./, c => c.toUpperCase()) },
+			":", prettyMoney(value)
+		]);
+	}
+	const potongan = JSON.parse(data.info_potongan);
+	for (const [key, value] of Object.entries(potongan)) {
+		data1.push([
+			{ text: key.replaceAll("_"," ").replace(/^./, c => c.toUpperCase()) },
+			":", prettyMoney(value)
+		]);
+	}
+	data1.push([
+		{ text: "Gaji bersih", style: "judul" },
+		{ text: ":", style: "judul" },
+		{ text: prettyMoney(gajiBersih), style: "judul" }
+	]);
+	content.push({ columns: [{ width: 226.77, table: { widths: ["*", 12, 90], body: data1 } }] });
+	
+	const docDefinition = {
+		pageSize: "A4",
+		pageMargins: [43, 43, 43, 43],
+		defaultStyle: {
+			font: "Helvetica"
+		},
+		content,
+		styles: {
+			jago: { bold: true },
+			judul: { bold: true, fontSize: 12, color: "green" },
+			header: { bold: true, fontSize: 12, alignment: "center", color: "black" }
+		}
+	};
+	const pathFile = path.join(folderFoto, filename);
+	
+	const pdfDoc = printer.createPdfKitDocument(docDefinition);
+	return new Promise((resolve, reject) => {
+		const stream = require("fs").createWriteStream(pathFile);
+		stream.on("finish", resolve);
+		stream.on("error", reject);
+		pdfDoc.pipe(stream);
+		pdfDoc.end();
+	});
+}
+
 function buatPdfRiwayat(data, periode, path) {
 	const content = [
 		{ text: "Riwayat penjualan campuran", style: "header" },
@@ -4855,7 +4962,6 @@ function buatPdfRiwayat(data, periode, path) {
 		pdfDoc.end();
 	});
 }
-
 
 function buatCsvRiwayat(data, periode, filename) {
 	const filePath = path.join(folderSqlite, filename);

@@ -1,4 +1,4 @@
-		<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="id">
 <head>
 	<meta charset="utf-8">
@@ -925,10 +925,23 @@ class TinjauGajiKaryawan {
 		this.siapkanLayout(this.data);
 	}
 	
+	async simpanDataGaji(data) {
+		if (await modalShow(confirm, `Simpan data gaji milik ${data.nama} sekarang?`)) {
+			const res = await postDataKedua("tambah_data_gaji", data);
+			const result = await message(res);
+			if (result) {
+				this.data = this.data.filter(p => p.inisial_code !== data.inisial_code);
+				this.siapkanLayout(this.data);
+			}
+		}
+	}
+	
 	siapkanLayout(data) {
 		this.tengah.innerHTML = "";
 		for (const item of data) {
 			const p = makeParent("frame", this.tengah);
+			const name = makeLabel(item.nama.toUpperCase(), "jdl", p);
+			name.style.alignSelf = "center";
 			const kiri = makeParent("container", p);
 			const kanan = makeParent("container", p);
 			
@@ -971,7 +984,7 @@ class TinjauGajiKaryawan {
 			]);
 			
 			const parentButton = makeParent("container-horizontal", kanan);
-			const btnSimpan = makeButton("btn", "Simpan", null, null, parentButton);
+			const btnSimpan = makeButton("btn", "Simpan", () => this.simpanDataGaji(item), null, parentButton);
 			const btnTinjau = makeButton("btn btn-cancel", "Tinjau", () => this.tinjau(item, lanjutanTunjangan, aspek.value), null, parentButton);
 			aspek.onchange = () => {
 				const selectedAspect = aspek.value.toLowerCase();
