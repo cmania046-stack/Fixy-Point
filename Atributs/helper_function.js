@@ -1,6 +1,11 @@
 
 
 //helper functions
+function capitalize(teks=""){
+	if(!teks)return teks;
+	return teks[0].toUpperCase() + teks.slice(1).toLowerCase();
+}
+
 function grafikMaker(parent, jdl, subjdl, lbls, lbl, data) {
 	const wadah = document.createElement("div");
 	wadah.className = "container";
@@ -475,6 +480,7 @@ function makeButton(kelas, teks, command, image=null, parent=null, bg=null, fg=n
 }
 
 function formatMataUang(uang) {
+	if (typeof uang === "string") return uang;
 	if (formatUang[1] === "kiri") {
 		return formatUang[0] + uang.toString().replace(/\B(?=(\d{3})+(?!\d))/g, formatUang[2]);
 	} else {

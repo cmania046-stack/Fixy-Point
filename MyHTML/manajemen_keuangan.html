@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+		<!DOCTYPE html>
 <html lang="id">
 <head>
 	<meta charset="utf-8">
@@ -687,6 +687,31 @@ class Keuangan {
 		});
 	}
 	
+	dataLengkap(data) {
+		console.log(data);
+		const parent = pembuatJendela();
+		const f = pembuatField(parent, `Detail info ${data.nama}`);
+		const info_potongan = JSON.parse(data.info_potongan);
+		const info_tunjangan = JSON.parse(data.info_tunjangan);
+		const info_rekening = JSON.parse(data.info_rekening);
+		
+		const prt = makeParent("container", f);
+		prt.style.display = "grid";
+		prt.style.gridTemplateColumns = "repeat(3,1fr)";
+		
+		for (const item of [info_potongan, info_tunjangan, info_rekening]) {
+			for (const [key, value] of Object.entries(item)) {
+				let val = key.toLowerCase() === "nomor rekening" ? String(value) : formatMataUang(value);
+				makeLabel(key, "biasa", prt);
+				makeLabel(":", "biasa", prt);
+				makeLabel(val, "biasa", prt);
+			}
+		}
+	}
+	
+	editKaryawan(data, p) {
+	}
+	
 	async tampilkanKaryawan(div) {
 		const data = await getData("data_karyawan");
 		if (kosong(data)) {
@@ -714,6 +739,13 @@ class Keuangan {
 				<td>${formatMataUang(i.gaji_pokok)}</td>
 			`;
 			tabel.appendChild(tr);
+			tr.onclick = (e) => {
+				const p = makeFlyParent(e);
+				pembuatButton(p, [
+					["btns", "Lihat data lengkap", () => this.dataLengkap(i)],
+					["btns", "Edit", () => this.editKaryawan(i, div)]
+				]);
+			}
 		}
 	}
 	
@@ -874,6 +906,92 @@ window.onload = async function() {
 	dash.setup();	
 }
 
+class TinjauGajiKaryawan {
+	constructor(data) {
+		this.data = data;
+	}
+	
+	tinjau(item, data, aspek) {
+		const hasil = pecahObject(data);
+		const nilai = safeFloat(hasil.nilai);
+		let info = aspek.toLowerCase() === "potongan" ? JSON.parse(item.info_potongan) : JSON.parse(item.info_tunjangan);
+		info[hasil.aspek.toLowerCase()] = nilai;
+		let key = aspek.toLowerCase() === "potongan" ? "info_potongan" : "info_tunjangan";
+		item[key] = JSON.stringify(info);
+		
+		this.data = this.data.map(i =>
+			i.inisial_code === item.inisial_code ? item : i
+		);
+		this.siapkanLayout(this.data);
+	}
+	
+	siapkanLayout(data) {
+		this.tengah.innerHTML = "";
+		for (const item of data) {
+			const p = makeParent("frame", this.tengah);
+			const kiri = makeParent("container", p);
+			const kanan = makeParent("container", p);
+			
+			const tunjangan = JSON.parse(item.info_tunjangan);
+			const potongan = JSON.parse(item.info_potongan);
+			
+			const labelGaji = makeLabel(`Gaji pokok: ${formatMataUang(item.gaji_pokok)}`, "teks", kiri);
+			const info = pembuatField(kiri, "Info umum");
+			const parentInfo = makeParent("container", info);
+			parentInfo.style.display = "grid";
+			parentInfo.style.gridTemplateColumns = "repeat(3,1fr)";
+			
+			let totalTunjangan = 0, totalPotongan = 0;
+			
+			for (const [key, value] of Object.entries(tunjangan)) {
+				makeLabel(capitalize(key), "biasa", parentInfo);
+				makeLabel(":", "biasa", parentInfo);
+				makeLabel(formatMataUang(value), "biasa", parentInfo);
+				totalTunjangan += value;
+			}
+			
+			for (const [key, value] of Object.entries(potongan)) {
+				makeLabel(capitalize(key), "biasa", parentInfo);
+				makeLabel(":", "biasa", parentInfo);
+				makeLabel(formatMataUang(value), "biasa", parentInfo);
+				totalPotongan += value;
+			}
+			
+			const gajiBersih = item.gaji_pokok + totalTunjangan - totalPotongan;
+			const labelBersih = makeLabel(`Gaji bersih: ${formatMataUang(gajiBersih)}`, "teks", kiri);
+			for (const i of [labelGaji, labelBersih]) {
+				i.style.fontSize = "1.1rem";
+				i.style.fontWeight = "600";
+			}
+			
+			const aspek = pembuatCombo(kanan, "- Pilih satu -", ["Potongan", "Tunjangan"]);	
+			const lanjutanTunjangan = pembuatEntry(kanan, [
+				["aspek", "", "text"],
+				["nilai", "", "number"]
+			]);
+			
+			const parentButton = makeParent("container-horizontal", kanan);
+			const btnSimpan = makeButton("btn", "Simpan", null, null, parentButton);
+			const btnTinjau = makeButton("btn btn-cancel", "Tinjau", () => this.tinjau(item, lanjutanTunjangan, aspek.value), null, parentButton);
+			aspek.onchange = () => {
+				const selectedAspect = aspek.value.toLowerCase();
+				if (selectedAspect.toLowerCase() === "- pilih satu -") return;
+				p.querySelectorAll("input").forEach(inp => {
+					if (inp.type === "text") { inp.placeholder = `Masukkan nama ${selectedAspect}`; }
+					else if (inp.type === "number") { inp.placeholder = `Masukkan nilai ${selectedAspect}`; }
+				});
+			}
+			
+		}
+	}
+
+	setup() {
+		document.querySelectorAll(".dropdown-overlay").forEach(item => { item.style.display = "none"; });
+		this.tengah = document.getElementById("tengah");
+		this.siapkanLayout(this.data);
+	}
+}
+
 async function cekGajian() {
 	const dt = await fetch(url + "periksa_pembayaran_gaji", { method: "POST" });
 	const dataGajian = await dt.json();
@@ -888,7 +1006,7 @@ async function cekGajian() {
 		
 		const lbl = makeLabel(`Terdapat ${dataGajian.length} staf telah jatuh tempo dalam pembayaran gaji. Mohon lakukan peninjauan`, "biasa", parent);
 		const p = makeParent("container-horizontal", parent);
-		const btnTinjau = makeButton("btn", "Tinjau", null, null, p);
+		const btnTinjau = makeButton("btn", "Tinjau", () => new TinjauGajiKaryawan(dataGajian).setup(), null, p);
 		const btnBatal = makeButton("btn btn-cancel", "Batal", () => {
 			parent.style.display = "none";
 		}, null, p);
