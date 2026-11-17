@@ -1325,7 +1325,7 @@ textarea::placeholder {
 	background: var(--surface);
 	border: 1px solid var(--border-strong);
 	border-radius: var(--radius);
-	animation: showUp .15s ease both;
+	animation: slideLeft .75s ease both;
 }
 
 .mdl {

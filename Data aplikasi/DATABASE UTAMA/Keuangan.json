@@ -1,7 +1,9 @@
 {
-    "kas": 390000,
-    "hpp": 200000,
-    "persediaan": -200000,
-    "pendapatan": 400000,
-    "beban": 10000
+    "kas": 773800,
+    "modal": 1000000,
+    "persediaan": 237000,
+    "hpp": 13000,
+    "pendapatan": 25800,
+    "voucher": 0,
+    "beban": 2000
 }

@@ -23,6 +23,7 @@ const listTanggal = [
 const listWaktu = ["H:m:s", "H/m/s", "H.m.s", "H:m", "H/m", "H.m"];
 
 const allowedMethods = [
+	"tambah_karyawan",
 	"hapus_saham",
 	"perbarui_persentase",
 	"tarik_profit",
@@ -116,7 +117,7 @@ const allowedMethods = [
 ];
 
 const existedTable = [
-	"riwayat_profit", "persentase", "riwayat_saldo", "data_saham", "investor", "vouchers_data", "ketentuan_voucher", "stok_flow", "users", "vipayment", "info_admin", "pin", "keuangan_lengkap", "aset_lain", "kewajiban", "Pengeluaran", "profil", "produk", "riwayat_utama", "margin", "produk_diskon", "keuangan", "operator",
+	"data_karyawan", "riwayat_profit", "persentase", "riwayat_saldo", "data_saham", "investor", "vouchers_data", "ketentuan_voucher", "stok_flow", "users", "vipayment", "info_admin", "pin", "keuangan_lengkap", "aset_lain", "kewajiban", "Pengeluaran", "profil", "produk", "riwayat_utama", "margin", "produk_diskon", "keuangan", "operator",
 	"device", "customer", "supplier", "pajak", "riwayat_pajak", "riwayat_penjualan_campuran",
 	"media_bayar", "cadangan_keranjang", "hak_akses", "status_qr", "riwayat_login", "shift",
 	"produk_tingkat", "tingkat_a", "tingkat_b", "validasi_owner", "pengaturan_nota", "riwayat_retur",
@@ -294,6 +295,11 @@ class Database {
 			await this.createTable(cl, "riwayat_saldo", "id_investor TEXT, tanggal TEXT, saldo_lama REAL, saldo_baru REAL, profit_lama REAL, profit_baru REAL, keterangan TEXT");
 			await this.createTable(cl, "persentase", "persen REAL");
 			await this.createTable(cl, "riwayat_profit", "id_profit TEXT, nilai REAL, tanggal TEXT, data_pembagian TEXT, potongan_proporsional REAL");
+			await this.createTable(cl, "data_karyawan",
+				`inisial_code TEXT, nama TEXT, status TEXT,
+				tanggal_mulai TEXT, gaji_pokok REAL, info_tunjangan TEXT,
+				info_potongan TEXT, info_rekening TEXT, info_pembayaran TEXT`
+			);
 			await cl.query("COMMIT");
 		} catch (err) {
 			await cl.query("ROLLBACK");
@@ -677,7 +683,7 @@ function periksaToken(token) {
 	return !!token && tokenSet.has(hashToken(token));
 }
 
-const publik = ["/post_data/periksa_login_web", "/post_data/periksa_admin", "/make_id_device", "/ketentuan_layanan", "/post_data/periksa_email_web", "/post_data/periksa_jawaban", "/post_data/perbarui_password"];
+const publik = ["/post_data/periksa_login_web", "/post_data/periksa_admin", "/make_id_device", "/ketentuan_layanan", "/post_data/periksa_email_web", "/post_data/periksa_jawaban", "/post_data/perbarui_password", "/periksa_pembayaran_gaji"];
 app.use((req, res, next) => {
 	if (publik.includes(req.path) ||
 		req.path === "/" ||
@@ -1159,6 +1165,8 @@ app.post("/hapus_produk", async (req,res) => {
 	const client = await pool.connect();
 	try {
 		const { rows: [row] } = await client.query(`SELECT * FROM produk WHERE id = $1`, [data.id || 0]);
+		const totalModal = row.harga_modal * row.jumlah;
+		
 		await client.query(`
 			INSERT INTO stok_flow (
 				id_produk, nama, barcode, stok_lama, stok_baru,
@@ -1169,9 +1177,33 @@ app.post("/hapus_produk", async (req,res) => {
 				"Hapus produk", data.operator || "", data.sumber || ""
 			]
 		);
-				
+		await client.query(`
+			INSERT INTO keuangan_lengkap (
+				tanggal,
+				jenis,
+				keterangan,
+				kas,
+				persediaan,
+				aset_lain,
+				pendapatan,
+				hpp,
+				beban,
+				referensi
+			) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`, [
+				await nowStr(), "Pengurangan persediaan",
+				"Persediaan dikurangi karena produk dihapus",
+				0, -(totalModal), 0, 0, 0, 0, "-"
+			]
+		);		
 		await client.query("DELETE FROM produk WHERE id = $1", [data.id || 0]);
 		await client.query("COMMIT");
+		try {
+			const keuangan = openJson(fileKeuangan, {});
+			keuangan.persediaan = (keuangan.persediaan ?? 0) - totalModal;
+			simpanSemua(fileKeuangan, keuangan);
+		} catch (e) {
+			console.error("Gagal menulis Keuangan.json: ", e);
+		}
 		res.status(200).json({
 			stat: "Berhasil",
 			pesan: `Produk ${data.nama || ""} telah dihapus`
@@ -1599,6 +1631,7 @@ app.post("/penjualan_campuran", async (req,res) => {
 		]);
 
 		const dataPromo = data.data_promo;
+		let potonganVoucher = 0;
 		if (!(kosong(dataPromo))) {
 			const hasilUpdate = await client.query(`
 				UPDATE vouchers_data SET
@@ -1607,16 +1640,18 @@ app.post("/penjualan_campuran", async (req,res) => {
 					"dipakai", await nowStr(), dataPromo.kode_voucher
 				]
 			);
+			potonganVoucher += dataPromo.potongan;
 			if (hasilUpdate.rowCount === 0) throw new Error("Update voucher gagal. Voucher tidak valid atau telah digunakan. Transaksi dibatalkan");
 		}
 		
 		await client.query("COMMIT");
 		try {
 			let keuangan = openJson(fileKeuangan, {});
-			keuangan.kas = (keuangan.kas ?? 0) + masuk;
+			keuangan.kas = (keuangan.kas ?? 0) + masuk - potonganVoucher;
 			keuangan.hpp = (keuangan.hpp ?? 0) + totalHpp;
 			keuangan.persediaan = (keuangan.persediaan ?? 0) - totalHpp;
 			keuangan.pendapatan = (keuangan.pendapatan ?? 0) + masuk;
+			keuangan.voucher = (keuangan.voucher ?? 0) + potonganVoucher;
 			simpanSemua(fileKeuangan, keuangan);
 		} catch (e) { console.error("Gagal menulis Keuangan.json:", e); }
 		return res.status(200).json({
@@ -2094,10 +2129,71 @@ async function bulkInsert(cl, tabel, rows) {
 	await cl.query(sql, params);
 }
 
+app.post("/periksa_pembayaran_gaji", async (req, res) => {
+	try {
+		const for_return = [];
+		const { rows: data } = await poolInvest.query("SELECT * FROM data_karyawan");
+		for (const d of data) {
+			const infoPembayaran = d.info_pembayaran ? JSON.parse(d.info_pembayaran) : {};
+			const lastPay = infoPembayaran.pembayaran_terakhir ?? d.tanggal_mulai;
+			const tglLast = new Date(lastPay);
+			const lastMonth = tglLast.getMonth() + 1;
+			let bulanJatuhTempo = lastMonth + 1;
+			let tahun = tglLast.getFullYear();
+			if (lastMonth === 12) {
+				bulanJatuhTempo = 1;
+				tahun += 1;
+			}
+			
+			const lastDay = new Date(tahun, bulanJatuhTempo, 0).getDate();
+			const hari = Math.min(new Date(d.tanggal_mulai).getDate(), lastDay);
+			const tanggalJatuhTempo = `${tahun}-${bulanJatuhTempo}-${hari}`;
+			const sekarang = new Date();
+			if (sekarang >= new Date(tanggalJatuhTempo)) {
+				for_return.push(d);
+			}
+		}
+		console.log(for_return);
+		res.json(for_return);
+	} catch (err) {
+		console.error(err);
+		res.json([]);
+	}
+});
+
 class PostData {
 	constructor(data, req) {
 		this.data = data;
 		this.req = req;
+	}
+	
+	async tambah_karyawan() {
+		const d = this.data;
+		if (kosong(d.nama) ||
+			kosong(d.start) ||
+			kosong(d.gaji)
+		) return [{
+			stat: "Gagal",
+			pesan: "Nama, tanggal mulai, dan gaji harus diisi"
+		}, 400];
+		try {
+			await poolInvest.query(`
+				INSERT INTO data_karyawan (
+					inisial_code, nama, status,
+					tanggal_mulai, gaji_pokok,
+					info_tunjangan, info_potongan, info_rekening, info_pembayaran
+				) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`, [
+					d.inisial_code ?? "", d.nama ?? "", d.status ?? "",
+					d.start ?? "", d.gaji ?? 0,
+					JSON.stringify(d.info_tunjangan ?? {}), JSON.stringify(d.info_potongan ?? {}),
+					JSON.stringify(d.info_rekening ?? {}), JSON.stringify({})
+				]
+			);
+			return [{
+				stat: "Berhasil",
+				pesan: `Data karyawan ${d.nama ?? ""} telah disimpan`
+			}, 200];	
+		} catch (e) { return errorReturn(e); }
 	}
 	
 	async hapus_saham() {
@@ -2808,6 +2904,7 @@ class PostData {
 			pesan: "Masukkan nilai dengan benar"
 		}, 400];
 		try {
+			let keuangan = openJson(fileKeuangan, {});
 			if (keuangan.kas < jumlah) return [{
 				stat: "Gagal",
 				pesan: "Saldo tidak mencukupi"
@@ -2843,7 +2940,6 @@ class PostData {
 				"-"
 			]);
 			try {
-				let keuangan = openJson(fileKeuangan, {});
 				keuangan.kas = (keuangan.kas ?? 0) - jumlah;
 				keuangan.pengambilan = (keuangan.pengambilan ?? 0) + jumlah;
 				simpanSemua(fileKeuangan, keuangan);
@@ -3775,6 +3871,7 @@ class PostData {
 		try {
 			await client.query("BEGIN");
 			const namaNama = [];
+			let totalModal = 0;
 			for (const id of d) {
 				const { rows: [row] } = await client.query(
 					"SELECT * FROM produk WHERE id_produk = $1",
@@ -3792,6 +3889,7 @@ class PostData {
 						"Hapus produk", data.operator || "", data.sumber || ""
 					]
 				);
+				totalModal += row.harga_modal * row.jumlah;
 				
 				await client.query(
 					"DELETE FROM produk WHERE id_produk = $1",
@@ -3804,7 +3902,31 @@ class PostData {
 				nama_produk: namaNama
 			};
 			await this.addRiwayat(client, forRiwayat, "Hapus produk");
+			await client.query(`
+				INSERT INTO keuangan_lengkap (
+					tanggal,
+					jenis,
+					keterangan,
+					kas,
+					persediaan,
+					aset_lain,
+					pendapatan,
+					hpp,
+					beban,
+					referensi
+				) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`, [
+					await nowStr(), "Pengurangan persediaan",
+					"Persediaan dikurangi karena produk dihapus",
+					0, -(totalModal), 0, 0, 0, 0, "-"
+				]
+			);
+				
 			await client.query("COMMIT");
+			try {
+				const u = openJson(fileKeuangan, {});
+				u.persediaan = (u.persediaan ?? 0) - totalModal;
+				simpanSemua(fileKeuangan, u);
+			} catch (e) { console.error("Gagal menulis Keuangan.json: ", e); }
 			return [{
 				stat: "Berhasil",
 				pesan: `Sebanyak ${d.length} data produk telah dihapus`
@@ -4057,7 +4179,7 @@ class PostData {
 			const tanggal = DateTime.fromFormat(tgl, "yyyy-M-d");
 			if (!tanggal.isValid) throw new Error("Format tanggal salah");
 			const exp = tanggal.toFormat("MM/dd/yy");
-			const idProduk = crypto.randomBytes(10).toString().replace("-","").toUpperCase();
+			const idProduk = crypto.randomUUID().slice(0,8).replace("-","").toUpperCase();
 			
 			await client.query("BEGIN");
 			await client.query(`INSERT INTO produk (
