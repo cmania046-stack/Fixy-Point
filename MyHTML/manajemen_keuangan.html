@@ -680,15 +680,51 @@ class Keuangan {
 		this.bawah = makeParent("container", this.tengah);
 		pembuatButtonGambar(atas, [
 			["btns", "Keuangan", () => this.keuangan(), "Pictures/budget.png"],
-			["btns", "Staf", () => this.staff(), "Pictures/employees.png"]
+			["btns", "Staf", () => this.staff(), "Pictures/employees.png"],
+			["btns", "Catatan gaji", () => this.catatanGaji(), "Pictures/laporan_keuangan.png"]
 		]);
 		atas.querySelectorAll("button").forEach(btn => {
 			btn.style.border = "none";
 		});
 	}
 	
+	async catatanGaji() {
+		this.bawah.innerHTML = "";
+		const data = await getData("riwayat_pencatatan_gaji", false, "lihat_data_invest");
+		const parent = pembuatField(this.bawah, "Riwayat pencatatan gaji");
+		
+		const td = pembuatTabel(
+			parent,
+			["Id riwayat", "Tanggal", "Status"],
+			["id_riwayat", "tanggal", "status"],
+			data
+		);
+		td.forEach((item, i) => {
+			item.onclick = (e) => {
+				const parent = makeFlyParent(e);
+				const obj = data[i];
+				pembuatButtonGambar(parent, [
+					["btns", "Detail", () => this.detailRiwayatGaji(JSON.parse(obj.data)), "Pictures/cari.png"],
+					["btns", "Hapus", null, "Pictures/hapus.png"]
+				]);
+			}
+		});
+	}
+	
+	detailRiwayatGaji(data) {
+		const parent = pembuatJendela();
+		const p = makeParent("container", parent);
+		p.style.display = "grid";
+		p.style.gridTemplateColumns = "repeat(3,1fr)";
+		
+		for (const [key, value] of Object.entries(data)) {
+			for (const teks of [capitalize(key.replaceAll("_"," ")), ":", formatMataUang(value)]) {
+				makeLabel(teks, "teks", p);
+			}
+		}
+	}
+	
 	dataLengkap(data) {
-		console.log(data);
 		const parent = pembuatJendela();
 		const f = pembuatField(parent, `Detail info ${data.nama}`);
 		const info_potongan = JSON.parse(data.info_potongan);
@@ -710,6 +746,61 @@ class Keuangan {
 	}
 	
 	editKaryawan(data, p) {
+		p.innerHTML = "";
+		let newInp = {};
+		const parent = makeParent("frame", p);
+		const p1 = makeParent("container", parent);
+		const p2 = makeParent("container", parent);
+		const p3 = makeParent("container", parent);
+		const p4 = makeParent("container", parent);
+		const p5 = makeParent("container", parent);
+		console.log(data);
+		for (const [key, value] of Object.entries(data)) {
+			if (!["id", "created_at", "inisial_code", "nama", "tanggal_mulai"].includes(key.toLowerCase())) {
+				if (!["info_pembayaran", "info_potongan", "info_rekening", "info_tunjangan"].includes(key.toLowerCase())) {
+					makeLabel(capitalize(key.replaceAll("_"," ")), "teks", p1);
+					const inp = makeEntry(`Masukkan ${key.replaceAll("_"," ")} baru...`, "text", p1);
+					inp.value = value;
+					newInp[key] = inp;
+				} else {
+					let prt = p2;
+					if (key.toLowerCase() === "info_pembayaran") { prt = p4; }
+					else if (key.toLowerCase() === "info_potongan") { prt = p3; }
+					else if (key.toLowerCase() === "info_rekening") { prt = p5; }
+					
+					const val = JSON.parse(value);
+					for (const [k, v] of Object.entries(val)) {
+						let tipe = "number";
+						if (["nama bank", "nama pemilik rekening"].includes(k.toLowerCase())) { tipe = "text"; }
+						else if (k.toLowerCase() === "pembayaran_terakhir") { tipe = "date"; }
+						
+						makeLabel(capitalize(k.replaceAll("_"," ")), "teks", prt);
+						const inp = makeEntry(`Masukkan ${k.replaceAll("_"," ")} baru...`, tipe, prt);
+						inp.value = v;
+						newInp[k] = inp;
+					}
+				}
+			}
+		}
+		const btnSimpan = makeButton("btn", "Simpan", null, null, p5);
+		btnSimpan.onclick = () => {
+			const hasil = pecahObject(newInp);
+			console.log(hasil);
+		}
+	}
+	
+	async hapus_karyawan(data) {
+		if (await modalShow(confirm, `Anda akan menghapus ${data.nama} dari daftar karyawan. Lanjutkan?`)) {
+			const dataKirim = {
+				key: "inisial_code",
+				tabel: "data_karyawan",
+				pool: "poolinvest",
+				data: [data.inisial_code]
+			}
+			const res = await postDataKedua("hapus_serbaguna_kedua", dataKirim);
+			const result = await message(res);
+			if (result) this.staff();
+		}
 	}
 	
 	async tampilkanKaryawan(div) {
@@ -726,24 +817,32 @@ class Keuangan {
 				<th>Status karyawan</th>
 				<th>Tanggal mulai bekerja</th>
 				<th>Gaji pokok</th>
+				<th>Gaji terkumpul</th>
+				<th>Pembayaran terakhir</th>
 			</tr>
 		`);
 		div.appendChild(tabel);
 		for (const i of data) {
 			const tr = document.createElement("tr");
-			tr.innerHTML = `
+			let teks = `
 				<td>${i.inisial_code}</td>
 				<td>${i.nama}</td>
 				<td>${i.status}</td>
 				<td>${i.tanggal_mulai}</td>
 				<td>${formatMataUang(i.gaji_pokok)}</td>
 			`;
+			const pembayaran = i.info_pembayaran ? JSON.parse(i.info_pembayaran) : {};
+			teks += `<td>${formatMataUang(pembayaran.gaji_terkumpul ?? 0)}</td>
+				<td>${pembayaran.pembayaran_terakhir ?? "-"}</td>
+			`;
+			tr.innerHTML = teks;
 			tabel.appendChild(tr);
 			tr.onclick = (e) => {
 				const p = makeFlyParent(e);
-				pembuatButton(p, [
-					["btns", "Lihat data lengkap", () => this.dataLengkap(i)],
-					["btns", "Edit", () => this.editKaryawan(i, div)]
+				pembuatButtonGambar(p, [
+					["btns", "Lihat data lengkap", () => this.dataLengkap(i), "Pictures/cari.png"],
+					["btns", "Edit", () => this.editKaryawan(i, div), "Pictures/edit.png"],
+					["btns", "Hapus", () => this.hapus_karyawan(i), "Pictures/hapus.png"]
 				]);
 			}
 		}

@@ -23,6 +23,7 @@ const listTanggal = [
 const listWaktu = ["H:m:s", "H/m/s", "H.m.s", "H:m", "H/m", "H.m"];
 
 const allowedMethods = [
+	"hapus_serbaguna_kedua",
 	"tambah_data_gaji",
 	"tambah_karyawan",
 	"hapus_saham",
@@ -118,7 +119,7 @@ const allowedMethods = [
 ];
 
 const existedTable = [
-	"data_karyawan", "riwayat_profit", "persentase", "riwayat_saldo", "data_saham", "investor", "vouchers_data", "ketentuan_voucher", "stok_flow", "users", "vipayment", "info_admin", "pin", "keuangan_lengkap", "aset_lain", "kewajiban", "Pengeluaran", "profil", "produk", "riwayat_utama", "margin", "produk_diskon", "keuangan", "operator",
+	"riwayat_pencatatan_gaji", "data_karyawan", "riwayat_profit", "persentase", "riwayat_saldo", "data_saham", "investor", "vouchers_data", "ketentuan_voucher", "stok_flow", "users", "vipayment", "info_admin", "pin", "keuangan_lengkap", "aset_lain", "kewajiban", "Pengeluaran", "profil", "produk", "riwayat_utama", "margin", "produk_diskon", "keuangan", "operator",
 	"device", "customer", "supplier", "pajak", "riwayat_pajak", "riwayat_penjualan_campuran",
 	"media_bayar", "cadangan_keranjang", "hak_akses", "status_qr", "riwayat_login", "shift",
 	"produk_tingkat", "tingkat_a", "tingkat_b", "validasi_owner", "pengaturan_nota", "riwayat_retur",
@@ -517,6 +518,22 @@ async function translator(table) {
 	}
 }
 
+function rentang(bulan) {
+	const tahun = DateTime.now().year;
+	const awal = DateTime.local(tahun, bulan, 1);
+	return [awal.startOf("month"), awal.endOf("month")];
+}
+
+function bulanLalu() {
+	const lalu = DateTime.now().minus({ months: 1 });
+	return [lalu.startOf("month"), lalu.endOf("month")];
+}
+
+function rentangHari(tanggal = DateTime.now()) {
+	const dt = tanggal instanceof Date ? DateTime.fromJSDate(tanggal) : tanggal;
+	return [dt.startOf("day"), dt.endOf("day")];
+}
+
 function periodeBulan() {
 	const sekarang = DateTime.now();
 	return [sekarang.startOf("month"), sekarang.endOf("month")];
@@ -651,6 +668,23 @@ function capitalize(teks=""){
 	return teks[0].toUpperCase() + teks.slice(1).toLowerCase();
 }
 
+function prediksi(dataSource, dataSearch, searchedValue) {
+	let w = 0, b = 0;
+	const skala = Math.max(...dataSource);
+	const zipping = dataSource.map((k, i) => [k / skala, dataSearch[i]]);
+	const iterasi = 5000;
+	const pengali = 0.01;
+
+	for (let i = 0; i < iterasi; i++) {
+		for (const [x, y] of zipping) {
+			const wrong = w * x + b - y;
+			w -= pengali * wrong * x;
+			b -= pengali * wrong;
+		}
+	}
+	return Math.round(w * (searchedValue / skala) + b);
+}
+
 //END HELPER FUNCTIONS
 
 
@@ -759,6 +793,19 @@ app.get("/filter_aktivitas_periode/:data", async (req,res) => {
 	if (pengguna.includes(operator)) forReturn = forFilter.filter(p => p.operator.toLowerCase() === operator.toLowerCase());
 	res.json(forReturn.sort((a,b) => parseDate(b.waktu) - parseDate(a.waktu)));
 	} finally {await catatLog(req.path, res.statusCode);}
+});
+
+app.post("/periksa_prediksi", async (req,res) => {
+	const data = req.body;
+	let sumber = data.dataSource ?? [];
+	let cari = data.dataSearch ?? [];
+	for (let i=0;i<3;i++) {
+		const last = sumber.at(-1);
+		const hasil = prediksi(sumber, cari, sumber.at(-1) + 1);
+		sumber.push(last + 1);
+		cari.push(hasil);
+	}
+	res.status(200).json([sumber, cari]);
 });
 
 app.post("/buat_qr_voucher", async (req, res) => {
@@ -2172,6 +2219,28 @@ class PostData {
 		this.req = req;
 	}
 	
+	async hapus_serbaguna_kedua() {
+		const d = this.data;
+		const key = d.key ?? "";
+		const tabel = d.tabel ?? "";
+		const cl = d.pool.toLowerCase() === "pool" ? pool : poolInvest;
+		const data = d.data ?? [];
+		const client = await cl.connect();
+		
+		try {
+			await client.query("BEGIN");
+			for (const item of data) {
+				await client.query(`DELETE FROM ${tabel} WHERE ${key} = $1`, [item]);
+			}
+			await client.query("COMMIT");
+			return [{
+				stat: "Berhasil",
+				pesan: "Data telah dihapus"
+			}, 200];			
+		} catch (e) { await client.query("ROLLBACK"); return errorReturn(e); }
+		finally { client.release(); }
+	}
+	
 	async tambah_data_gaji() {
 		const d = this.data;
 		const client = await poolInvest.connect();
@@ -2184,8 +2253,11 @@ class PostData {
 			const gajiBersih = gajiPokok + totalTunjangan - totalPotongan;
 			const infoPembayaran = JSON.parse(d.info_pembayaran);
 			infoPembayaran["gaji_terkumpul"] = (infoPembayaran["gaji_terkumpul"] ?? 0) + gajiBersih;
+			
+			const lastPay = new Date(infoPembayaran.pembayaran_terakhir ?? d.tanggal_mulai);
 			const now = new Date();
-			const stringWaktu = `${now.getFullYear()}-${now.getMonth() + 1}-${now.getDate()}`;
+			const stringWaktu = `${now.getFullYear()}-${now.getMonth() + 1}-${lastPay.getDate()}`;
+			
 			infoPembayaran.pembayaran_terakhir = stringWaktu;
 			
 			await client.query("BEGIN");

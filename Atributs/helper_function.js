@@ -1,9 +1,120 @@
 
 
 //helper functions
+function pembuatTabel(parent, header, body, data) {
+	let td = [];
+	let teksHead = "";
+	for (const item of header) teksHead += `<th>${item}</th>`;
+	const tabel = makeTable(`<tr>${teksHead}</tr>`);
+	parent.appendChild(tabel);
+	for (const item of data) {
+		let teksBody = "";
+		for (const i of body)
+			teksBody += `<td>${formatMataUang(item[i])}</td>`;
+		const tr = document.createElement("tr");
+		tr.innerHTML = teksBody;
+		tabel.appendChild(tr);
+		td.push(tr);
+	}
+	return td;
+}
+
+function dateFiller(data) {
+	const index = [], newData = [];
+	for (let i=0;i<Math.max(...data);i++) {
+		const tgl = i + 1;
+		if (data.includes(tgl)) {
+			index.push(i);
+			newData.push(tgl);
+		} else {
+			newData.push(tgl);
+		}
+	}
+	return [index, newData];
+}
+
+function zeroFiller(mainData, indexData) {
+	const newData = [];
+	for (let i=0;i<=Math.max(...indexData);i++) {
+		if (indexData.includes(i)) {
+			newData.push(mainData[indexData.indexOf(i)]);
+		} else { newData.push(0); }
+	}
+	return newData;
+}
+
+function sortByDates(dates, qtys) {
+	const pairs = [];
+	for (let i=0;i<dates.length;i++) {
+		pairs.push([dates[i], qtys[i]]);
+	}
+	pairs.sort((a,b) => a[0] - b[0]);
+	const sortedDates = [], sortedQtys = [];
+	for (const [date, qty] of pairs) {
+		sortedDates.push(date);
+		sortedQtys.push(qty);
+	}
+	return [sortedDates, sortedQtys];
+}
+
 function capitalize(teks=""){
 	if(!teks)return teks;
 	return teks[0].toUpperCase() + teks.slice(1).toLowerCase();
+}
+
+function lineMaker(parent, jdl, subjdl, lbls, lbl, data) {
+	const wadah = document.createElement("div");
+	wadah.className = "container";
+	const judul = document.createElement("h3");
+	judul.className = "teks";
+	judul.textContent = jdl;
+	const subjudul = document.createElement("p");
+	subjudul.className = "biasa";
+	subjudul.textContent = subjdl;
+	const subparent = document.createElement("div");
+	subparent.className = "chart-wrap";
+	const canvas = document.createElement("canvas");
+	subparent.appendChild(canvas);
+
+	new Chart(canvas, {
+		type: "line",
+		data: {
+			labels: lbls,
+			datasets: [{
+				label: lbl,
+				data: data,
+				borderColor: primary,
+				backgroundColor: primarySoft,
+				fill: true,
+				tension: 0.3,
+				pointRadius: 4,
+				pointHoverRadius: 6,
+				pointBackgroundColor: primary,
+				pointBorderColor: primary
+			}]
+		},
+		options: {
+			responsive: true,
+			maintainAspectRatio: false,
+			plugins: {
+				legend: { display: false }
+			},
+			scales: {
+				x: {
+					grid: { color: primarySoft }
+				},
+				y: {
+					beginAtZero: true,
+					grid: { color: primarySoft }
+				}
+			}
+		}
+	});
+
+	for (const item of [judul, subjudul, subparent]) {
+		wadah.appendChild(item);
+	}
+	parent.appendChild(wadah);
 }
 
 function grafikMaker(parent, jdl, subjdl, lbls, lbl, data) {

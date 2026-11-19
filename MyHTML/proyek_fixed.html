@@ -5336,6 +5336,53 @@ class OpsiTransaksi {
 			if (e.key === "Enter") { e.preventDefault(); this.cariTransaksi(bawah, bawah2); }
 		});
 	}
+		
+	async filterRiwayatPenjualan() {
+		const riwayat = await getData("riwayat_penjualan_campuran");
+		let hasilFilter = {};
+		for (const item of riwayat) {
+			const tanggal = (item.waktu ?? "").split(" ")[0];
+			const now = new Date();
+			const bulanSekarang = now.getMonth() + 1;
+			const [dd, mm, yyyy] = tanggal.split("/");
+			const bulanTgl = safeInt(mm);
+			if (bulanSekarang !== bulanTgl || now.getFullYear() !== safeInt(yyyy)) continue;
+			
+			const dataBelanja = JSON.parse(item.data_belanja);
+			const qtyTotal = dataBelanja.reduce((sum, b) => sum + b.qty_asli,0);
+			
+			const ada = hasilFilter[dd];
+			if (ada) {
+				ada.total += item.total;
+				ada.laba += item.total_laba;
+				ada.qty += qtyTotal;
+			} else {
+				hasilFilter[dd] = {
+					tanggal: dd,
+					total: item.total,
+					laba: item.total_laba,
+					qty: qtyTotal
+				}
+			}
+		}
+		const dataTanggal = [], dataQty = [], dataTotal = [], dataLaba = [];
+		const hasilOpr = Object.values(hasilFilter);
+		for (const i of hasilOpr) {
+			dataTanggal.push(safeInt(i.tanggal));
+			dataQty.push(i.qty);
+			dataTotal.push(i.total);
+			dataLaba.push(i.laba);
+		}
+		const [sortedTanggal, sortedQty] = sortByDates(dataTanggal, dataQty);
+		const [_, sortedTotal] = sortByDates(dataTanggal, dataTotal);
+		const [a, sortedLaba] = sortByDates(dataTanggal, dataLaba);
+		
+		const [idx, dateData] = dateFiller(sortedTanggal);
+		const qtyData = zeroFiller(sortedQty, idx);
+		const totalData = zeroFiller(sortedTotal, idx);
+		const labaData = zeroFiller(sortedLaba, idx);
+		return [dateData, qtyData, totalData, labaData];
+	}
 	
 	async ringkasanTransaksi(periode) {
 		resetJudul("Ringkasan transaksi");
@@ -5411,6 +5458,64 @@ class OpsiTransaksi {
 		}
 	}
 	
+	async prediksiPenjualan() {
+		this.prt.innerHTML = "";
+		const [tanggal, qty, total, laba] = await this.filterRiwayatPenjualan();
+		const pr2 = pembuatField(this.prt, "Prediksi penjualan harian");
+		const prt2 = makeParent("frame", pr2);
+		
+		const pembagianData = [
+			[tanggal, qty, "Prediksi produk terjual harian", "qty"],
+			[tanggal, total, "Prediksi total pemasukan harian", "pemasukan"],
+			[tanggal, laba, "Prediksi total keuntungan harian", "laba"]
+		];
+		
+		let forTabel = {};
+		for (const [tgl, dataTujuan, judul, key] of pembagianData) {
+			const [t, d] = await postData("periksa_prediksi", { dataSource: tgl, dataSearch: dataTujuan });
+			lineMaker(prt2, judul, "", t, "Nilai prediksi", d);
+			forTabel["tanggal"] = t;
+			forTabel[key] = d;
+		}
+		const mapBulan = {
+			1: "Januari", 2: "Februari", 3: "Maret",
+			4: "April", 5: "Mei", 6: "Juni",
+			7: "Juli", 8: "Agustus", 9: "September",
+			10: "Oktober", 11: "November", 12: "Desember"
+		}
+		const now = new Date();
+		makeLabel(`Data transaksi harian dan prediksi 3 hari kedepan`, "teks", pr2);
+		makeLabel(`Periode: ${mapBulan[now.getMonth() + 1]} ${now.getFullYear()}`, "teks", pr2);
+		
+		const tabel = makeTable(`
+			<tr>
+				<th>Tanggal</th>
+				<th>Terjual</th>
+				<th>Pemasukan</th>
+				<th>Keuntungan</th>
+			</tr>
+		`);
+		pr2.appendChild(tabel);
+		const dataTabel = Object.values(forTabel);
+		for (let i=0; i<dataTabel[0].length; i++) {
+			const tr = document.createElement("tr");
+			tr.innerHTML = `
+				<td>${dataTabel[0][i]}</td>
+				<td>${dataTabel[1][i]} unit</td>
+				<td>${formatMataUang(dataTabel[2][i])}</td>
+				<td>${formatMataUang(dataTabel[3][i])}</td>
+			`;
+			let warna;
+			let fg;
+			if (i <= dataTabel[0].length && i > dataTabel[0].length - 4) { fg = "white"; warna = primary; }
+			tr.style.background = warna;
+			tr.querySelectorAll("td").forEach(f => {
+				f.style.color = fg;
+			});
+			tabel.appendChild(tr);
+		}
+	}
+
 	async kelolaCadangan() {
 		resetJudul("Cadangan transaksi");
 		this.cadang = await getData("cadangan_keranjang");
@@ -5501,9 +5606,10 @@ class OpsiTransaksi {
 		this.tengah.innerHTML = "";
 		const btnFr = makeParent("container-horizontal");
 		pembuatButton(btnFr, [
-				["btn", "Hari ini", () => this.ringkasanTransaksi("hari_ini")],
-				["btn", "Minggu ini", () => this.ringkasanTransaksi("minggu_ini")],
-				["btn", "Bulan ini", () => this.ringkasanTransaksi("bulan_ini")]
+			["btn", "Hari ini", () => this.ringkasanTransaksi("hari_ini")],
+			["btn", "Minggu ini", () => this.ringkasanTransaksi("minggu_ini")],
+			["btn", "Bulan ini", () => this.ringkasanTransaksi("bulan_ini")],
+			["btn", "Prediksi penjualan harian", () => this.prediksiPenjualan()]
 		])
 
 		this.prt = makeParent("container");
