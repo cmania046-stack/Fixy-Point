@@ -5606,16 +5606,22 @@ class OpsiTransaksi {
 		this.tengah.innerHTML = "";
 		const btnFr = makeParent("container-horizontal");
 		pembuatButton(btnFr, [
-			["btn", "Hari ini", () => this.ringkasanTransaksi("hari_ini")],
-			["btn", "Minggu ini", () => this.ringkasanTransaksi("minggu_ini")],
-			["btn", "Bulan ini", () => this.ringkasanTransaksi("bulan_ini")],
-			["btn", "Prediksi penjualan harian", () => this.prediksiPenjualan()]
+			["invisible-btn", "Hari ini", () => this.ringkasanTransaksi("hari_ini")],
+			["invisible-btn", "Minggu ini", () => this.ringkasanTransaksi("minggu_ini")],
+			["invisible-btn", "Bulan ini", () => this.ringkasanTransaksi("bulan_ini")],
+			["invisible-btn", "Prediksi penjualan harian", () => this.prediksiPenjualan()]
 		])
 
 		this.prt = makeParent("container");
 		for (const fr of [btnFr, this.prt]) {
 			this.tengah.appendChild(fr);
 		}
+		btnFr.querySelectorAll("button").forEach(btn => {
+			btn.style.fontWeight = "600";
+			btn.style.borderRadius = "0";
+			btn.style.borderLeft = `2px solid ${primary}`;
+			btn.style.marginRight = "10px";
+		});
 	}
 	setup() {
 		this.tengah = document.querySelector("#tgh");
@@ -6496,7 +6502,7 @@ class Laporan {
 			if (key.toLowerCase() === "terjual") {
 				valueNilai = formatUnit(value, "unit");
 			} else if (["total penjualan", "total laba"].includes(key.toLowerCase())) {
-				valueNilai = formatMataUang(Math.round(value)) + " /termasuk pajak";
+				valueNilai = formatMataUang(Math.round(value));
 			}
 			const val = makeLabel(valueNilai, "biasa");
 			for (const item of [keyLabel, titik, val]) {
@@ -6516,6 +6522,11 @@ class Laporan {
 			tabel.appendChild(tr);
 		}
 		field.appendChild(atas);
+		const warningLabel = makeLabel("Pemasukan dan laba kemungkinan termasuk pajak. Harap lakukan peninjauan ulang laporan keuangan dan pajak.", "biasa", field);
+		warningLabel.style.color = "red";
+		warningLabel.style.padding = "10px";
+		warningLabel.style.border = `1px solid ${primary}`;
+		warningLabel.style.borderRadius = "10px";
 		this.tgh.appendChild(tabel);
 	}
 

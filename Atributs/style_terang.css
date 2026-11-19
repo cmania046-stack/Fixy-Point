@@ -1,7 +1,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
 :root {
-	--primary: var(--kiri-panel);
+	--primary: #335E8C; /*var(--kiri-panel);*/
 	--primary-hover: #1F4C7A;
 	--primary-soft: #DDE8F4;
 	--primary-soft-hover: #CBDCEE;
@@ -32,7 +32,7 @@
 	--bar-press: rgba(255, 255, 255, .16);
 
 	--kiri-bg: #F7FAFC;
-	--kiri-panel: #282E36;
+	--kiri-panel: #4074B7; /*#282E36;*/
 	--kiri-text: #172433;
 	--kiri-muted: #5B6B80;
 	--kiri-border: #DCE4EE;
@@ -54,9 +54,9 @@
 	--state-hover: #E6EEF7;
 	--state-press: #D6E3F1;
 
-	--radius-sm: 3px;
-	--radius: 4px;
-	--radius-lg: 6px;
+	--radius-sm: 8px;
+	--radius: 10px;
+	--radius-lg: 13px;
 	--atas-h: 64px;
 
 	--font: 'Inter', system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
@@ -355,7 +355,7 @@ textarea::placeholder {
 	padding: 6px 12px;
 	background: var(--bar-bg);
 	color: var(--surface);
-	border-radius: 0 0 2px 2px;
+	border-radius: 0 0 10px 10px;
 }
 
 .container,
@@ -487,7 +487,7 @@ textarea::placeholder {
 	justify-content: flex-start;
 	gap: 10px;
 	overflow-x: auto;
-	border-radius: 2px 2px 0 0;
+	border-radius: 10px 10px 0 0;
 }
 
 .bawah > img:first-child {
@@ -1256,6 +1256,7 @@ textarea::placeholder {
 	align-items: center;
 	justify-content: center;
 	background: var(--overlay-soft);
+	animation: showUp .5s ease forwards;
 }
 
 .laptop {
