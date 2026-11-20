@@ -1023,8 +1023,8 @@ app.get("/filter_riwayat_penjualan/:data", async (req,res) => {
 	const prd = data.prd || "";
 	let filtered = dataRiwayat;
 	if (prd.toLowerCase() !== "semua periode") {
-		const id = ["hari ini", "minggu ini", "bulan ini"];
-		const funx = [periodeHari, periodeMinggu, periodeBulan];
+		const id = ["hari ini", "minggu ini", "bulan ini", "bulan lalu"];
+		const funx = [periodeHari, periodeMinggu, periodeBulan, bulanLalu];
 		const [start, end] = funx[id.indexOf(prd)]();
 		filtered = dataRiwayat.filter(a => parseDate(a.waktu || "") >= start && parseDate(a.waktu || "") <= end);
 	}

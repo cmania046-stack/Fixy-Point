@@ -1379,10 +1379,10 @@ class Dashboard {
 		this.lastTrx = makeParent("container");
 		this.last = makeParent("container")
 		for (const item of [bar, this.induk, this.frameOpr, this.frameKtgr, this.lastTrx, this.last]) { this.tengah.appendChild(item); }
-		pembuatButton(bar, [
-			["btn", "Hari ini", () => this.setup("hari_ini")],
-			["btn", "Minggu ini", () => this.setup("minggu_ini")],
-			["btn", "Bulan ini", () => this.setup("bulan_ini")]
+		pembuatButtonGambar(bar, [
+			["invisible-btn", "Hari ini", () => this.setup("hari_ini"), "Pictures/day.png"],
+			["invisible-btn", "Minggu ini", () => this.setup("minggu_ini"), "Pictures/week.png"],
+			["invisible-btn", "Bulan ini", () => this.setup("bulan_ini"), "Pictures/month.png"]
 		]);
 		
 		//document.getElementById("bwh").innerHTML = "";
@@ -5477,12 +5477,7 @@ class OpsiTransaksi {
 			forTabel["tanggal"] = t;
 			forTabel[key] = d;
 		}
-		const mapBulan = {
-			1: "Januari", 2: "Februari", 3: "Maret",
-			4: "April", 5: "Mei", 6: "Juni",
-			7: "Juli", 8: "Agustus", 9: "September",
-			10: "Oktober", 11: "November", 12: "Desember"
-		}
+		
 		const now = new Date();
 		makeLabel(`Data transaksi harian dan prediksi 3 hari kedepan`, "teks", pr2);
 		makeLabel(`Periode: ${mapBulan[now.getMonth() + 1]} ${now.getFullYear()}`, "teks", pr2);
@@ -5507,11 +5502,14 @@ class OpsiTransaksi {
 			`;
 			let warna;
 			let fg;
-			if (i <= dataTabel[0].length && i > dataTabel[0].length - 4) { fg = "white"; warna = primary; }
-			tr.style.background = warna;
-			tr.querySelectorAll("td").forEach(f => {
-				f.style.color = fg;
-			});
+			if (i <= dataTabel[0].length && i > dataTabel[0].length - 4) {
+				tr.querySelectorAll("td").forEach(item => {
+					item.style.background = primary;
+					item.style.color = "white";
+					item.style.fontWeight = "600";
+					item.style.fontStyle = "italic";
+				});
+			}
 			tabel.appendChild(tr);
 		}
 	}
@@ -5605,23 +5603,17 @@ class OpsiTransaksi {
 	setTengah() {
 		this.tengah.innerHTML = "";
 		const btnFr = makeParent("container-horizontal");
-		pembuatButton(btnFr, [
-			["invisible-btn", "Hari ini", () => this.ringkasanTransaksi("hari_ini")],
-			["invisible-btn", "Minggu ini", () => this.ringkasanTransaksi("minggu_ini")],
-			["invisible-btn", "Bulan ini", () => this.ringkasanTransaksi("bulan_ini")],
-			["invisible-btn", "Prediksi penjualan harian", () => this.prediksiPenjualan()]
+		pembuatButtonGambar(btnFr, [
+			["invisible-btn", "Hari ini", () => this.ringkasanTransaksi("hari_ini"), "Pictures/day.png"],
+			["invisible-btn", "Minggu ini", () => this.ringkasanTransaksi("minggu_ini"), "Pictures/week.png"],
+			["invisible-btn", "Bulan ini", () => this.ringkasanTransaksi("bulan_ini"), "Pictures/month.png"],
+			["invisible-btn", "Prediksi penjualan harian", () => this.prediksiPenjualan(), "Pictures/prediksi.png"]
 		])
 
 		this.prt = makeParent("container");
 		for (const fr of [btnFr, this.prt]) {
 			this.tengah.appendChild(fr);
 		}
-		btnFr.querySelectorAll("button").forEach(btn => {
-			btn.style.fontWeight = "600";
-			btn.style.borderRadius = "0";
-			btn.style.borderLeft = `2px solid ${primary}`;
-			btn.style.marginRight = "10px";
-		});
 	}
 	setup() {
 		this.tengah = document.querySelector("#tgh");
@@ -6246,19 +6238,6 @@ class Lainnya {
 			label.onclick = () => this.putar(item, "audio", lagu);
 		}
 	}
-	async film() {
-		this.b.innerHTML = "";
-		showPopupLoading();
-		if (video.length === 0) {
-			video = await getDt("ambil_file/mp4");
-		}
-		hidePopupLoading();
-		for (const item of video) {
-			const label = makeLabel(item, "daftar");
-			this.b.appendChild(label);
-			label.onclick = () => this.putar(item, "video", video);
-		}
-	}
 	
 	async refresh() {
 		showPopupLoading();
@@ -6273,16 +6252,13 @@ class Lainnya {
 	hiburan() {
 		this.tengah.innerHTML = "";
 		resetJudul("Hiburan");
-		const atas = makeParent("container-horizontal");
-		this.b = makeParent("container");
-		pembuatButton(atas, [
-				["btns", "🎵 Musik", () => this.musik()],
-				["btns", "💿 Video", () => this.film()],
-				["btns", "Refresh", () => this.refresh()]
+		const atas = makeParent("container-horizontal", this.tengah);
+		this.b = makeParent("container", this.tengah);
+		pembuatButtonGambar(atas, [
+			["invisible-btn", "Musik", () => this.musik(), "Pictures/hiburan.png"],
+			["invisible-btn", "Refresh", () => this.refresh(), "Pictures/refresh.png"]
 		])
-		for (const item of [atas, this.b]) {
-			this.tengah.appendChild(item);
-		}
+		this.musik();
 	}
 	
 	async backup() {
@@ -6585,9 +6561,9 @@ class Laporan {
 			this.tengah.appendChild(x);
 		}
 
-		this.periode = pembuatCombo(atas, "Semua periode", ["Hari ini", "Minggu ini", "Bulan ini"]);
+		this.periode = pembuatCombo(atas, "Semua periode", ["Hari ini", "Minggu ini", "Bulan ini", "Bulan lalu"]);
 		this.operator = pembuatCombo(atas, "Semua operator", [...new Set(this.user.map(p => p.nama))]);
-		this.opsi = pembuatCombo(atas, "Pilih daftar laporan", ["Laporan produk kategori", "Laporan operator"]);
+		this.opsi = pembuatCombo(atas, "- Pilih daftar -", ["Laporan produk kategori", "Laporan operator", "Prediksi penjualan bulanan"]);
 		for (const x of [this.periode, this.operator]) {
 			x.onchange = () => this.filterData();
 		}
@@ -6760,17 +6736,107 @@ class Laporan {
 			"Total keuntungan",
 			opr_laba.map(p => p.laba)
 		);
-
+	}
+	
+	async prediksiPenjualan() {
+		const riwayat = await getData("riwayat_penjualan_campuran");
+		const now = new Date();
+		let dataFilter = {};
+		for (const item of riwayat) {
+			const tanggal = item.waktu.split(" ")[0];
+			const [dd, mm, yyyy] = tanggal.split("/");
+			if (Number(now.getFullYear()) !== Number(yyyy)) continue;
+			
+			const dataBelanja = JSON.parse(item.data_belanja);
+			const qtyTotal = dataBelanja.reduce((sum, a) => sum + a.qty_asli,0);
+			const ada = dataFilter[Number(mm)];
+			if (ada) {
+				ada.total += item.total;
+				ada.laba += item.total_laba;
+				ada.terjual += qtyTotal;
+			} else {
+				dataFilter[Number(mm)] = {
+					tanggal: Number(mm),
+					total: item.total,
+					laba: item.total_laba,
+					terjual: qtyTotal	
+				}
+			}
+		}
+		
+		const tanggal = [], qty = [], total = [], laba = [];
+		for (const value of Object.values(dataFilter)) {
+			tanggal.push(value.tanggal);
+			qty.push(value.terjual);
+			total.push(value.total);
+			laba.push(value.laba);
+		}
+		const [date, qtySorted] = sortByDates(tanggal, qty);
+		const [a, totalSorted] = sortByDates(tanggal, total);
+		const [b, labaSorted] = sortByDates(tanggal, laba);
+		
+		const [idx, tanggalBaru] = dateFiller(date);
+		const qtyBaru = zeroFiller(qtySorted, idx);
+		const totalBaru = zeroFiller(totalSorted, idx);
+		const labaBaru = zeroFiller(labaSorted, idx);
+		
+		this.tgh.innerHTML = "";
+		const pt = makeParent("container", this.tgh);
+		const pr = makeParent("frame", this.tgh);
+		
+		const dtTbl = {};
+		for (const [tgl, dataTujuan, judul, key] of [
+			[tanggalBaru, qtyBaru, "Prediksi produk terjual bulanan", "qty"],
+			[tanggalBaru, totalBaru, "Prediksi pemasukan bulanan", "pemasukan"],
+			[tanggalBaru, labaBaru, "Prediksi keuntungan bulanan", "laba"]
+		]) {
+			const [t, d] = await postData("periksa_prediksi", { dataSource: tgl, dataSearch: dataTujuan });
+			const tt = [];
+			for (const i of t) {
+				let namaBulan = i > 12 ? mapBulan[i - 12] : mapBulan[i];
+				tt.push(namaBulan);
+			}
+			dtTbl["bulan"] = tt;
+			dtTbl[key] = d;
+			lineMaker(pr, judul, "", tt, "Nilai prediksi", d);
+		}
+		const dataTabel = Object.values(dtTbl);
+		const tabel = makeTable(`
+			<tr>
+				<th>Bulan</th>
+				<th>Terjual</th>
+				<th>Total pemasukan</th>
+				<th>Total keuntungan</th>
+			</tr>
+		`);
+		pt.appendChild(tabel);
+		for (let i=0; i<dataTabel[0].length; i++) {
+			const tr = document.createElement("tr");
+			tr.innerHTML = `
+				<td>${dataTabel[0][i]}</td>
+				<td>${dataTabel[1][i]} unit</td>
+				<td>${formatMataUang(dataTabel[2][i])}</td>
+				<td>${formatMataUang(dataTabel[3][i])}</td>
+			`;
+			if (i <= dataTabel[0].length && i >= (dataTabel[0].length - 3)) {
+				tr.querySelectorAll("td").forEach(item => {
+					item.style.background = primary;
+					item.style.color = "white";
+					item.style.fontWeight = "600";
+					item.style.fontStyle = "italic";
+				});
+			}
+			tabel.appendChild(tr);
+		}
 	}
 
 	opsiPilih() {
 		const pilih = this.opsi.value.toLowerCase();
-		if (pilih === "pilih daftar laporan") {
-			return;
-		}
+		if (pilih === "pilih daftar laporan") return;
 		const map = {
 			"laporan produk kategori": this.laporanProdukKategori,
-			"laporan operator": this.laporanOperator
+			"laporan operator": this.laporanOperator,
+			"prediksi penjualan bulanan": this.prediksiPenjualan
 		}
 		map[pilih].call(this);
 	}
