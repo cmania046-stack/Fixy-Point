@@ -3142,7 +3142,7 @@ class Produk {
 			pict.onclick = (e) => {
 				const p = makeFlyParent(e);
 				pembuatButtonGambar(p, [
-					["btns", "Hapus", () => this.hapusGambarProduk(path, nama), "Pictures/hapus.png"]
+					["invisible-btn", "Hapus", () => this.hapusGambarProduk(path, nama), "Pictures/hapus.png"]
 				]);
 				document.body.appendChild(p);
 			}
@@ -6002,8 +6002,8 @@ class Riwayat {
 				parent.style.left = `${e.pageX}px`;
 				
 				pembuatButtonGambar(parent, [
-					["btns", "Detail", () => this.detailRiwayatAktivitas(i.data), "Pictures/cari.png"],
-					["btns", "Hapus", () => this.hapusRiwayatAktivitas(i.id), "Pictures/hapus.png"]
+					["invisible-btn", "Detail", () => this.detailRiwayatAktivitas(i.data), "Pictures/cari.png"],
+					["invisible-btn", "Hapus", () => this.hapusRiwayatAktivitas(i.id), "Pictures/hapus.png"]
 				]);
 				document.body.appendChild(parent);
 			}
@@ -6190,37 +6190,21 @@ class Riwayat {
 }
 
 class Lainnya {
-	async putar(judul, tipe, simpanan) {
-		const wadah = document.querySelector(".file-field");
-		wadah.classList.remove("hidden");
-		wadah.innerHTML = "";
-		const pemutar = document.createElement(tipe);
-		const jdl = makeLabel(judul, "biasa");
 	
-		const badge = makeLabel("x", "badge");
-		badge.style.right = "10px";
-		badge.style.top = "10px";
-		
-		badge.onclick = () => {
-			pemutar.pause();
-			wadah.classList.add("hidden");
-		}
-		pemutar.controls = true;
-		pemutar.src = await ambil_tipe_file(judul);
-		pemutar.play();
-	
-		pemutar.addEventListener("ended", async () => {
-			const index = simpanan.indexOf(judul);
-			if (index === -1) return;			
-			const source = simpanan[(index + 1) % simpanan.length];			
-			pemutar.src = await ambil_tipe_file(source);
-			jdl.textContent = source;
-			pemutar.play();
+	async putar(lagu, daftarLagu) {
+		this.pemutar.src = await ambil_tipe_file(lagu);
+		this.judulLagu.textContent = lagu;
+		this.pemutar.play();
+		this.pemutar.addEventListener("ended", async () => {
+			const index = daftarLagu.indexOf(lagu);
+			if (index === daftarLagu.length) return;
+			const source = daftarLagu[(index + 1) % daftarLagu.length];
+			this.pemutar.src = await ambil_tipe_file(source);
+			this.judulLagu.textContent = source;
+			this.pemutar.play();
 		});
-		for (const it of [badge, jdl, pemutar]) {
-			wadah.appendChild(it);
-		}
 	}
+	
 	async musik() {
 		this.b.innerHTML = "";
 		showPopupLoading();
@@ -6232,10 +6216,18 @@ class Lainnya {
 			localStorage.setItem("musics", JSON.stringify(m));
 		}
 		hidePopupLoading();
+		
+		this.judulLagu = makeLabel("", "teks", this.b);
+		this.pemutar = document.createElement("audio");
+		this.pemutar.controls = true;
+		for (const item of [this.judulLagu, this.pemutar])
+			item.style.alignSelf = "center";
+		this.pemutar.style.margin = "10px";
+		this.b.appendChild(this.pemutar);
+		
 		for (const item of lagu) {
-			const label = makeLabel("🎵 " + item, "daftar");
-			this.b.appendChild(label);
-			label.onclick = () => this.putar(item, "audio", lagu);
+			const lbl = makeButton("invisible-btn", item, null, "Pictures/hiburan.png", this.b);
+			lbl.onclick = () => this.putar(item, lagu);
 		}
 	}
 	
@@ -6290,10 +6282,10 @@ class Lainnya {
 			fff.onclick = (e) => {
 				const parent = makeFlyParent(e);
 				pembuatButtonGambar(parent, [
-					["btns", "Buka file", () => this.openFile(fls[item]), "Pictures/open.png"],	
-					["btns", "Backup file", () => this.downloadFile(fls[item]), "Pictures/backup_file.png"],
-					["btns", "Unduh file", () => this.unduhFile(fls[item]), "Pictures/download.png"],
-					["btns", "Hapus file", () => this.hapusFile(fls[item]), "Pictures/hapus.png"]
+					["invisible-btn", "Buka file", () => this.openFile(fls[item]), "Pictures/open.png"],	
+					["invisible-btn", "Backup file", () => this.downloadFile(fls[item]), "Pictures/backup_file.png"],
+					["invisible-btn", "Unduh file", () => this.unduhFile(fls[item]), "Pictures/download.png"],
+					["invisible-btn", "Hapus file", () => this.hapusFile(fls[item]), "Pictures/hapus.png"]
 				]);
 			}
 		});
@@ -6309,8 +6301,8 @@ class Lainnya {
 			lbl.onclick = (e) => {
 				const p = makeFlyParent(e);
 				pembuatButtonGambar(p, [
-					["btns", "Pulihkan", () => this.pulihkan(filess[item]), "Pictures/download.png"],
-					["btns", "Hapus", () => this.hapusFile(filess[item]), "Pictures/hapus.png"]
+					["invisible-btn", "Pulihkan", () => this.pulihkan(filess[item]), "Pictures/download.png"],
+					["invisible-btn", "Hapus", () => this.hapusFile(filess[item]), "Pictures/hapus.png"]
 				]);
 			}
 		});
@@ -6937,8 +6929,8 @@ class Laporan {
 		parent.style.top = `${e.pageY}px`;
 		
 		pembuatButtonGambar(parent, [
-			["btns", "Cairkan", null, "Pictures/edit.png"],
-			["btns", "Hapus", null, "Pictures/hapus.png"]
+			["invisible-btn", "Cairkan", null, "Pictures/edit.png"],
+			["invisible-btn", "Hapus", null, "Pictures/hapus.png"]
 		]);
 	}
 	

@@ -680,12 +680,13 @@ class Keuangan {
 		this.bawah = makeParent("container", this.tengah);
 		pembuatButtonGambar(atas, [
 			["btns", "Keuangan", () => this.keuangan(), "Pictures/budget.png"],
-			["btns", "Staf", () => this.staff(), "Pictures/employees.png"],
+			["btns", "Staf", () => this.tampilkanKaryawan(), "Pictures/employees.png"],
 			["btns", "Catatan gaji", () => this.catatanGaji(), "Pictures/laporan_keuangan.png"]
 		]);
 		atas.querySelectorAll("button").forEach(btn => {
 			btn.style.border = "none";
 		});
+		this.keuangan();
 	}
 	
 	async catatanGaji() {
@@ -803,10 +804,10 @@ class Keuangan {
 		}
 	}
 	
-	async tampilkanKaryawan(div) {
+	async tampilkanKaryawan() {
 		const data = await getData("data_karyawan");
 		if (kosong(data)) {
-			const lbl = makeLabel("Data karyawan tidak tersedia", "biasa", div);
+			const lbl = makeLabel("Data karyawan tidak tersedia", "biasa", this.bawah);
 			lbl.style.color = "red";
 			return;
 		}
@@ -821,7 +822,8 @@ class Keuangan {
 				<th>Pembayaran terakhir</th>
 			</tr>
 		`);
-		div.appendChild(tabel);
+		this.bawah.innerHTML = "";
+		this.bawah.appendChild(tabel);
 		for (const i of data) {
 			const tr = document.createElement("tr");
 			let teks = `
@@ -841,11 +843,17 @@ class Keuangan {
 				const p = makeFlyParent(e);
 				pembuatButtonGambar(p, [
 					["btns", "Lihat data lengkap", () => this.dataLengkap(i), "Pictures/cari.png"],
-					["btns", "Edit", () => this.editKaryawan(i, div), "Pictures/edit.png"],
-					["btns", "Hapus", () => this.hapus_karyawan(i), "Pictures/hapus.png"]
+					["btns", "Detail gaji", () => this.detailGaji(i), "Pictures/banknotes.png"],
+					["btns", "Edit staf", () => this.editKaryawan(i, div), "Pictures/edit.png"],
+					["btns", "Hapus staf", () => this.hapus_karyawan(i), "Pictures/hapus.png"]
 				]);
 			}
 		}
+		makeButton("btn", "Tambah staf", () => this.staff(), null, this.bawah);
+	}
+	
+	async detailGaji(item) {
+		this.bawah.innerHTML = "";
 	}
 	
 	async staff() {
@@ -853,7 +861,6 @@ class Keuangan {
 	  const ats = pembuatField(this.bawah, "Daftar staf");
 	  const bwh = makeParent("frame", this.bawah);
 	  const user = await getData("users", false, "lihat_data");
-	  this.tampilkanKaryawan(ats);
 	  
 	  const p1 = pembuatField(bwh, "Info umum");
 	  const nama = pembuatCombo(p1, "- Pilih nama -", 
