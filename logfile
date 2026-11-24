@@ -678,3 +678,24 @@
 2026-11-18 23:27:15.788 WIT [22469] LOG:  database system is ready to accept connections
 2026-11-18 23:32:15.882 WIT [22477] LOG:  checkpoint starting: time
 2026-11-18 23:32:16.071 WIT [22477] LOG:  checkpoint complete: wrote 1 buffers (0.0%), wrote 0 SLRU buffers; 0 WAL file(s) added, 0 removed, 0 recycled; write=0.112 s, sync=0.002 s, total=0.189 s; sync files=1, longest=0.002 s, average=0.002 s; distance=0 kB, estimate=0 kB; lsn=0/346E158, redo lsn=0/346E100
+2026-11-21 16:10:58.089 WIT [25283] LOG:  starting PostgreSQL 18.6 on arm-unknown-linux-androideabi, compiled by Android (16134705, +pgo, +bolt, +lto, +mlgo, based on r574158c) clang version 21.0.0 (https://android.googlesource.com/toolchain/llvm-project 9f872551d3c681d06fd303b36f16ed5c274735eb), 32-bit
+2026-11-21 16:10:58.091 WIT [25283] LOG:  listening on IPv4 address "127.0.0.1", port 5432
+2026-11-21 16:10:58.095 WIT [25283] LOG:  listening on Unix socket "/data/data/com.termux/files/usr/tmp/.s.PGSQL.5432"
+2026-11-21 16:10:58.212 WIT [25299] LOG:  database system was shut down at 2026-11-21 15:29:40 WIT
+2026-11-21 16:10:58.305 WIT [25283] LOG:  database system is ready to accept connections
+2026-11-21 16:15:58.285 WIT [25297] LOG:  checkpoint starting: time
+2026-11-21 16:15:58.319 WIT [25297] LOG:  checkpoint complete: wrote 0 buffers (0.0%), wrote 3 SLRU buffers; 0 WAL file(s) added, 0 removed, 0 recycled; write=0.012 s, sync=0.002 s, total=0.035 s; sync files=2, longest=0.001 s, average=0.001 s; distance=0 kB, estimate=0 kB; lsn=0/34B6298, redo lsn=0/34B6240
+2026-11-21 18:32:42.520 WIT [25297] LOG:  checkpoint starting: time
+2026-11-21 18:32:42.982 WIT [25297] LOG:  checkpoint complete: wrote 4 buffers (0.0%), wrote 1 SLRU buffers; 0 WAL file(s) added, 0 removed, 0 recycled; write=0.421 s, sync=0.003 s, total=0.462 s; sync files=5, longest=0.002 s, average=0.001 s; distance=4 kB, estimate=4 kB; lsn=0/34B7440, redo lsn=0/34B73E8
+2026-11-21 18:47:43.142 WIT [25297] LOG:  checkpoint starting: time
+2026-11-21 18:47:43.283 WIT [25297] LOG:  checkpoint complete: wrote 1 buffers (0.0%), wrote 0 SLRU buffers; 0 WAL file(s) added, 0 removed, 0 recycled; write=0.113 s, sync=0.002 s, total=0.141 s; sync files=1, longest=0.002 s, average=0.002 s; distance=0 kB, estimate=4 kB; lsn=0/34B76D8, redo lsn=0/34B7680
+2026-11-21 19:10:27.031 WIT [7773] ERROR:  relation "riwayat_penarikan_saldo" does not exist at character 18
+2026-11-21 19:10:27.031 WIT [7773] STATEMENT:  
+					INSERT INTO riwayat_penarikan_saldo (id_riwayat, tanggal, data, status)
+					VALUES ($1, $2, $3, $4)
+2026-11-21 19:14:23.294 WIT [25297] LOG:  checkpoint starting: time
+2026-11-21 19:14:28.283 WIT [25297] LOG:  checkpoint complete: wrote 48 buffers (0.3%), wrote 1 SLRU buffers; 0 WAL file(s) added, 0 removed, 0 recycled; write=4.914 s, sync=0.037 s, total=4.989 s; sync files=44, longest=0.008 s, average=0.001 s; distance=192 kB, estimate=192 kB; lsn=0/34E7AA8, redo lsn=0/34E7A18
+2026-11-21 20:24:38.724 WIT [25297] LOG:  checkpoint starting: time
+2026-11-21 20:24:39.800 WIT [25297] LOG:  checkpoint complete: wrote 10 buffers (0.1%), wrote 1 SLRU buffers; 0 WAL file(s) added, 0 removed, 0 recycled; write=1.031 s, sync=0.007 s, total=1.077 s; sync files=11, longest=0.002 s, average=0.001 s; distance=11 kB, estimate=174 kB; lsn=0/34EA740, redo lsn=0/34EA6E8
+2026-11-22 06:02:25.601 WIT [25297] LOG:  checkpoint starting: time
+2026-11-22 06:02:28.822 WIT [25297] LOG:  checkpoint complete: wrote 31 buffers (0.2%), wrote 1 SLRU buffers; 0 WAL file(s) added, 0 removed, 0 recycled; write=3.173 s, sync=0.019 s, total=3.229 s; sync files=33, longest=0.003 s, average=0.001 s; distance=30 kB, estimate=160 kB; lsn=0/34F1FD8, redo lsn=0/34F1F80

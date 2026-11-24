@@ -853,12 +853,86 @@ class Keuangan {
 	}
 	
 	async detailGaji(item) {
+		hideOverlay();
 		this.bawah.innerHTML = "";
+		const infoBayar = JSON.parse(item.info_pembayaran);
+		let dataForTabel = [];
+		for (const [k, v] of [
+			["Nama", item.nama], ["Inisial code", item.inisial_code], ["Gaji pokok", formatMataUang(item.gaji_pokok)]
+		]) dataForTabel.push({ aspek: k, value: v });
+
+		for (const [key, value] of Object.entries(infoBayar)) {
+			let val = value;
+			if (key.toLowerCase() === "pembayaran_terakhir") {
+				const payTime = new Date(value);
+				val = `${payTime.getDate()} ${mapBulan[payTime.getMonth() + 1]} ${payTime.getFullYear()}`;
+			}
+			dataForTabel.push({
+				aspek: capitalize(key.replaceAll("_"," ")),
+				value: val
+			});
+		}
+		
+		const cekGajian = await fetch(url + "periksa_pembayaran_gaji", { method: "POST" });
+		const dataGajian = await cekGajian.json();
+		
+		let find = null;
+		if (!(kosong(dataGajian)))
+			find = dataGajian.find(p => p.inisial_code.toLowerCase() === item.inisial_code.toLowerCase()) ?? null;
+		
+		dataForTabel.push({
+			aspek: "Status gajian",
+			value: kosong(find) ? "Belum gajian" : "Sudah gajian"
+		});
+		pembuatTabel(this.bawah, ["Aspek", "Value"], ["aspek", "value"], dataForTabel);
+		
+		const fr = makeParent("container-horizontal", this.bawah);
+		const buttonInfo = [];
+		if (infoBayar.gaji_terkumpul > 100000) buttonInfo.push(
+			["btn", "Cairkan gaji", () => this.cairkanGaji(item)]
+		);
+		if (!(kosong(find))) buttonInfo.push(
+			["btn", "Bayar gaji", () => new TinjauGajiKaryawan([find]).setup()]
+		);
+		if (buttonInfo.length) pembuatButton(fr, buttonInfo);
+	}
+	
+	async cairkanGaji(item) {
+		const rekening = JSON.parse(item.info_rekening);
+		const gaji = await modalShow("Nilai gaji", "Masukkan nilai gaji yang hendak dicairkan", true);
+		if (kosong(gaji)) return;
+		setTimeout(async () => {
+			const dibayar = safeFloat(gaji);
+			const infoBayar = JSON.parse(item.info_pembayaran);
+			if (dibayar > infoBayar.gaji_terkumpul) {
+				await modalShow(gagal, "Gaji tidak cukup");
+				return;
+			}
+			if (await modalShow(confirm,
+				`Silahkan bayar atau transfer sejumlah
+				${formatMataUang(dibayar)} ke:\n
+				Nomor rekening: ${rekening["nomor rekening"]}
+				Nama pemilik: ${rekening["nama pemilik rekening"]}
+				Bank: ${rekening["nama bank"]}\n
+				Mohon konfirmasi bahwa ${rekening["nama pemilik rekening"]} telah menerima.
+				Tekan 'Ok' untuk lanjutkan!`)) {
+				const dataKirim = {
+					id: item.inisial_code,
+					nama: item.nama,
+					nilai: dibayar,
+					info_pembayaran: infoBayar,
+					operator: user,
+					sumber: idDevice
+				}
+				const res = await postDataKedua("cairkan_gaji", dataKirim);
+				const result = await message(res);
+				if (result) this.tampilkanKaryawan();
+			}
+		}, 0);
 	}
 	
 	async staff() {
 	  this.bawah.innerHTML = "";
-	  const ats = pembuatField(this.bawah, "Daftar staf");
 	  const bwh = makeParent("frame", this.bawah);
 	  const user = await getData("users", false, "lihat_data");
 	  
@@ -994,6 +1068,12 @@ function setButtonBawah() {
 		item.style.boxShadow = "none";
 		item.style.justifyContent = "center";
 		item.style.alignItems = "center";
+	});
+}
+
+function hideOverlay() {
+	document.querySelectorAll(".dropdown-overlay").forEach(item => {
+		item.style.display = "none";
 	});
 }
 

@@ -1,3 +1,97 @@
+//class
+class Kalkulator {
+	setup() {
+		const parent = pembuatJendela();
+		const jdl = makeLabel("Kalkulator", "jdl");
+		const pr = makeParent("container");
+		pr.style.background = kiriBg;
+		for (const i of [jdl, pr]) parent.appendChild(i);
+		this.input = document.createElement("textarea");
+		this.input.className = "entry";
+		this.input.rows = "2";
+		const btnFrame = makeParent("container");
+		btnFrame.style.display = "grid";
+		btnFrame.style.gridTemplateColumns = "repeat(4,1fr)";
+		for (const i of [this.input, btnFrame]) pr.appendChild(i);
+		
+		const btns = [
+		  "AC", "÷", "×", "←",
+		  "7", "8", "9", "–",
+		  "4", "5", "6", "+",
+		  "1", "2", "3", ",",
+		  "0", "(", ")", "%",
+		  "="
+		];
+		const colorMap = {
+			"AC": "red",
+			"=": "green",
+			"←": "yellow"
+		}
+		
+		for (const teks of btns) {
+			const btn = makeButton("btn", teks, null);
+			btn.style.fontSize = "1.15rem";
+			btn.style.transition = "none";
+			btn.style.fontWeight = "550";
+			btn.style.background = colorMap[teks];
+			if (teks === "=") btn.style.gridColumn = "1/-1";
+			if (teks === "←") btn.style.color = "black";
+			btnFrame.appendChild(btn);
+			btn.addEventListener("pointerdown", (e) => {
+				e.preventDefault();
+				this.give(teks);
+			});
+		}
+		this.input.addEventListener("keydown", (e) => {
+			if (e.key === "Enter") {
+				e.preventDefault();
+				this.showResult();
+			} else {
+				const val = this.input.value.trim();
+				if (val.includes("\n")) {
+					const p = val.split("\n");
+					this.input.value = p.at(-1);
+				}
+			}
+		});
+	}
+	
+	showResult() {
+		try {
+			const inp = this.input.value.trim()
+				.replaceAll("÷","/")
+				.replaceAll("×","*")
+				.replaceAll("–","-")
+				.replaceAll(",",".")
+				.replaceAll("%","/100");
+			const hasil = stringMath(inp);
+			this.input.value += "\n" + hasil;
+			this.sudahHitung = true;
+		} catch (err) {
+			this.input.value = err.message;
+		}
+	}
+	
+	give(teks) {
+		const el = this.input;
+		if (teks === "AC") {
+			el.value = "";
+			this.sudahHitung = false;
+		} else if (teks === "←") {
+			el.value = el.value.slice(0, -1);
+		} else if (teks === "=") {
+			this.showResult();
+		} else {
+			if (this.sudahHitung) {
+				el.value = el.value.split("\n").at(-1);
+				this.sudahHitung = false;
+			}
+			el.value += teks;
+		}
+	}
+}
+//class
+
 //map
 const mapBulan = {
 	1: "Januari", 2: "Februari", 3: "Maret",
@@ -8,6 +102,180 @@ const mapBulan = {
 //map
 
 //helper functions
+async function uploadFile(endpoint, file) {
+	showPopupLoading();
+	try {
+		const res = await fetch(url + endpoint, {
+				method: "POST",
+				body: file
+		});
+		const r = await res.json()
+		hidePopupLoading();
+		return r;
+	} catch (e) {
+		hidePopupLoading();
+		await modalShow(error, e);
+		return null;
+	}
+}
+
+async function postData(endpoint, data) {
+	showPopupLoading();
+	try {
+		const res = await fetch(url + endpoint, {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json",
+				},
+				body: JSON.stringify(data),
+				credentials: "include"
+		});
+		const d = await res.json();
+		hidePopupLoading();
+		return d;
+	} catch (error) {
+		hidePopupLoading();
+		mainkanBeep(300,0.3);
+		await modalShow(gagal, "Gagal upload data ke server");
+		return null;
+	};
+}
+
+async function postDataKedua(endpoint, data) {
+	showPopupLoading();
+	try {
+		const res = await fetch(url + "post_data/" + endpoint, {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json",
+				},
+				body: JSON.stringify(data),
+				credentials: "include"
+		});
+		const d = await res.json();
+		hidePopupLoading();
+		return d;
+	} catch (error) {
+		hidePopupLoading();
+		mainkanBeep(300,0.3);
+		await modalShow(gagal, "Gagal upload data ke server");
+		return null;
+	};
+}
+
+async function takePictures(file="", folder="", age=86400) {
+	try {
+		const info = {
+			file: file,
+			folder: folder,
+			age: age
+		}
+		const payload = JSON.stringify(info);
+		const link = `get_all_pictures/${encodeURIComponent(payload)}`;
+		const res = await fetch(url + link);
+		if (!res.ok) throw new Error(`Status ${res.status}`);
+		const blob = await res.blob();
+		return URL.createObjectURL(blob);
+	} catch (er) {
+		await modalShow(error, er);
+		return null;
+	}
+}
+
+async function getDt(endpoint) {
+	try {
+		const response = await fetch(url + endpoint, {
+			method: "GET",
+			credentials: "include"
+		});
+		const data = await response.json();
+		return data;
+	} catch (e) {
+		await modalShow(error, e);
+		return null
+	}
+}
+
+async function getData(endpoint, cache=false) {
+	showPopupLoading(`Menyiapkan data ${endpoint.replace(/_/g, " ")}...`);
+	try {
+		const URL = `lihat_data?tabel=${encodeURIComponent(endpoint)}`;
+		const res = await fetch(url + URL, {
+			method: "GET",
+			headers: {
+				"Accept": "application/json"
+			},
+			credentials: "include"
+		});
+		if (res.status === 401) {
+			hidePopupLoading();
+			return [];
+		}
+		const data = await res.json();
+		if (cache) localStorage.setItem(endpoint, JSON.stringify(data));
+		hidePopupLoading();
+		return data;
+	} catch {
+		hidePopupLoading();
+		await modalShow(gagal, "Koneksi server tidak aktif. Data memakai cadangan data", false);
+		const data = localStorage.getItem(endpoint);
+		return data ? JSON.parse(data) : [];
+	}
+}
+
+function cetak(id, ukuran="80mm auto", lebar="80mm") {
+	const elemen = document.querySelector(id);
+	const style = document.createElement("style");
+	style.textContent = `
+		@page {
+			size: ${ukuran};
+			margin: 0;
+		}
+	`;
+	document.head.appendChild(style);
+	
+	elemen.classList.add("cetak");
+	elemen.style.width = lebar;
+	window.print();
+	elemen.classList.remove("cetak");
+	elemen.style.width = "";
+	style.remove();
+}
+
+function pecahCek(data) {
+	if (kosong(data)) return [];
+	let forReturn = [];
+	for (const [key, value] of Object.entries(data)) {
+		const val = value.checked;
+		if (val) forReturn.push(key);
+	}
+	return forReturn;	
+}
+
+function makeCekbox(parent, label) {
+	const lbl = makeLabel(label, "label-data");
+	const cek = document.createElement("input");
+	cek.type = "checkbox";
+	cek.className = "cek";
+	lbl.appendChild(cek);
+	parent.appendChild(lbl);
+	return cek;
+}
+
+function makeCekTrx(parent, label) {
+	const lbl = makeLabel(label, "label-data");
+	const cek = document.createElement("input");
+	cek.type = "checkbox";
+	cek.className = "cek";
+	lbl.appendChild(cek);
+	parent.appendChild(lbl);
+	return cek;
+}
+
+function hideWindow() {
+	document.querySelector(".lc").classList.add("hidden");
+	document.querySelector(".lc-content").innerHTML = "";
+}
 
 function pembuatTabel(parent, header, body, data) {
 	let td = [];

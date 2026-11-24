@@ -23,6 +23,7 @@ const listTanggal = [
 const listWaktu = ["H:m:s", "H/m/s", "H.m.s", "H:m", "H/m", "H.m"];
 
 const allowedMethods = [
+	"cairkan_gaji",
 	"hapus_serbaguna_kedua",
 	"tambah_data_gaji",
 	"tambah_karyawan",
@@ -119,7 +120,7 @@ const allowedMethods = [
 ];
 
 const existedTable = [
-	"riwayat_pencatatan_gaji", "data_karyawan", "riwayat_profit", "persentase", "riwayat_saldo", "data_saham", "investor", "vouchers_data", "ketentuan_voucher", "stok_flow", "users", "vipayment", "info_admin", "pin", "keuangan_lengkap", "aset_lain", "kewajiban", "Pengeluaran", "profil", "produk", "riwayat_utama", "margin", "produk_diskon", "keuangan", "operator",
+	"riwayat_penarikan_gaji", "riwayat_pencatatan_gaji", "data_karyawan", "riwayat_profit", "persentase", "riwayat_saldo", "data_saham", "investor", "vouchers_data", "ketentuan_voucher", "stok_flow", "users", "vipayment", "info_admin", "pin", "keuangan_lengkap", "aset_lain", "kewajiban", "Pengeluaran", "profil", "produk", "riwayat_utama", "margin", "produk_diskon", "keuangan", "operator",
 	"device", "customer", "supplier", "pajak", "riwayat_pajak", "riwayat_penjualan_campuran",
 	"media_bayar", "cadangan_keranjang", "hak_akses", "status_qr", "riwayat_login", "shift",
 	"produk_tingkat", "tingkat_a", "tingkat_b", "validasi_owner", "pengaturan_nota", "riwayat_retur",
@@ -303,6 +304,10 @@ class Database {
 				info_potongan TEXT, info_rekening TEXT, info_pembayaran TEXT`
 			);
 			await this.createTable(cl, "riwayat_pencatatan_gaji", `
+					id_riwayat TEXT, tanggal TEXT, data TEXT, status TEXT
+				`
+			);
+			await this.createTable(cl, "riwayat_penarikan_gaji", `
 					id_riwayat TEXT, tanggal TEXT, data TEXT, status TEXT
 				`
 			);
@@ -745,6 +750,7 @@ app.get("/", (req,res) => {
 app.get("/dashboard_admin", (req,res) => { res.sendFile(path.join(folderHtml, "proyek_fixed.html")); });
 app.get("/lain", (req,res) => { res.sendFile(path.join(folderHtml, "mylampion.html")); });
 app.get("/manajemen_keuangan", (req,res) => { res.sendFile(path.join(folderHtml, "manajemen_keuangan.html")); });
+app.get("/transaksi", (req,res) => { res.sendFile(path.join(folderHtml, "transaksi.html")); });
 app.get("/customer", (req,res) => { res.sendFile(path.join(folderHtml, "Customer2.html")); });
 
 app.get("/tabel_tabel", (req, res) => {
@@ -2217,6 +2223,66 @@ class PostData {
 	constructor(data, req) {
 		this.data = data;
 		this.req = req;
+	}
+	
+	async cairkan_gaji() {
+		const d = this.data;
+		const client = await poolInvest.connect();
+		const cl = await pool.connect();
+		try {
+			for (const i of [client, cl]) await i.query("BEGIN");
+			const infoBayar = d.info_pembayaran ?? {};
+			infoBayar["gaji_dicairkan"] = (infoBayar.gaji_dicairkan ?? 0) + (d.nilai ?? 0);
+			infoBayar["gaji_terkumpul"] = (infoBayar.gaji_terkumpul ?? 0) - (d.nilai ?? 0);
+			const now = new Date();
+			infoBayar["pencairan_terakhir"] = `${now.getFullYear()}-${now.getMonth() + 1}-${now.getDate()}`;
+			const idRiwayat = crypto.randomUUID().slice(0,10).replaceAll("-","").toUpperCase();
+			
+			await client.query(`
+				UPDATE data_karyawan SET
+				info_pembayaran = $1 WHERE inisial_code = $2`, [
+					JSON.stringify(infoBayar), d.id ?? ""
+				]
+			);
+			await cl.query(`
+				INSERT INTO Pengeluaran (
+					waktu, nama, jumlah, satuan_jumlah, harga, total,
+					kategori, keterangan, operator, sumber
+				) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`, [
+					await nowStr(), `Bayar gaji ${d.nama}`, 1, "",
+					0, d.nilai ?? 0, "Gaji", "Lunas", d.operator ?? "", d.sumber ?? ""
+				]
+			);
+			await cl.query(`INSERT INTO keuangan_lengkap (
+				tanggal, jenis, keterangan, kas,
+				persediaan, aset_lain, pendapatan, hpp,
+				beban, referensi
+			) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`, [
+				await nowStr(),
+				"Pengurangan saldo",
+				"Pengurangan saldo kas untuk pembayaran gaji",
+				-(d.nilai ?? 0),
+				0, 0, 0, 0, d.nilai ?? 0, idRiwayat
+			]);
+			
+			await client.query(`
+				INSERT INTO riwayat_penarikan_gaji (id_riwayat, tanggal, data, status)
+				VALUES ($1, $2, $3, $4)`, [
+					idRiwayat, await nowStr(), JSON.stringify(d), "Selesai"
+				]
+			);
+			
+			for (const i of [client, cl]) await i.query("COMMIT");
+			const keuangan = openJson(fileKeuangan, {});
+			keuangan.saldo = (keuangan.saldo ?? 0) - (d.nilai ?? 0);
+			keuangan.beban = (keuangan.beban ?? 0) + (d.nilai ?? 0);
+			simpanSemua(fileKeuangan, keuangan);
+			return [{
+				stat: "Berhasil",
+				pesan: `Pencairan gaji ${d.nama} senilai ${d.nilai} berhasil`
+			}, 200];
+		} catch (err) { for (const i of [client, cl]) await i.query("ROLLBACK"); return errorReturn(err); }
+		finally { for (const i of [client, cl]) i.release(); }
 	}
 	
 	async hapus_serbaguna_kedua() {
