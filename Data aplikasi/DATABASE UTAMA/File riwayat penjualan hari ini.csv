@@ -1,0 +1,22 @@
+"Riwayat penjualan campuran"
+"Periode: hari ini"
+
+"Id",":","54"
+"Waktu",":","24/11/2026 09:39:33"
+"Total",":","Rp18.700"
+"Total laba",":","Rp8.500"
+"No trans",":","D23_681365"
+"Operator",":","Admin"
+"Sumber",":","d3f41b1e-7289-4905-9"
+"Pembeli",":","Dino 08219015776"
+"Bayar",":","Rp18.700"
+"Kembali",":","Rp0"
+
+"Id","Nama","Barcode","Qty","Qty asli","Harga jual","Subtotal jual","Harga modal","Subtotal modal","Laba","Harga asli","Potongan tingkat","Potongan diskon","Min diskon","Min tingkat","Tipe promo","Persen pajak"
+"EA584066","Sendal hitam","005","1","1","Rp2.200","Rp2.200","Rp1.000","Rp1.000","Rp1.000","Rp2.000","Rp0","Rp0","","","","10"
+"ECA32CF2","Sepatu kets","006","1","1","Rp5.500","Rp5.500","Rp2.500","Rp2.500","Rp2.500","Rp5.000","Rp0","Rp0","","","","10"
+"E903AC55","Bantal","004","1","1","Rp11.000","Rp11.000","Rp5.000","Rp5.000","Rp5.000","Rp10.000","Rp0","Rp0","","","","10"
+
+"Kena pajak",":","Rp1.700"
+"Status pajak",":","1"
+"Created at",":","Tue Nov 24 2026 09:39:33 GMT+0900 (Eastern Indonesia Time)"

@@ -912,6 +912,8 @@ class Transaksi {
 		this.labelNoTrans.textContent = this.noTrans;
 	}
 	
+	getNoTrans() { return this.noTrans; }
+	
 	async setup() {
 		this.produk = await getData("produk");
 		this.pajak = await getData("pajak");
@@ -938,6 +940,213 @@ class Transaksi {
 		this.setPembayaran();
 		this.cekInfoCadangan();
 		this.tambahkanSecondKeranjang();
+	}
+}
+
+class Retur {
+	async cariTransaksi(parent, parent2) {
+		const noTrans = this.inputRetur.value.trim().toLowerCase();
+		const data = await getData("riwayat_penjualan_campuran");
+		const transaksi = data.find(a => a.no_trans.toLowerCase() === noTrans) ?? null;
+		
+		if (!transaksi) { await modalShow(gagal, "Transaksi tidak tersedia"); return; }
+		this.dt = transaksi;
+		parent.innerHTML = "";
+		let keranjang = [];
+		
+		const tabel1 = makeTable(`
+			<tr>
+				<th>Aspek</th>
+				<th>Value</th>
+			</tr>
+		`);
+		parent.appendChild(tabel1);
+		for (const [key, value] of Object.entries(transaksi)){
+			if (!["id", "no_trans", "data_belanja"].includes(key.toLowerCase())) {
+				let val = value;
+				if (["total", "total_laba", "bayar", "kembali", "kena_pajak"].includes(key.toLowerCase())) {
+					val = formatMataUang(Math.round(value));
+				}
+				const tr = document.createElement("tr");
+				tr.innerHTML = `
+					<td>${capitalize(key.replace(/_/g, " "))}</td>
+					<td>${val}</td>
+				`;
+				tabel1.appendChild(tr);	
+			} else if (key.toLowerCase() === "data_belanja") { keranjang = JSON.parse(value); }
+		}
+		if (keranjang.length > 0) {
+			parent2.innerHTML = "";
+			for (const item of keranjang) {
+				const field = pembuatField(parent2, item.nama);
+				const prt = makeParent("container");
+				prt.style.display = "grid";
+				prt.style.gridTemplateColumns = "repeat(3,1fr)";
+				field.appendChild(prt);
+				
+				for (const [key, val] of [
+					["Barcode", item.barcode],
+					["Qty", item.qty_asli],
+					["Harga jual", formatMataUang(item.harga_jual)],
+					["Subtotal", formatMataUang(item.subtotal_jual)]
+				]) {
+					prt.appendChild(makeLabel(key, "biasa"));
+					prt.appendChild(makeLabel(":", "biasa"));
+					prt.appendChild(makeLabel(val, "biasa"));
+				}
+				
+				const entryQty = makeEntry("Masukkan qty retur", "number");
+				entryQty.value = item.qty_asli.toString();
+				const btnRetur = makeButton("btn", "Tambah keranjang", () => this.tambahKeranjangRetur(entryQty, item));
+				for (const i of [entryQty, btnRetur]) { field.appendChild(i); }
+			}
+		}
+		const inputs = parent2.querySelectorAll("input");
+		if (inputs.length > 0) { inputs[0].focus(); }
+		inputs.forEach((item,i) => {
+			const produk = keranjang[i];
+			item.addEventListener("keydown", (e) => {
+				if (e.key === "Enter") {
+					e.preventDefault();
+					if (i < inputs.length - 1) { this.tambahKeranjangRetur(item, produk); inputs[i+1].focus(); }
+					else { this.tambahKeranjangRetur(item, produk); this.lookAtkeranjangRetur(); }
+				}
+			});
+		});
+	}
+	
+	async tambahKeranjangRetur(qty, item) {
+		const q = safeInt(qty.value.trim());
+		if (q <= 0) return;
+
+		const itemRetur = this.keranjangRetur.find(a => a.id === item.id) ?? null;
+		const sudahAda = itemRetur ? itemRetur.jumlah : 0;
+		const qtyTotal = sudahAda + q;
+		if (qtyTotal > item.qty_asli) return;
+		const qtySisa = item.qty_asli - qtyTotal;
+		let subtotalRetur = 0;
+		let tipePromo = (item.tipe_promo || "").toLowerCase();
+		if (tipePromo === "diskon") {
+			let batal = 0;
+			if (qtySisa < (item.min_diskon || 0)) {
+				batal = (item.potongan_diskon || 0) / item.qty_asli * qtySisa;
+			} subtotalRetur = qtyTotal * item.harga_jual - batal;
+		} else if (tipePromo === "tingkat") {
+			let batal = 0;
+			if (qtySisa < (item.min_tingkat || 0)) {
+				batal = (item.potongan_tingkat || 0) / item.qty_asli * qtySisa;
+			}
+			const kotor = item.harga_jual / item.qty_asli * qtyTotal;
+			subtotalRetur = kotor - batal;
+		} else { subtotalRetur = qtyTotal * item.harga_jual; }
+		
+		if (subtotalRetur > 0) {
+			if (itemRetur) {
+				itemRetur.jumlah = qtyTotal
+				itemRetur.subtotal = subtotalRetur	
+			} else {
+				this.keranjangRetur.push({
+					id: item.id,
+					nama: item.nama,
+					jumlah: qtyTotal,
+					subtotal: subtotalRetur
+				})
+			}
+			this.totalRetur = this.keranjangRetur.reduce((sum, a) => sum + a.subtotal, 0);
+			this.badgeRetur.textContent = this.keranjangRetur.length.toString();
+		}
+	}
+	
+	lookAtkeranjangRetur() {
+		const parent = pembuatJendela();
+		const tabel = makeTable(`
+			<tr>
+				<th>Nama</th>
+				<th>Jumlah retur</th>
+				<th>Subtotal</th>
+				<th>Aksi</th>
+			</tr>
+		`);
+		parent.appendChild(makeLabel("Total retur: " + formatMataUang(this.totalRetur), "jdl"));
+		parent.appendChild(tabel);
+		for (const item of this.keranjangRetur) {
+			const tr = document.createElement("tr");
+			tr.innerHTML = `
+				<td>${item.nama}</td>
+				<td>${item.jumlah}</td>
+				<td>${formatMataUang(item.subtotal)}</td>
+				<td>
+					<img id="hapus" class="icon" alt="" onclick="ret.hapusItemRetur('${item.id}', event)">
+				</td>
+			`;
+			tr.querySelector("#hapus").src = "Pictures/hapus.png";
+			tabel.appendChild(tr);
+		}
+		const inp = document.createElement("textarea");
+		inp.className = "entry";
+		inp.rows = "5";
+		inp.cols = "40";
+		const eksekusi = makeButton("btn", "Selesaikan", () => this.selesaikanRetur(inp.value.trim()));
+		parent.appendChild(makeLabel("Alasan retur", "jdl"));
+		parent.appendChild(inp);
+		parent.appendChild(eksekusi);
+		inp.focus();
+		const layarSentuh = window.matchMedia("(pointer: coarse)").matches;
+
+		if (!layarSentuh) {
+		    inp.addEventListener("keydown", (e) => {
+		        if (e.key === "Enter" && !e.shiftKey) {
+		            e.preventDefault();
+		            this.selesaikanRetur(inp.value.trim());
+		        }
+		    });
+		}
+	}
+	
+	async selesaikanRetur(alasan) {
+		const data = {
+			belanja: this.dt,
+			retur: this.keranjangRetur,
+			alasan: alasan,
+			operator: user,
+			sumber: idDevice
+		}
+		if (await modalShow(confirm, "Data retur siap. Selesaikan sekarang?")) {
+			const up = await postDataKedua("proses_retur", data);
+			await message(up);
+			this.setup();
+		}
+	}
+	
+	hapusItemRetur(id, e) {
+		e.stopPropagation();
+		this.keranjangRetur = this.keranjangRetur.filter(a => a.id !== id);
+		this.badgeRetur.textContent = String(this.keranjangRetur.length);
+		this.totalRetur = this.keranjangRetur.reduce((sum, b) => sum + b.subtotal, 0);
+		this.lookAtkeranjangRetur();
+	}
+	
+	
+	retur() {
+		this.tengah.innerHTML = "";
+		const atas = makeParent("container-horizontal", this.tengah);
+		this.inputRetur = entryMaker("Cari transaksi...", "text", "Pictures/cari.png", atas);
+		const keranjangRetur = makeButton("btns", "", () => this.lookAtkeranjangRetur(), "Pictures/checkout.png", atas);
+		keranjangRetur.style.position = "relative";
+		
+		this.badgeRetur = makeLabel(this.keranjangRetur.length.toString(), "badge", keranjangRetur);
+		const bawah = makeParent("container", this.tengah);
+		const bawah2 = makeParent("frame", this.tengah);
+
+		this.inputRetur.addEventListener("keydown", (e) => {
+			if (e.key === "Enter") { e.preventDefault(); this.cariTransaksi(bawah, bawah2); }
+		});
+	}
+	
+	setup() {
+		this.keranjangRetur = [];
+		this.tengah = document.getElementById("tengah");
+		this.retur();		
 	}
 }
 
@@ -1089,8 +1298,8 @@ class SetupKiri {
 		for (const item of data) {
 			const keranjang = JSON.parse(item.keranjang);
 			const total = keranjang.reduce((sum,b) => sum + (b.harga * b.qty), 0);
-			
-			const fr = makeParent("container", parent);
+			const prt = makeParent("container", parent);
+			const fr = makeParent("container", prt);
 			fr.style.display = "grid";
 			fr.style.gridTemplateColumns = "repeat(3,1fr)";
 			fr.style.border = "none";
@@ -1109,26 +1318,72 @@ class SetupKiri {
 				item["qty"] = String(item["qty"]);
 				
 			const tabel = pembuatTabel(
-				parent,
+				prt,
 				["Id produk", "Barcode", "Nama", "Qty", "Harga"],
 				["id", "barcode", "nama", "qty", "harga"],
 				keranjang
 			);
-			const fr2 = makeParent("container-horizontal", parent);
+			const fr2 = makeParent("container-horizontal", prt);
 			pembuatButton(fr2, [
-				["btn", "Selesaikan", () => this.selesaikanTransaksi(item)], ["btn btn-cancel", "Hapus", null]
+				["btn", "Selesaikan", () => this.selesaikanTransaksi(item)], ["btn btn-cancel", "Hapus", () => this.hapusTrx(item.no)]
 			]);
 		}
 	}
 	
-	simpananBaru() {}
+	async hapusTrx(no) {
+		if (await modalShow("Konfirmasi", "Hapus transaksi " + no + "?", false)) {
+			const info = {
+				tabel: "cadangan_keranjang",
+				key: "no",
+				data: [no]
+			}
+			const hasil = await postDataKedua("hapus_serbaguna", info)
+			await message(hasil)
+		}
+	}
+	
+	async simpanKeranjang(no, inp) {
+		const hasil = pecahObject(inp);
+		const bayar = safeFloat(hasil["jumlah dibayar"]);
+		const data = {
+			no: no,
+			nama: hasil["nama pembeli"],
+			dibayar: bayar,
+			status: "Belum lunas",
+			dt: keranjang
+		}
+		if (await modalShow(confirm, "Data telah siap. Simpan sekarang?")) {
+			const res = await postDataKedua("simpan_keranjang", data);
+			const result = await message(res);
+			if (result) trx.resetTransaksi();
+		}
+	}
+	
+	async simpananBaru() {
+		if (kosong(keranjang)) {
+			await modalShow(gagal, "Keranjang kosong");
+			return;
+		}
+		const noTrans = trx.getNoTrans();
+		const parent = pembuatJendela();
+		const p = pembuatField(parent, noTrans);
+		const input = pembuatEntry(p, [
+			["nama pembeli", "Masukkan nama pembeli...", "text"],
+			["jumlah dibayar", "Masukkan nilai pembayaran...", "number"]
+		]);
+		if (!(kosong(infoCadangan))) {
+			input["nama pembeli"].value = infoCadangan.pembeli;
+			input["jumlah dibayar"].value = infoCadangan.sudah_bayar;
+		}
+		makeButton("btn", "Simpan", () => this.simpanKeranjang(noTrans, input), null, p);
+	}
 	
 	async transaksiSimpanan() {
 		const data = await getData("cadangan_keranjang");
 		const parent = document.getElementById("tengah");
 		parent.innerHTML = "";
 		const tab = makeParent("container-horizontal", parent);
-		const utama = makeParent("container", parent);
+		const utama = makeParent("frame", parent);
 		pembuatButton(tab, [
 			["btns", "Semua", () => this.tampilkanSimpanan(utama, data)],
 			["btns", "Lunas", () => this.tampilkanSimpanan(utama, data.filter(p => ["lunas", "sudah lunas"].includes(p.status.toLowerCase())))],
@@ -1148,7 +1403,9 @@ class SetupKiri {
 		pembuatButtonGambar(this.kiri, [
 			["btns", "Daftar produk", () => this.daftarProduk(), "Pictures/produk2.png"],
 			["btns", "Pembayaran", () => this.pembayaran(), "Pictures/payment.png"],
-			["btns", "Tersimpan", () => this.transaksiSimpanan(), "Pictures/pending.png"]
+			["btns", "Tersimpan", () => this.transaksiSimpanan(), "Pictures/pending.png"],
+			["btns", "Riwayat", null, "Pictures/history_icon.png"],
+			["btns", "Pengembalian", () => ret.setup(), "Pictures/return_icon.png"]
 		]);
 		this.kiri.querySelectorAll("button").forEach((item, i) => {
 			if (i !== 0) {
@@ -1184,6 +1441,7 @@ const trx = new Transaksi();
 const login = new Login();
 const kalk = new Kalkulator();
 const setKir = new SetupKiri();
+const ret = new Retur();
 
 window.onload = async function() {
 	await prepareIdDevice();
