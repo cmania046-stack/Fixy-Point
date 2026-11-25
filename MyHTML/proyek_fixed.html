@@ -4756,7 +4756,8 @@ class Lainnya {
 		this.b.appendChild(this.pemutar);
 		
 		for (const item of lagu) {
-			const lbl = makeButton("invisible-btn", item, null, "Pictures/hiburan.png", this.b);
+			const lbl = makeButton("invisible-btn", item, null, "Pictures/lagu.png", this.b);
+			lbl.style.gap = "15px";
 			lbl.onclick = () => this.putar(item, lagu);
 		}
 	}
@@ -4777,7 +4778,7 @@ class Lainnya {
 		const atas = makeParent("container-horizontal", this.tengah);
 		this.b = makeParent("container", this.tengah);
 		pembuatButtonGambar(atas, [
-			["invisible-btn", "Musik", () => this.musik(), "Pictures/hiburan.png"],
+			["invisible-btn", "Musik", () => this.musik(), "Pictures/lagu.png"],
 			["invisible-btn", "Refresh", () => this.refresh(), "Pictures/refresh.png"]
 		])
 		this.musik();
