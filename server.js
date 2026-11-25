@@ -439,6 +439,46 @@ for (const d of listTanggal)
 		formats.push(`${d} ${t}`);
 formats.push(...listTanggal);
 
+let limit = {};
+let max = 30000;
+
+function addLimit(ip) {
+	const ada = limit[ip] || null;
+	if (kosong(ada)) {
+		limit[ip] = {
+			kesalahan: 1
+		}
+	} else {
+		ada.kesalahan += 1;
+	}
+}
+
+function periksaKunci(ip) {
+	console.log(ip);
+	const ada = limit[ip] || null;
+	if (kosong(ada)) return [true, ""];
+	if (ada.kesalahan >= 3) {
+		const now = new Date();
+		const waktu = now.getTime();
+		const terkunci = ada.waktu_terbuka || null;
+		if (kosong(terkunci)) {
+			ada.waktu_terbuka = waktu + max;
+			const selisih = (ada.waktu_terbuka - waktu) / 1000;
+			return [false, `Login ditolak. Silahkan coba kembali dalam ${parseInt(selisih)} detik`];
+		} else {
+			if (ada.waktu_terbuka <= waktu) {
+				delete limit[ip];
+				return [true, ""];
+			} else {
+				const selisih = (ada.waktu_terbuka - waktu) / 1000;
+				return [false, `Login ditolak. Silahkan coba kembali dalam ${parseInt(selisih)} detik`];
+			}
+		}
+	} else {
+		return [true, ""];
+	}
+}
+
 function prettyMoney(value) {
 	try {
 		return `Rp${Number(value).toLocaleString("id-ID", {
@@ -698,7 +738,8 @@ function prediksi(dataSource, dataSearch, searchedValue) {
 const mapPeriode = {
 	"hari_ini": periodeHari,
 	"minggu_ini": periodeMinggu,
-	"bulan_ini": periodeBulan
+	"bulan_ini": periodeBulan,
+	"bulan_lalu": bulanLalu
 }
 
 //END MAPPING
@@ -706,6 +747,7 @@ const mapPeriode = {
 //API START FROM HERE
 const exp = require("express");
 const app = exp();
+app.set("trust_proxy", true);
 app.use(cookieParser());
 
 
@@ -727,7 +769,7 @@ function periksaToken(token) {
 	return !!token && tokenSet.has(hashToken(token));
 }
 
-const publik = ["/post_data/periksa_login_web", "/post_data/periksa_admin", "/make_id_device", "/ketentuan_layanan", "/post_data/periksa_email_web", "/post_data/periksa_jawaban", "/post_data/perbarui_password", "/periksa_pembayaran_gaji"];
+const publik = ["/transaksi", "/post_data/periksa_login_web", "/post_data/periksa_admin", "/make_id_device", "/ketentuan_layanan", "/post_data/periksa_email_web", "/post_data/periksa_jawaban", "/post_data/perbarui_password", "/periksa_pembayaran_gaji"];
 app.use((req, res, next) => {
 	if (publik.includes(req.path) ||
 		req.path === "/" ||
@@ -743,10 +785,7 @@ app.use((err, req, res, next) => {
   res.status(500).json({ stat: false, pesan: "Terjadi kesalahan server" });
 });
 
-app.get("/", (req,res) => {
-	res.sendFile(path.join(folderHtml, "proyek_fixed.html"));
-});
-
+app.get("/", (req,res) => { res.sendFile(path.join(folderHtml, "proyek_fixed.html"));});
 app.get("/dashboard_admin", (req,res) => { res.sendFile(path.join(folderHtml, "proyek_fixed.html")); });
 app.get("/lain", (req,res) => { res.sendFile(path.join(folderHtml, "mylampion.html")); });
 app.get("/manajemen_keuangan", (req,res) => { res.sendFile(path.join(folderHtml, "manajemen_keuangan.html")); });
@@ -969,6 +1008,35 @@ app.get("/lihat_data", async (req,res) => {
 		console.error(err.message);
 		res.json([]);
 	} finally { await catatLog(req.path + "/" + req.query.tabel, res.statusCode); }
+});
+
+app.get("/get_filtered_riwayat/:data", async (req, res) => {
+	try {
+	const data = JSON.parse(req.params.data);
+	const periode = data.periode.toLowerCase();
+	const operator = data.operator.toLowerCase();
+	const [info,_] = await translator("riwayat_penjualan_campuran");
+	let riwayat = info.data;
+	
+	if (periode !== "- pilih periode -") {
+		const [start, end] = mapPeriode[periode.replaceAll(" ","_")]();
+		riwayat = riwayat.filter(
+			p =>
+			parseDate(p.waktu || "") >= start &&
+			parseDate(p.waktu || "") <= end
+		);
+	}
+	let riwayatFiltered = riwayat;
+	if (operator !== "- pilih operator -") {
+		riwayatFiltered = riwayat.filter(p =>
+			p.operator.toLowerCase() === operator
+		);
+	}
+	res.status(200).json(riwayatFiltered);
+	} catch (err) {
+		console.error(err);
+		res.status(500);
+	}	
 });
 
 app.get("/get_data_sold_out_today/:period", async (req, res) => {
@@ -4742,6 +4810,12 @@ class PostData {
 	}
 
 	async periksa_login_web() {
+		const ip = getRealIp(this.req);
+		const [status, pesan] = periksaKunci(ip);
+		if (!status) return [{
+			stat: "Gagal",
+			pesan: pesan
+		}, 400];
 		const d = this.data;
 		const u = d.username || "";
 		const p = d.password || "";
@@ -4752,6 +4826,7 @@ class PostData {
 			if (kosong(user)) {
 				if ((u).toLowerCase() === "admin" && (p) === "admin123")
 					return [{ stat: "Berhasil" }, 200];
+				addLimit(ip);
 				return [{
 					stat: "Gagal",
 					pesan: "Username atau password salah"
@@ -4792,7 +4867,7 @@ class PostData {
 								"Masih login"
 							]);
 							await client.query("COMMIT");
-
+							delete limit[ip];
 							return [{
 								stat: "Berhasil",
 								nama: ada.nama,
@@ -4801,6 +4876,7 @@ class PostData {
 							}, 200];
 						} else {
 							kesalahanLogin += 1;
+							addLimit(ip);
 							return [{
 								stat: "Gagal",
 								pesan: "Username atau password salah"
@@ -4812,6 +4888,7 @@ class PostData {
 					}, 400]
 				} else {
 					kesalahanLogin += 1;
+					addLimit(ip)
 					return [{
 						stat: "Gagal",
 						pesan: "Data Anda tidak ditemukan"
@@ -5162,7 +5239,19 @@ const c = {
 
 const init = new Database();
 
-app.listen(3000, async () => {
+function getLANIP() {
+  const nets = os.networkInterfaces();
+  for (const name of Object.keys(nets)) {
+    for (const net of nets[name]) {
+      if (net.family === 'IPv4' && !net.internal) {
+        return net.address;
+      }
+    }
+  }
+  return '127.0.0.1';
+}
+
+app.listen(3000, "0.0.0.0", async () => {
 	await init.setupDatabase();
 	await init.createTables();
 	await init.createTablesInvest();
@@ -5181,8 +5270,8 @@ ${c.dim}
   INFO SERVER:
 	PORT: 3000
 	Pengembang: Dino
-	URL: http://localhost:3000
-	IP: 127.0.0.1${c.reset}
+	URL: http://${getLANIP()}:3000
+	IP: ${getLANIP()}${c.reset}
 
 ${c.dim}${" ".repeat(30)} © 2026 ${c.reset}
 ${c.dim}${" ".repeat(30)}Dino Timika...${c.reset}

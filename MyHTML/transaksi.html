@@ -333,6 +333,7 @@ class Login {
 			user = hasil.nama;
 			inisialCode = hasil.id;
 			status = hasil.status;
+			setKir.setup();
 			trx.setup();
 		} else {
 			await modalShow(hasil.stat, hasil.pesan);
@@ -454,6 +455,7 @@ class Transaksi {
 		this.infoPembeli = null;
 		this.voc = null;
 		this.generateNoTrans();
+		this.setPembayaran();
 		this.setLabelTotal();
 		this.tambahkanSecondKeranjang();
 		this.cari.focus();
@@ -875,6 +877,7 @@ class Transaksi {
 	}
 	
 	setPembayaran() {
+		this.kiriInfo.innerHTML = "";
 		this.infoPembeli = pembuatEntry(this.kiriInfo, [
 			["nama pembeli", "Nama pembeli...", "text"],
 			["nomor telepon", "Nomor telepon...", "number"]
@@ -915,6 +918,7 @@ class Transaksi {
 	getNoTrans() { return this.noTrans; }
 	
 	async setup() {
+		console.log(user);
 		this.produk = await getData("produk");
 		this.pajak = await getData("pajak");
 		this.qr = await getData("status_qr");
@@ -1147,6 +1151,81 @@ class Retur {
 		this.keranjangRetur = [];
 		this.tengah = document.getElementById("tengah");
 		this.retur();		
+	}
+}
+
+class Riwayat {
+	constructor() {
+		this.tengah = document.getElementById("tengah");
+		this.dataFilter = [];
+	}
+	
+	tampilkanFilter(prd, opr) {
+		this.utama.innerHTML = "";
+		const jdl = makeLabel(`Riwayat penjualan ${opr} ${prd}`.toUpperCase(), "teks", this.utama);
+		jdl.style.gridColumn = "1/-1";
+		for (const i of this.dataFilter) {
+			const pp = makeParent("container", this.utama);
+			const pr = makeParent("container", pp);
+			const prt = makeParent("container", pp);
+			pr.style.display = "grid";
+			pr.style.gridTemplateColumns = "repeat(3, 1fr)";
+			
+			for (const [k,v] of Object.entries(i)) {
+				if (!["id", "created_at", "data_belanja"].includes(k.toLowerCase())) {
+					let val = v;
+					if (k.toLowerCase() === "status_pajak") { val = v === 1 ? "Termasuk pajak" : "Tidak termasuk pajak"; }
+					else if (k.toLowerCase() === "kena_pajak") { val = Math.round(v); }
+					
+					for (const it of [capitalize(k.replaceAll("_"," ")), ":", formatMataUang(val)]) {
+						makeLabel(it, "teks", pr);
+					}
+				}
+				if (k.toLowerCase() === "data_belanja") {
+					const krj = JSON.parse(v);
+					for (const k of krj) {
+						k.qty = String(k.qty);
+						k.qty_asli = String(k.qty_asli);
+						k.min_diskon = String(k.min_diskon);
+						k.min_tingkat = String(k.min_tingkat);
+						k.persen_pajak = `${k.persen_pajak}%`;
+					}
+					const header = Object.keys(krj[0]).map(p => capitalize(p.replace("_"," ")));
+					const body = Object.keys(krj[0]);
+					pembuatTabel(prt, header, body, krj);
+				}
+			}
+		}
+	}
+	
+	async filterRiwayat(prd, opr) {
+		const periode = prd.value.toLowerCase();
+		const operator = opr.value.toLowerCase();
+		const riwayat = await getData("riwayat_penjualan_campuran");
+		const dataKirim = {
+			operator: operator,
+			periode: periode
+		}
+		const link = `get_filtered_riwayat/${encodeURIComponent(JSON.stringify(dataKirim))}`;
+		this.dataFilter = await getDt(link);
+		this.tampilkanFilter(periode, operator);
+	}
+	
+	async setup() {
+		this.tengah.innerHTML = "";
+		const atas = makeParent("container", this.tengah);
+		atas.style.display = "grid";
+		atas.style.gridTemplateColumns = "repeat(2,1fr)";
+		
+		const users = await getData("users");
+		const comboPeriode = pembuatCombo(atas, "- Pilih periode -", ["Hari ini", "Minggu ini", "Bulan ini", "Bulan lalu"]);
+		const comboOperator = pembuatCombo(atas, "- Pilih operator -", [...new Set(users.map(p => p.nama))]);
+		const cari = makeEntry("Masukkan nomor transaksi...", "text", atas);
+		cari.style.gridColumn = "1/-1";		
+		this.utama = makeParent("frame", this.tengah);		
+		for (const c of [comboPeriode, comboOperator]) {
+			c.onchange = () => this.filterRiwayat(comboPeriode, comboOperator);
+		}
 	}
 }
 
@@ -1401,10 +1480,11 @@ class SetupKiri {
 		logo.style.borderRadius = "50%";
 	
 		pembuatButtonGambar(this.kiri, [
+			["btns", "Transaksi", () => trx.setup(), "Pictures/sell.png"],
 			["btns", "Daftar produk", () => this.daftarProduk(), "Pictures/produk2.png"],
 			["btns", "Pembayaran", () => this.pembayaran(), "Pictures/payment.png"],
 			["btns", "Tersimpan", () => this.transaksiSimpanan(), "Pictures/pending.png"],
-			["btns", "Riwayat", null, "Pictures/history_icon.png"],
+			["btns", "Riwayat", () => riwayat.setup(), "Pictures/history_icon.png"],
 			["btns", "Pengembalian", () => ret.setup(), "Pictures/return_icon.png"]
 		]);
 		this.kiri.querySelectorAll("button").forEach((item, i) => {
@@ -1442,13 +1522,13 @@ const login = new Login();
 const kalk = new Kalkulator();
 const setKir = new SetupKiri();
 const ret = new Retur();
+const riwayat = new Riwayat();
 
 window.onload = async function() {
 	await prepareIdDevice();
-	setKir.setup();
 	setupFrames();
-	trx.setup();
-	//login.setup();
+	//trx.setup();
+	login.setup();
 };
 </script>
 </div>

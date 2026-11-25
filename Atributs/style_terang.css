@@ -1,7 +1,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
 :root {
-	--primary: #335E8C; /*var(--kiri-panel);*/
+	--primary: #25384D;/*#335E8C; var(--kiri-panel);*/
 	--primary-hover: #1F4C7A;
 	--primary-soft: #DDE8F4;
 	--primary-soft-hover: #CBDCEE;
@@ -32,7 +32,7 @@
 	--bar-press: rgba(255, 255, 255, .16);
 
 	--kiri-bg: #F7FAFC;
-	--kiri-panel: #2D5A87;/*#4074B7*/; /*#282E36;*/
+	--kiri-panel: #2C4158;/*#405B78;#2D5A87;#4074B7*/; /*#282E36;*/
 	--kiri-text: #172433;
 	--kiri-muted: #5B6B80;
 	--kiri-border: #DCE4EE;
@@ -236,7 +236,7 @@ textarea::placeholder {
 	height: 100vh;
 	height: 100dvh;
 	padding: 14px 12px calc(14px + env(safe-area-inset-bottom));
-	background: var(--kiri-bg);
+	background: var(--kiri-panel);
 	color: var(--kiri-text);
 	border-radius: 0;
 	border-right: 1px solid var(--kiri-border);
@@ -254,7 +254,7 @@ textarea::placeholder {
 	gap: 8px;
 	margin: 0 0 8px;
 	padding: 18px 12px;
-	background: var(--kiri-panel);
+	background: var(--surface);
 	color: var(--kiri-text);
 	border: 1px solid var(--kiri-border);
 	border-radius: var(--radius);
@@ -274,7 +274,7 @@ textarea::placeholder {
 }
 
 #kiri .invisible-btn {
-	color: var(--kiri-text);
+	color: var(--surface);
 	font-size: .95rem;
 	font-weight: 500;
 }
@@ -287,7 +287,7 @@ textarea::placeholder {
 
 #kiri .invisible-btn:hover {
 	background: var(--kiri-hover);
-	color: var(--primary);
+	color: var(--primary-soft);
 }
 
 #kiri .invisible-btn:active {
@@ -320,7 +320,7 @@ textarea::placeholder {
 	width: calc(100% - 18px);
 	margin: 0 0 4px 18px;
 	padding: 5px 5px 5px 10px;
-	background: var(--kiri-bg);
+	background: var(--kiri-panel);
 	border-bottom: 2px solid var(--kiri-border);
 	border-left: 2px solid var(--kiri-border);
 	border-radius: var(--radius);
@@ -333,7 +333,7 @@ textarea::placeholder {
 	margin: 0;
 	padding: 9px 10px;
 	background: transparent;
-	color: var(--kiri-muted);
+	color: var(--surface);
 	font-size: .9rem;
 	font-weight: 400;
 	text-align: left;
@@ -342,7 +342,7 @@ textarea::placeholder {
 
 .sub button:hover {
 	background: var(--kiri-hover);
-	color: var(--primary);
+	color: var(--primary-soft);
 }
 
 .sub button:active {
