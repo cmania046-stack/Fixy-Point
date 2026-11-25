@@ -6695,8 +6695,7 @@ class ProdukDigital {
 	}
 	
 	gameStreaming() {
-		alert("babi");
-		console.log(this.games[0]);
+		window.location.href = "https://vip-reseller.co.id/order/game";
 	}
 	
 	makeBt(parent) {
@@ -7185,7 +7184,7 @@ function setProperties() {
 		["btn", "Rekap", async () => {await cek("rekap", () => opsiTransaksi.setup())}, "Pictures/transaksi_laporan.png"],
 		["btn", "Penjualan", async() => {await cek("penjualan", () => goPenjualan())}, "Pictures/trolly.png"],
 		["btn", "Cadangan", async () => {await cek("cadangan", () => opsiTransaksi.kelolaCadangan())}, "Pictures/transaksi_cadangan.png"],
-		["btn", "Retur", async () => {await cek("retur transaksi", () => opsiTransaksi.retur())}, "Pictures/retur.png"],
+		["btn", "Retur", async () => {await cek("retur transaksi", () => opsiTransaksi.retur())}, "Pictures/return_icon.png"],
 		["btn", "Offline", async () => {await cek("offline", () => opsiTransaksi.offlineTrx())}, "Pictures/off.png"]
 	]);
 	
