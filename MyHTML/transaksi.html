@@ -1457,20 +1457,23 @@ class SetupKiri {
 	}
 	
 	async simpanKeranjang(no, inp) {
-		const hasil = pecahObject(inp);
-		const bayar = safeFloat(hasil["jumlah dibayar"]);
-		const data = {
-			no: no,
-			nama: hasil["nama pembeli"],
-			dibayar: bayar,
-			status: "Belum lunas",
-			dt: keranjang
-		}
-		if (await modalShow(confirm, "Data telah siap. Simpan sekarang?")) {
-			const res = await postDataKedua("simpan_keranjang", data);
-			const result = await message(res);
-			if (result) trx.resetTransaksi();
-		}
+		if (ex) return; ex = true;
+		try {
+			const hasil = pecahObject(inp);
+			const bayar = safeFloat(hasil["jumlah dibayar"]);
+			const data = {
+				no: no,
+				nama: hasil["nama pembeli"],
+				dibayar: bayar,
+				status: "Belum lunas",
+				dt: keranjang
+			}
+			if (await modalShow(confirm, "Data telah siap. Simpan sekarang?")) {
+				const res = await postDataKedua("simpan_keranjang", data);
+				const result = await message(res);
+				if (result) trx.resetTransaksi();
+			}
+		} finally { ex = false; }
 	}
 	
 	async simpananBaru() {
