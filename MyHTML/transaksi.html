@@ -455,7 +455,7 @@ class Transaksi {
 		this.dataPromo = null;
 		this.infoPembeli = null;
 		this.voc = null;
-		this.checking = false;
+		this.kodeVoucher = null;
 		this.generateNoTrans();
 		this.setPembayaran();
 		this.setLabelTotal();
@@ -497,7 +497,7 @@ class Transaksi {
 			tabel.appendChild(tr);
 			const inp = tr.querySelector("input");
 			inp.enterKeyHint = "go";
-			inp.addEventListener("keydown", (e) => {
+			inp.addEventListener("keydown", async (e) => {
 				if (e.key === "Enter") {
 					e.preventDefault();
 					const val = safeInt(inp.value.trim());
@@ -506,7 +506,7 @@ class Transaksi {
 						const idx = Array.from(inputs).indexOf(inp);
 						const next = inputs[idx+1] || this.cari;
 						next.focus();
-					} else { this.tambahKeranjang(item.id_produk, val); }
+					} else { await this.tambahKeranjang(item.id_produk, val); }
 				}
 			});
 		}
@@ -537,7 +537,6 @@ class Transaksi {
 	}
 	
 	lihatKeranjang() {
-		document.querySelector(".produk-pop").classList.add("hidden");
 		const tbody = this.tabel.tBodies[0];
 		tbody.innerHTML = "";
 		this.cari.value = "";
@@ -566,7 +565,6 @@ class Transaksi {
 	}
 	
 	async editQty(id, qty){
-		console.log("fungsi terpanggil");
 		const q = safeInt(qty);
 		if (q <= 0){ keranjang = keranjang.filter(a => String(a.id) !== String(id)); return this.tambahkanSecondKeranjang(); }
 		const findP = this.produk.find(produk => String(produk.id_produk) === String(id)) ?? Null;
@@ -603,39 +601,45 @@ class Transaksi {
 	}
 	
 	async tambahKeranjang(id, qtyInp) {
-		const qty = safeInt(qtyInp);
-		if (qty <= 0) {
-			await modalShow(gagal, "Invalid qty");
-			return;
-		}
-		const item = this.produk.find(p => String(p.id_produk) === String(id) || String(p.barcode) === String(id) || String(p.nama.toLowerCase()) === String(id.toLowerCase())) ?? null;
-		if (item) {
-			const foundKeranjang = keranjang.find(p => String(p.id) === String(item.id_produk)) ?? null;
-			if (foundKeranjang) {
-				const totalQty = foundKeranjang.qty + qty
-				if (totalQty > item.jumlah) {
-					await modalShow(gagal, "Stok produk tidak cukup");
-					return
-				}
-				foundKeranjang["qty"] = totalQty;
-			} else {
-				if (qty > item.jumlah) {
-					await modalShow(gagal, "Stok produk tidak cukup");
-					return
-				}
-				keranjang.push({
-					nama: item.nama,
-					barcode: item.barcode,
-					id: item.id_produk,
-					qty: qty,
-					harga: item.harga_jual
-				});
+		if (ex) return; ex = false;
+		try {
+			const qty = safeInt(qtyInp);
+			if (qty <= 0) {
+				await modalShow(gagal, "Invalid qty");
+				return;
 			}
-		} else {
-			await modalShow(gagal, "Produk tidak ditemukan");
-			return;
+			const item = this.produk.find(p => String(p.id_produk) === String(id) || String(p.barcode) === String(id) || String(p.nama.toLowerCase()) === String(id.toLowerCase())) ?? null;
+			if (item) {
+				const foundKeranjang = keranjang.find(p => String(p.id) === String(item.id_produk)) ?? null;
+				if (foundKeranjang) {
+					const totalQty = foundKeranjang.qty + qty
+					if (totalQty > item.jumlah) {
+						await modalShow(gagal, "Stok produk tidak cukup");
+						return
+					}
+					foundKeranjang["qty"] = totalQty;
+				} else {
+					if (qty > item.jumlah) {
+						await modalShow(gagal, "Stok produk tidak cukup");
+						return
+					}
+					keranjang.push({
+						nama: item.nama,
+						barcode: item.barcode,
+						id: item.id_produk,
+						qty: qty,
+						harga: item.harga_jual
+					});
+				}
+			} else {
+				await modalShow(gagal, "Produk tidak ditemukan");
+				return;
+			}
+			this.tambahkanSecondKeranjang();
+		} finally {
+			document.querySelector(".produk-pop").classList.add("hidden");
+			hideWindow(); ex = false;
 		}
-		this.tambahkanSecondKeranjang();
 	}
 	
 	searchProduk(teks="") {
@@ -674,7 +678,7 @@ class Transaksi {
 		}
 		
 		this.cari.oninput = () => this.searchProduk(this.cari.value.trim());
-		this.cari.addEventListener("keydown", (e) => {
+		this.cari.addEventListener("keydown", async (e) => {
 			if (e.key === "Enter") {
 				e.preventDefault();
 				const val = this.cari.value.trim();
@@ -686,7 +690,7 @@ class Transaksi {
 						const allInp = pop.querySelectorAll("input");
 						if (allInp.length > 0)
 							setTimeout(() => { allInp[0].focus(); }, 0);
-					} else { this.tambahKeranjang(val,1); }
+					} else { await this.tambahKeranjang(val,1); }
 				}
 			} else if (e.key === "Tab") {
 				e.preventDefault();
@@ -1308,7 +1312,7 @@ class SetupKiri {
 				<td>${formatMataUang(item.harga_jual)}</td>
 				<td style="display: flex; gap: 10px;">
 					<input class="entry" type="number">
-					<button class="btn" onclick="setKir.tambahKeranjang('${item.id_produk}', this.previousElementSibling.value)">Tambah</button>
+					<button class="btn" onclick="trx.tambahKeranjang('${item.id_produk}', this.previousElementSibling.value)">Tambah</button>
 				</td>
 			`;
 			tabelProduk.appendChild(tr);
@@ -1323,47 +1327,13 @@ class SetupKiri {
 						const next = inputs[idx+1] || this.cari;
 						next.focus();
 					} else {
-						await this.tambahKeranjang(item.id_produk, nilai);
+						await trx.tambahKeranjang(item.id_produk, nilai);
 					}
 				}
 			});
 		}
 	}
-	
-	async tambahKeranjang(id, value) {
-		if (ex) return; ex = true;
-		try {
-			const val = safeInt(value);
-			if (val <= 0) {
-				await modalShow(gagal, "Invalid qty");
-				return;
-			}
-			const produk = this.produk.find(p => p.id_produk === id);
-			const find = keranjang.find(p => p.id === produk.id_produk);
-			if (find) {
-				const qtyTotal = find.qty + val;
-				if (qtyTotal > produk.jumlah) {
-					await modalShow(gagal, "Stok tidak cukup");
-					return;
-				}
-				find.qty = qtyTotal;
-			} else {
-				if (val > produk.jumlah) {
-					await modalShow(gagal, "Stok tidak cukup");
-					return;
-				}
-				keranjang.push({
-					id: produk.id_produk,
-					nama: produk.nama,
-					barcode: produk.barcode,
-					qty: val,
-					harga: produk.harga_jual
-				});
-			}
-			await trx.setup();
-		} finally { ex = false; }
-	}
-	
+
 	async pembayaran() {
 		const data = await getData("media_bayar");
 		const parent = pembuatJendela();
