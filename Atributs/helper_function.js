@@ -99,6 +99,9 @@ const mapBulan = {
 	7: "Juli", 8: "Agustus", 9: "September",
 	10: "Oktober", 11: "November", 12: "Desember"
 }
+
+const html = (strs, ...vals) =>
+	strs.reduce((out, s, i) => out + s + (i < vals.length ? esc(vals[i]) : ""), "");
 //map
 
 //helper functions

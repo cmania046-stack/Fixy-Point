@@ -327,21 +327,21 @@ class Login {
 	
 	async validasi(form){
 		if (ex) return; ex = true;
-		const id = localStorage.getItem("id_device");
-		const us = form.username.value.trim();
-		const pw = form.password.value;
-		const hasil = await postDataKedua("periksa_login_web", {username: us, password: pw, idDevice: id});
-		if (hasil.stat.toLowerCase() == "berhasil"){
-			user = hasil.nama;
-			inisialCode = hasil.id;
-			status = hasil.status;
-			ex = false;
-			setKir.setup();
-			trx.setup();
-		} else {
-			ex = false;
-			await modalShow(hasil.stat, hasil.pesan);
-		}
+		try {
+			const id = localStorage.getItem("id_device");
+			const us = form.username.value.trim();
+			const pw = form.password.value;
+			const hasil = await postDataKedua("periksa_login_web", {username: us, password: pw, idDevice: id});
+			if (hasil.stat.toLowerCase() == "berhasil"){
+				user = hasil.nama;
+				inisialCode = hasil.id;
+				status = hasil.status;
+				setKir.setup();
+				trx.setup();
+			} else {
+				await modalShow(hasil.stat, hasil.pesan);
+			}
+		} finally { ex = false; }
 	}
 	
 	buildFrames() {
@@ -446,6 +446,7 @@ class Transaksi {
 		keranjang = [];
 		infoCadangan = {};
 		secondKeranjang = [];
+		this.isPending = false
 		this.sudahBayar = 0;
 		this.namaPembeli = "";
 		this.nomorTelepon = "";
@@ -537,6 +538,7 @@ class Transaksi {
 	}
 	
 	lihatKeranjang() {
+		document.querySelector(".produk-pop").classList.add("hidden");
 		const tbody = this.tabel.tBodies[0];
 		tbody.innerHTML = "";
 		this.cari.value = "";
@@ -601,7 +603,7 @@ class Transaksi {
 	}
 	
 	async tambahKeranjang(id, qtyInp) {
-		if (ex) return; ex = false;
+		if (ex) return; ex = true;
 		try {
 			const qty = safeInt(qtyInp);
 			if (qty <= 0) {
@@ -807,10 +809,14 @@ class Transaksi {
 				await modalShow(gagal, "Anda tidak diizinkan mengklaim lebih dari satu voucher dalam sekali transaksi");
 				return;
 			}
+			
 			let bayar = safeFloat(this.bayarInput.value.trim()) + this.sudahBayar;
-			if (this.dataPromo && this.dataPromo.potongan) {
-				bayar += this.dataPromo.potongan <= this.totalBelanja ? this.dataPromo.potongan : 0;
-			} else {
+			const ada = this.dataPromo && this.dataPromo.potongan;
+			const dipakai = ada && this.dataPromo.potongan <= this.totalBelanja;
+			if (dipakai) {
+				bayar += this.dataPromo.potongan;
+			}
+			if (!ada) {
 				if (this.kodeVoucher && this.kodeVoucher.length) {
 					if (await modalShow(confirm, `Voucher ${this.kodeVoucher} masih tersedia untuk digunakan. Pakai sekarang?`)) {
 						await this.reedemVoucher(this.kodeVoucher);
@@ -818,7 +824,7 @@ class Transaksi {
 					}
 				}
 			}
-				
+		
 			if (bayar < this.totalBelanja) {
 				await modalShow(gagal, "Pembayaran tidak cukup");
 				return;
@@ -839,7 +845,7 @@ class Transaksi {
 				pembeli: pembeli,
 				is_pending: this.isPending,
 				voucher: voucher,
-				data_promo: this.dataPromo
+				data_promo: dipakai ? this.dataPromo : null
 			}
 			try {
 				const res = await fetch(`${url}penjualan_campuran`, {
@@ -902,8 +908,8 @@ class Transaksi {
 			} else {
 				this.labelTotal.textContent = `Belum dibayar: ${formatMataUang(tb)}`;
 			}
+			this.kodeVoucher = kode;
 		}
-		this.kodeVoucher = kode;
 	}
 	
 	setPembayaran() {
@@ -919,6 +925,9 @@ class Transaksi {
 		reedemFr.style.flexWrap = "nowrap";
 		reedemFr.style.border = "none";
 		reedemFr.style.padding = "3px";
+		const ikon = this.kiriInfo.querySelector("img");
+		ikon.style.background = primary;
+		ikon.style.borderRadius = "10px";
 	}
 	
 	async periksaVoucher() {
@@ -978,12 +987,12 @@ class Transaksi {
 
 class Retur {
 	async cariTransaksi(parent, parent2) {
-		this.keranjangRetur = [];
 		const noTrans = this.inputRetur.value.trim().toLowerCase();
 		const data = await getData("riwayat_penjualan_campuran");
 		const transaksi = data.find(a => a.no_trans.toLowerCase() === noTrans) ?? null;
 		
 		if (!transaksi) { await modalShow(gagal, "Transaksi tidak tersedia"); return; }
+		this.keranjangRetur = [];
 		this.dt = transaksi;
 		parent.innerHTML = "";
 		let keranjang = [];
