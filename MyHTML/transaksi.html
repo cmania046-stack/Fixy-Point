@@ -76,6 +76,7 @@
 <script src="helper_function.js"></script>
 <script src="string-math.min.js"></script>
 <script>
+let ex = false;
 let infoCadangan = {};
 let toko = "", alamatToko = "", kontakToko = "";
 let user = "Admin", inisialCode = "A02_122731", status = "", idDevice = "";
@@ -325,6 +326,7 @@ class Login {
 	}
 	
 	async validasi(form){
+		if (ex) return; ex = true;
 		const id = localStorage.getItem("id_device");
 		const us = form.username.value.trim();
 		const pw = form.password.value;
@@ -333,9 +335,11 @@ class Login {
 			user = hasil.nama;
 			inisialCode = hasil.id;
 			status = hasil.status;
+			ex = false;
 			setKir.setup();
 			trx.setup();
 		} else {
+			ex = false;
 			await modalShow(hasil.stat, hasil.pesan);
 		}
 	}
@@ -396,8 +400,6 @@ class Login {
 class Transaksi {
 	constructor() {
 		this.isPending = false;
-		this.bayar = 0;
-		this.kembali = 0;
 		this.noTrans = "";
 		this.sudahBayar = 0;
 		this.namaPembeli = "";
@@ -412,6 +414,7 @@ class Transaksi {
 		this.dataPromo = null;
 		this.infoPembeli = null;
 		this.voc = null;
+		this.kodeVoucher = null;
 	}
 	
 	doUndo() {
@@ -443,8 +446,6 @@ class Transaksi {
 		keranjang = [];
 		infoCadangan = {};
 		secondKeranjang = [];
-		this.bayar = 0;
-		this.kembali = 0;
 		this.sudahBayar = 0;
 		this.namaPembeli = "";
 		this.nomorTelepon = "";
@@ -454,6 +455,7 @@ class Transaksi {
 		this.dataPromo = null;
 		this.infoPembeli = null;
 		this.voc = null;
+		this.checking = false;
 		this.generateNoTrans();
 		this.setPembayaran();
 		this.setLabelTotal();
@@ -511,6 +513,7 @@ class Transaksi {
 	}
 	
 	async tambahkanSecondKeranjang() {
+		this.dataPromo = null;
 		try {
 			const hasilValidasi = await fetch(url + "tambahkan_second_keranjang", {
 				method: "POST",
@@ -526,9 +529,9 @@ class Transaksi {
 			this.lihatKeranjang();
 		} catch (err) {
 			console.error(`Terjadi kesalahan pengolahan data: ${err}`)
-			this.operasiSecondKeranjang();
-			totalBelanja = secondKeranjang.reduce((sum, a) => sum + a.subtotal_jual, 0);
-			this.labelTotal.textContent = "Total: " + formatMataUang(totalBelanja);
+			this.operasiSecondKeranjang(); //penanda
+			this.totalBelanja = secondKeranjang.reduce((sum, a) => sum + a.subtotal_jual, 0);
+			this.labelTotal.textContent = "Total: " + formatMataUang(this.totalBelanja);
 			this.lihatKeranjang(); 
 		}
 	}
@@ -601,6 +604,10 @@ class Transaksi {
 	
 	async tambahKeranjang(id, qtyInp) {
 		const qty = safeInt(qtyInp);
+		if (qty <= 0) {
+			await modalShow(gagal, "Invalid qty");
+			return;
+		}
 		const item = this.produk.find(p => String(p.id_produk) === String(id) || String(p.barcode) === String(id) || String(p.nama.toLowerCase()) === String(id.toLowerCase())) ?? null;
 		if (item) {
 			const foundKeranjang = keranjang.find(p => String(p.id) === String(item.id_produk)) ?? null;
@@ -784,63 +791,79 @@ class Transaksi {
 	}
 	
 	async transaksiSelesai() {
-		if (kosong(secondKeranjang)) {
-			await modalShow(gagal, "Keranjang kosong");
-			return;
-		}
-		const voucher = pecahCek(this.voc);
-		if (voucher.length > 1) {
-			await modalShow(gagal, "Anda tidak diizinkan mengklaim lebih dari satu voucher dalam sekali transaksi");
-			return;
-		}
-		let jumlahBayar = this.sudahBayar + this.bayar;
-		if (this.dataPromo && this.dataPromo.potongan) jumlahBayar += this.dataPromo.potongan;
-		if (jumlahBayar < this.totalBelanja) {
-			await modalShow(gagal, "Pembayaran tidak cukup");
-			return;
-		}
-		const namaPembeli = this.infoPembeli["nama pembeli"].value.trim();
-		const kontakPembeli = this.infoPembeli["nomor telepon"].value.trim();
-		const pembeli = `${namaPembeli} ${kontakPembeli}`;
-		const data = {
-			items: secondKeranjang,
-			total: this.totalBelanja,
-			bayar: jumlahBayar,
-			kembali: this.kembali,
-			sumber: String(idDevice),
-			operator: String(user),
-			no_trans: this.noTrans,
-			pembeli: pembeli,
-			is_pending: this.isPending,
-			voucher: voucher,
-			data_promo: this.dataPromo
-		}
+		if (ex) return; ex = true;
 		try {
-			const res = await fetch(`${url}penjualan_campuran`, {
-				method: "POST",
-				headers: {
-					"Content-Type": "application/json"
-				},
-				body: JSON.stringify(data)
-			});
+			if (kosong(secondKeranjang)) {
+				await modalShow(gagal, "Keranjang kosong");
+				return;
+			}
 			
-			const pesan = await res.json();
-			if (pesan.stat.toLowerCase() === "berhasil") {
-				if (await modalShow(pesan.stat, pesan.pesan, false)) {
-					await cetakStruk(data);
+			const voucher = pecahCek(this.voc);
+			if (voucher.length > 1) {
+				await modalShow(gagal, "Anda tidak diizinkan mengklaim lebih dari satu voucher dalam sekali transaksi");
+				return;
+			}
+			let bayar = safeFloat(this.bayarInput.value.trim()) + this.sudahBayar;
+			if (this.dataPromo && this.dataPromo.potongan) {
+				bayar += this.dataPromo.potongan <= this.totalBelanja ? this.dataPromo.potongan : 0;
+			} else {
+				if (this.kodeVoucher && this.kodeVoucher.length) {
+					if (await modalShow(confirm, `Voucher ${this.kodeVoucher} masih tersedia untuk digunakan. Pakai sekarang?`)) {
+						await this.reedemVoucher(this.kodeVoucher);
+						return;
+					}
+				}
+			}
+				
+			if (bayar < this.totalBelanja) {
+				await modalShow(gagal, "Pembayaran tidak cukup");
+				return;
+			}
+			const kembali = bayar - this.totalBelanja;
+		
+			const namaPembeli = this.infoPembeli["nama pembeli"].value.trim();
+			const kontakPembeli = this.infoPembeli["nomor telepon"].value.trim();
+			const pembeli = `${namaPembeli} ${kontakPembeli}`;
+			const data = {
+				items: secondKeranjang,
+				total: this.totalBelanja,
+				bayar: bayar,
+				kembali: kembali,
+				sumber: String(idDevice),
+				operator: String(user),
+				no_trans: this.noTrans,
+				pembeli: pembeli,
+				is_pending: this.isPending,
+				voucher: voucher,
+				data_promo: this.dataPromo
+			}
+			try {
+				const res = await fetch(`${url}penjualan_campuran`, {
+					method: "POST",
+					headers: {
+						"Content-Type": "application/json"
+					},
+					body: JSON.stringify(data)
+				});
+				
+				const pesan = await res.json();
+				if (pesan.stat.toLowerCase() === "berhasil") {
+					if (await modalShow(pesan.stat, pesan.pesan, false)) {
+						await cetakStruk(data);
+						this.resetTransaksi();
+					} else { this.resetTransaksi(); }
+				} else { await modalShow(pesan.stat, pesan.pesan); }
+			} catch {
+				const trxOff = localStorage.getItem("transaksi_offline");
+				const trans = trxOff ? JSON.parse(trxOff) : [];
+				trans.push(data);
+				localStorage.setItem("transaksi_offline", JSON.stringify(trans));
+				if (await modalShow("Tersimpan", "Koneksi server terganggu. Riwayat transaksi telah disimpan sementara. Cetak struk penjualan?", false)) {
+					await cetakStruk(data, false);
 					this.resetTransaksi();
 				} else { this.resetTransaksi(); }
-			} else { await modalShow(pesan.stat, pesan.pesan); }
-		} catch {
-			const trxOff = localStorage.getItem("transaksi_offline");
-			const trans = trxOff ? JSON.parse(trxOff) : [];
-			trans.push(data);
-			localStorage.setItem("transaksi_offline", JSON.stringify(trans));
-			if (await modalShow("Tersimpan", "Koneksi server terganggu. Riwayat transaksi telah disimpan sementara. Cetak struk penjualan?", false)) {
-				await cetakStruk(data, false);
-				this.resetTransaksi();
-			} else { this.resetTransaksi(); }
-		}
+			}
+		} finally { ex = false; }
 	}
 	
 	async aktifkanPajak() {
@@ -855,15 +878,17 @@ class Transaksi {
 			this.labelTotal.style.color = primary;
 			return;
 		}
-		this.bayar = bayar;
-		if (this.dataPromo && this.dataPromo.potongan) this.bayar += this.dataPromo.potongan;
+		let pay = bayar;
+		if (this.dataPromo && this.dataPromo.potongan)
+			pay += this.dataPromo.potongan <= this.totalBelanja ? this.dataPromo.potongan : 0;
+			
 		const totalAsli = this.totalBelanja - this.sudahBayar;
-		this.kembali = this.bayar - totalAsli;
-		let warna = this.kembali >= 0 ? "green" : "red";
-		this.labelTotal.textContent = `Kembali: ${formatMataUang(this.kembali)}`;
+		const kembali = pay - totalAsli;
+		let warna = kembali >= 0 ? "green" : "red";
+		this.labelTotal.textContent = `Kembali: ${formatMataUang(kembali)}`;
 		this.labelTotal.style.color = warna;
 	}
-	
+
 	async reedemVoucher(kode) {
 		this.dataPromo = await reedem(kode, secondKeranjang);
 		if (this.dataPromo && this.dataPromo.potongan) {
@@ -874,6 +899,7 @@ class Transaksi {
 				this.labelTotal.textContent = `Belum dibayar: ${formatMataUang(tb)}`;
 			}
 		}
+		this.kodeVoucher = kode;
 	}
 	
 	setPembayaran() {
@@ -918,7 +944,6 @@ class Transaksi {
 	getNoTrans() { return this.noTrans; }
 	
 	async setup() {
-		console.log(user);
 		this.produk = await getData("produk");
 		this.pajak = await getData("pajak");
 		this.qr = await getData("status_qr");
@@ -949,6 +974,7 @@ class Transaksi {
 
 class Retur {
 	async cariTransaksi(parent, parent2) {
+		this.keranjangRetur = [];
 		const noTrans = this.inputRetur.value.trim().toLowerCase();
 		const data = await getData("riwayat_penjualan_campuran");
 		const transaksi = data.find(a => a.no_trans.toLowerCase() === noTrans) ?? null;
@@ -1201,12 +1227,12 @@ class Riwayat {
 	async filterRiwayat(prd, opr) {
 		const periode = prd.value.toLowerCase();
 		const operator = opr.value.toLowerCase();
-		const riwayat = await getData("riwayat_penjualan_campuran");
+		//const riwayat = await getData("riwayat_penjualan_campuran");
 		const dataKirim = {
 			operator: operator,
 			periode: periode
 		}
-		const link = `get_filtered_riwayat/${encodeURIComponent(JSON.stringify(dataKirim))}`;
+		const link = `get_riwayat_filter/${encodeURIComponent(JSON.stringify(dataKirim))}`;
 		this.dataFilter = await getDt(link);
 		this.tampilkanFilter(periode, operator);
 	}
@@ -1231,19 +1257,39 @@ class Riwayat {
 
 class SetupKiri {
 	constructor() {
+		this.produk = null;
 		this.kiri = document.getElementById("kiri");
 	}
 	
 	async daftarProduk() {
-		const produk = await getData("produk");
+		this.produk = await getData("produk");
 		const p = pembuatJendela();
 		makeLabel("Daftar produk", "teks", p);
 		const pr1 = makeParent("container-horizontal", p);
 		this.cari = entryMaker("Masukkan nama atau barcode...", "text", "Pictures/cari.png", pr1);
 		makeButton("btn", "Cari", null, null, pr1);
-		
 		const pr2 = makeParent("container", p);
-		this.tabelProduk = makeTable(`
+		this.cari.oninput = () => this.cariProduk(pr2, this.cari.value.trim());
+		this.cariProduk(pr2);
+		this.cari.addEventListener("keydown", (e) => {
+			if (["Enter", "ArrowDown"].includes(e.key)) {
+				e.preventDefault();
+				const inputs = pr2.querySelectorAll("input");
+				if (inputs.length) inputs[0].focus();
+			}
+		});		
+	}
+	
+	cariProduk(parent, val="") {
+		parent.innerHTML = "";
+		const forShow = this.produk.filter(
+			p =>
+			p.nama.toLowerCase().includes(val.toLowerCase()) ||
+			p.kategori.toLowerCase().includes(val.toLowerCase()) ||
+			p.barcode.includes(val) ||
+			p.id_produk.includes(val)
+		);
+		 const tabelProduk = makeTable(`
 			<tr>
 				<th>Barcode</th>
 				<th>Nama produk</th>
@@ -1252,81 +1298,70 @@ class SetupKiri {
 				<th>Aksi</th>
 			</tr>
 		`);
-		pr2.appendChild(this.tabelProduk);
-		this.cari.oninput = () => this.cariProduk(produk, this.cari.value.trim());
-		this.cari.addEventListener("keydown", (e) => {
-			if (e.key === "Enter" || e.key === "ArrowDown") {
-				e.preventDefault();
-				const inputs = this.tabelProduk.querySelectorAll("input");
-				if (inputs.length) inputs[0].focus();
-			}
-		});
-		this.cariProduk(produk);
-	}
-	
-	async tambahKeranjang(produk, val) {
-		const find = keranjang.find(p => p.id === produk.id_produk);
-		if (find) {
-			const qtyTotal = find.qty + val;
-			if (qtyTotal > produk.jumlah) {
-				await modalShow(gagal, "Stok tidak cukup");
-				return;
-			}
-			find.qty = qtyTotal;
-		} else {
-			if (val > produk.jumlah) {
-				await modalShow(gagal, "Stok tidak cukup");
-				return;
-			}
-			keranjang.push({
-				id: produk.id_produk,
-				nama: produk.nama,
-				barcode: produk.barcode,
-				qty: val,
-				harga: produk.harga_jual
-			});
-		}
-		trx.setup();
-	}
-	
-	cariProduk(produk, val="") {
-		let data = produk.filter(p =>
-			(p.nama.toLowerCase().includes(val.toLowerCase())) ||
-			(p.barcode.includes(val))
-		);
-		const body = this.tabelProduk.tBodies[0];
-		body.innerHTML = "";
-		for (const obj of data.slice(0,10)) {
+		parent.appendChild(tabelProduk);
+		for (const item of forShow.slice(0,10)) {
 			const tr = document.createElement("tr");
 			tr.innerHTML = `
-				<td>${obj.barcode}</td>
-				<td>${obj.nama}</td>
-				<td>${obj.jumlah} ${obj.satuan_jual}</td>
-				<td>${formatMataUang(obj.harga_jual)}</td>
+				<td>${item.barcode}</td>
+				<td>${item.nama}</td>
+				<td>${item.jumlah} ${item.satuan_jual}</td>
+				<td>${formatMataUang(item.harga_jual)}</td>
 				<td style="display: flex; gap: 10px;">
 					<input class="entry" type="number">
-					<button class="btn" onclick="setKir.tambahKeranjang('${obj}', this.previousElementSibling.value)">Tambah</button>
+					<button class="btn" onclick="setKir.tambahKeranjang('${item.id_produk}', this.previousElementSibling.value)">Tambah</button>
 				</td>
 			`;
-			this.tabelProduk.appendChild(tr);
-			
+			tabelProduk.appendChild(tr);
 			const inp = tr.querySelector("input");
-			inp.enterKeyHint = "go";
-			inp.addEventListener("keydown", (e) => {
-				if (e.key === "Enter" || e.key === "ArrowDown") {
+			inp.addEventListener("keydown", async (e) => {
+				if (["Enter", "ArrowDown"].includes(e.key)) {
 					e.preventDefault();
-					const val = safeInt(inp.value.trim());
-					if (val <= 0) {
-						const inputs = this.tabelProduk.querySelectorAll("input");
+					const nilai = safeInt(inp.value.trim());
+					if (nilai <= 0) {
+						const inputs = tabelProduk.querySelectorAll("input");
 						const idx = Array.from(inputs).indexOf(inp);
 						const next = inputs[idx+1] || this.cari;
 						next.focus();
 					} else {
-						this.tambahKeranjang(obj, val);
+						await this.tambahKeranjang(item.id_produk, nilai);
 					}
 				}
 			});
 		}
+	}
+	
+	async tambahKeranjang(id, value) {
+		if (ex) return; ex = true;
+		try {
+			const val = safeInt(value);
+			if (val <= 0) {
+				await modalShow(gagal, "Invalid qty");
+				return;
+			}
+			const produk = this.produk.find(p => p.id_produk === id);
+			const find = keranjang.find(p => p.id === produk.id_produk);
+			if (find) {
+				const qtyTotal = find.qty + val;
+				if (qtyTotal > produk.jumlah) {
+					await modalShow(gagal, "Stok tidak cukup");
+					return;
+				}
+				find.qty = qtyTotal;
+			} else {
+				if (val > produk.jumlah) {
+					await modalShow(gagal, "Stok tidak cukup");
+					return;
+				}
+				keranjang.push({
+					id: produk.id_produk,
+					nama: produk.nama,
+					barcode: produk.barcode,
+					qty: val,
+					harga: produk.harga_jual
+				});
+			}
+			await trx.setup();
+		} finally { ex = false; }
 	}
 	
 	async pembayaran() {

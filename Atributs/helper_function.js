@@ -109,9 +109,15 @@ async function uploadFile(endpoint, file) {
 				method: "POST",
 				body: file
 		});
-		const r = await res.json()
-		hidePopupLoading();
-		return r;
+		if (res.status === 200) {
+			const r = await res.json()
+			hidePopupLoading();
+			return r;
+		} else {
+			hidePopupLoading();
+			await modalShow(`${gagal.replace(" Gagal")}${res.status}`, "Operasi gagal");
+			return null;
+		}
 	} catch (e) {
 		hidePopupLoading();
 		await modalShow(error, e);
@@ -130,9 +136,15 @@ async function postData(endpoint, data) {
 				body: JSON.stringify(data),
 				credentials: "include"
 		});
-		const d = await res.json();
-		hidePopupLoading();
-		return d;
+		if (res.status === 200) {
+			const d = await res.json();
+			hidePopupLoading();
+			return d;
+		} else {
+			hidePopupLoading();
+			await modalShow(gagal, `Operasi gagal: ${res.status}`);
+			return null;
+		}
 	} catch (error) {
 		hidePopupLoading();
 		mainkanBeep(300,0.3);
@@ -145,12 +157,12 @@ async function postDataKedua(endpoint, data) {
 	showPopupLoading();
 	try {
 		const res = await fetch(url + "post_data/" + endpoint, {
-				method: "POST",
-				headers: {
-					"Content-Type": "application/json",
-				},
-				body: JSON.stringify(data),
-				credentials: "include"
+			method: "POST",
+			headers: {
+				"Content-Type": "application/json",
+			},
+			body: JSON.stringify(data),
+			credentials: "include"
 		});
 		const d = await res.json();
 		hidePopupLoading();
@@ -188,8 +200,13 @@ async function getDt(endpoint) {
 			method: "GET",
 			credentials: "include"
 		});
-		const data = await response.json();
-		return data;
+		if (response.status === 200) {
+			const data = await response.json();
+			return data;
+		} else {
+			await modalShow(gagal, `Terjadi kesalahan: ${response.status}`);
+			return null;
+		}
 	} catch (e) {
 		await modalShow(error, e);
 		return null
@@ -199,8 +216,8 @@ async function getDt(endpoint) {
 async function getData(endpoint, cache=false) {
 	showPopupLoading(`Menyiapkan data ${endpoint.replace(/_/g, " ")}...`);
 	try {
-		const URL = `lihat_data?tabel=${encodeURIComponent(endpoint)}`;
-		const res = await fetch(url + URL, {
+		const link = `lihat_data?tabel=${encodeURIComponent(endpoint)}`;
+		const res = await fetch(url + link, {
 			method: "GET",
 			headers: {
 				"Accept": "application/json"
@@ -531,8 +548,8 @@ async function message(hasil) {
 		stat = hasil.stat;
 		pesan = hasil.pesan ?? hasil.hasil
 	} else {
-		stat: "Gagal";
-		pesan: pesanGagal;
+		stat = "Gagal";
+		pesan = pesanGagal;
 	}
 	await modalShow((stat.toLowerCase() === "berhasil" ? berhasil : gagal), pesan);
 	return sukses;
@@ -769,38 +786,6 @@ function makeLabel(teks, kelas, parent=null) {
 	lbl.className = kelas;
 	if (parent) parent.appendChild(lbl);
 	return lbl;
-}
-
-function entryMaker(placeholder, tipe, gambar, parent){
-	const fr = document.createElement("div");
-	fr.className = "inp";
-	fr.style.position = "relative";
-	
-	const image = document.createElement("img");
-	image.src = url + gambar;
-	image.style.display = "block";
-	image.style.width = "25px";
-	image.style.height = "25px";
-	image.style.flexShrink = "0";
-	image.style.flexGrow = "0";
-	image.style.border = "none";
-	image.style.borderRadius = "0";
-	image.style.background = "transparent";
-	fr.appendChild(image);
-
-	const entry = document.createElement("input");
-	entry.placeholder = placeholder;
-	entry.type = tipe;
-	entry.style.border = "none";
-	entry.style.outline = "none";
-	entry.style.height = "100%";
-	entry.style.flex = "1";
-	entry.style.minWidth = "0";
-	entry.style.boxSizing = "border-box";
-	fr.appendChild(entry);
-
-	parent.appendChild(fr);
-	return entry;
 }
 
 function pwMaker(placeholder, tipe, gambar, parent){

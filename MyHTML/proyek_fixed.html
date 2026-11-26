@@ -4406,7 +4406,7 @@ class Riwayat {
 			periode: periode,
 			operator: operator
 		}
-		const data = await getDt("get_riwayat_filter/" + JSON.stringify(aspek));
+		const data = await getDt("get_riwayat_filter/" + encodeURIComponent(JSON.stringify(aspek)));
 		this.dataFilter = data;
 	}
 	

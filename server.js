@@ -917,21 +917,21 @@ app.get("/filter_aktivitas/:data", async (req,res) => {
 app.get("/get_riwayat_filter/:aspek", async (req,res) => {
 	try {
 		const aspek = JSON.parse(req.params.aspek);
-		const periode = (aspek.periode ?? "semua periode").toLowerCase().replace(" ","_");
+		const periode = (aspek.periode ?? "semua periode").toLowerCase().replaceAll(" ","_");
 		const operator = (aspek.operator ?? "semua operator").toLowerCase();
 	
 		const [dataR, _] = await translator("riwayat_penjualan_campuran");
 		const data = dataR.data;
 		if (Array.isArray(data)) {
 			let filtered = data;
-			if (periode !== "semua_periode") {
+			if (!["semua_periode", "-_pilih_periode_-"].includes(periode)) {
 				const [start, end] = mapPeriode[periode]();
 				filtered = data.filter(p => parseDate(p.waktu) >= start && parseDate(p.waktu) <= end);
 			}
 			let oprFilter = filtered;
-			if (operator !== "semua operator") oprFilter = filtered.filter(p => p.operator.toLowerCase() === operator);
-			return res.json(oprFilter.sort((a,b) => parseDate(b.waktu) - parseDate(a.waktu)));
-		} return res.json([]);
+			if (!["semua operator", "- pilih operator -"].includes(operator)) oprFilter = filtered.filter(p => p.operator.toLowerCase() === operator);
+			return res.status(200).json(oprFilter.sort((a,b) => parseDate(b.waktu) - parseDate(a.waktu)));
+		} return res.status(400).json([]);
 	} finally { await catatLog(req.path, res.statusCode); }
 });
 
@@ -1008,35 +1008,6 @@ app.get("/lihat_data", async (req,res) => {
 		console.error(err.message);
 		res.json([]);
 	} finally { await catatLog(req.path + "/" + req.query.tabel, res.statusCode); }
-});
-
-app.get("/get_filtered_riwayat/:data", async (req, res) => {
-	try {
-	const data = JSON.parse(req.params.data);
-	const periode = data.periode.toLowerCase();
-	const operator = data.operator.toLowerCase();
-	const [info,_] = await translator("riwayat_penjualan_campuran");
-	let riwayat = info.data;
-	
-	if (periode !== "- pilih periode -") {
-		const [start, end] = mapPeriode[periode.replaceAll(" ","_")]();
-		riwayat = riwayat.filter(
-			p =>
-			parseDate(p.waktu || "") >= start &&
-			parseDate(p.waktu || "") <= end
-		);
-	}
-	let riwayatFiltered = riwayat;
-	if (operator !== "- pilih operator -") {
-		riwayatFiltered = riwayat.filter(p =>
-			p.operator.toLowerCase() === operator
-		);
-	}
-	res.status(200).json(riwayatFiltered);
-	} catch (err) {
-		console.error(err);
-		res.status(500);
-	}	
 });
 
 app.get("/get_data_sold_out_today/:period", async (req, res) => {
@@ -2796,7 +2767,8 @@ class PostData {
 	    const d = this.data;
 	    const keranjang = d.keranjang ?? [];
 	    const kodeVoucher = d.kode_voucher ?? "";
-	    
+	    console.log(keranjang);
+	    console.log(kodeVoucher);
 	    try {
 	        const { rows: [stts] } = await pool.query("SELECT status, id_program FROM vouchers_data WHERE kode_voucher = $1", [kodeVoucher]);
 	        
