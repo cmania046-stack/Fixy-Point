@@ -796,6 +796,30 @@ app.get("/tabel_tabel", (req, res) => {
 	res.json(existedTable);
 });
 
+app.get("/get_last_login", async (req, res) => {
+	try {
+		const { rows: idCode } = await pool.query("SELECT inisial_code FROM users");
+		const dataLogin = [];
+		for (const id of idCode) {
+			const { rows: [riwayat] } = await pool.query(`
+				  SELECT nama, waktu, waktu_logout, device
+				  FROM riwayat_login
+				  WHERE inisial_code = $1
+				  ORDER BY id DESC
+				  LIMIT 1`, [id.inisial_code]
+				);
+			if (!(kosong(riwayat))) {
+				dataLogin.push({
+					nama: riwayat.nama, login: riwayat.waktu,
+					logout: riwayat.waktu_logout, device: riwayat.device
+				});
+			}
+		}
+		res.status(200).json(dataLogin);
+	} catch (e) { console.log(e); res.status(500).json([]); }
+	finally { await catatLog(req.path, res.statusCode); }
+});
+
 app.get("/ketentuan_layanan", async (req, res) => {
 	try {
 	const teks = fs.readFileSync(fileAtt, "utf8");

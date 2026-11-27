@@ -824,7 +824,9 @@ class Transaksi {
 					}
 				}
 			}
-		
+			if (ada && !dipakai) {
+				if (!(await modalShow(confirm, `Voucher tersedia namun total belanja kurang dari potongan. Apakah Anda ingin lanjutkan tanpa memakai voucher?`))) return;
+			}
 			if (bayar < this.totalBelanja) {
 				await modalShow(gagal, "Pembayaran tidak cukup");
 				return;

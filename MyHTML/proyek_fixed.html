@@ -389,6 +389,7 @@ let toko = "";
 let alamatToko = "";
 let kontakToko = "";
 let status = null;
+let ex = false;
 
 async function ambil_tipe_file(judul) {
 	try {
@@ -555,50 +556,52 @@ class UserMenu {
 	}
 	
 	async daftarPengguna() {
-		const hasil = pecahObject(this.entries);
-		const nama = hasil.nama, email = hasil["email/nomor telepon"];
-		const status = hasil.status, pw = hasil.password, kpw = hasil["konfirmasi password"];
-		
-		if (kosong(this.user)) {
-			if (status.toLowerCase() !== "owner") {
-				await modalShow(gagal, "Pendaftaran pengguna pertama kali harus berstatus owner");
+		if (ex) return; ex = true;
+		try {
+			const hasil = pecahObject(this.entries);
+			const nama = hasil.nama, email = hasil["email/nomor telepon"];
+			const status = hasil.status, pw = hasil.password, kpw = hasil["konfirmasi password"];
+			
+			if (kosong(this.user)) {
+				if (status.toLowerCase() !== "owner") {
+					await modalShow(gagal, "Pendaftaran pengguna pertama kali harus berstatus owner");
+					return;
+				}
+			}
+			if (![nama, email, status, pw, kpw].every(Boolean)) {
+				await modalShow(gagal, "Nama, status, kata sandi, konfirmasi kata sandi wajib diisi");
 				return;
 			}
-		}
-		if (![nama, email, status, pw, kpw].every(Boolean)) {
-			await modalShow(gagal, "Nama, status, kata sandi, konfirmasi kata sandi wajib diisi");
-			return;
-		}
-		if (pw !== kpw) {
-			await modalShow(gagal, "Kata sandi dan konfirmasi kata sandi harus sama");
-			return;
-		}
-		const users = await getData("users");
-		const sama = users.find(p => p.nama.toLowerCase() === nama.toLowerCase() &&
-			p.email.toLowerCase() === email.toLowerCase());
-		if (sama) {
-			await modalShow(gagal, "Pengguna atas nama " + nama + " telah terdaftar");
-			return;
-		}
-		const dataUnggah = {
-			nama: nama, status: status, email: email,
-			password: pw, question: hasil["pertanyaan keamanan"],
-			answer: hasil.jawaban, operator: user, sumber: idDevice
-		}
-		if (await modalShow(confirm, "Data telah siap. Unggah sekarang?")) {
-			const up = await postDataKedua("tambah_user_baru", dataUnggah);
-			await message(up);
-			resetPop();
-			pengguna.setup();
-		}
+			if (pw !== kpw) {
+				await modalShow(gagal, "Kata sandi dan konfirmasi kata sandi harus sama");
+				return;
+			}
+			const users = await getData("users");
+			const sama = users.find(p => p.nama.toLowerCase() === nama.toLowerCase() &&
+				p.email.toLowerCase() === email.toLowerCase());
+			if (sama) {
+				await modalShow(gagal, "Pengguna atas nama " + nama + " telah terdaftar");
+				return;
+			}
+			const dataUnggah = {
+				nama: nama, status: status, email: email,
+				password: pw, question: hasil["pertanyaan keamanan"],
+				answer: hasil.jawaban, operator: user, sumber: idDevice
+			}
+			if (await modalShow(confirm, "Data telah siap. Unggah sekarang?")) {
+				const up = await postDataKedua("tambah_user_baru", dataUnggah);
+				await message(up);
+				resetPop();
+				pengguna.setup();
+			}
+		} finally { ex = false; }
 	}
 
 	async tambahPengguna() {
 		this.user = await getData("users");
 		const cont = pembuatJendela();
-
-		const judul = makeButton("invisible-btn", "INPUT FORM PENGGUNA BARU", null, "Pictures/edit.png");
-		const info_input = [
+		makeButton("invisible-btn", "FORM PENGGUNA BARU", null, "Pictures/edit.png", cont);
+		this.entries = pembuatEntry(cont, [
 			["nama", "Masukkan nama", "text"],
 			["email/nomor telepon", "Masukkan email atau nomor telepon", "email"],
 			["status", "Masukkan status", "text"],
@@ -606,11 +609,9 @@ class UserMenu {
 			["konfirmasi password", "Masukkan konfirmasi password", "password"],
 			["pertanyaan keamanan", "Masukkan pertanyaan keamanan", "text"],
 			["jawaban", "Masukkan jawaban", "text"]
-		]
-		cont.appendChild(judul);
-		this.entries = pembuatEntry(cont, info_input);
-		const simpan = makeButton("btn", "Daftar", () => this.daftarPengguna());
-		cont.appendChild(simpan);
+		]);
+		makeButton("btn", "Daftar", () => this.daftarPengguna(), null, cont);
+		addListener(this.entries.jawaban, "keydown", ["Enter"], () => this.daftarPengguna());
 	}
 }
 
@@ -835,56 +836,50 @@ class Pengguna {
 		}
 	}
 	async simpanEdit() {
-		const result = Object.fromEntries(Object.entries(this.entries).map(([key, value]) => [key, value.value.trim()]));
-		if (![
-				result.nama,
-				result.alamat,
-				result.kontak,
-				result.email,
-				result.website,
-				result.jenis
-			].every(Boolean)) {
-			await modalShow(gagal, "Semua input data harus diisi");
-			return;
-		}
-		result["operator"] = user;
-		result["sumber"] = idDevice;
-
-		if (await modalShow(confirm, "Ganti data profil toko sekarang")) {
-			const upload = await postDataKedua("tambah_profil", result);
-			await message(upload);
-			resetPop();
-			pengguna.setup();
-		}
+		if (ex) return; ex = true;
+		try {
+			const result = Object.fromEntries(Object.entries(this.entries).map(([key, value]) => [key, value.value.trim()]));
+			if (![
+					result.nama,
+					result.alamat,
+					result.kontak,
+					result.email,
+					result.website,
+					result.jenis
+				].every(Boolean)) {
+				await modalShow(gagal, "Semua input data harus diisi");
+				return;
+			}
+			result["operator"] = user;
+			result["sumber"] = idDevice;
+	
+			if (await modalShow(confirm, "Ganti data profil toko sekarang")) {
+				const upload = await postDataKedua("tambah_profil", result);
+				await message(upload);
+				resetPop();
+				pengguna.setup();
+			}
+		} finally { ex = false; }
 	}
+	
 	editProfil() {
 		const wadah = pembuatJendela();
-
-		const judul = makeButton("invisible-btn", "Edit profil", null, "Pictures/edit.png");
-		const btns = [
-			["btn", "Simpan", this.simpanEdit]
-		]
-		wadah.appendChild(judul);
-		const ents = [
+		makeButton("invisible-btn", "Edit profil", null, "Pictures/edit.png", wadah);
+		this.entries = pembuatEntry(wadah, [
 			["nama", "Masukkan nama baru", "text"],
 			["alamat", "masukkan alamat baru", "text"],
 			["kontak", "Masukkan telepon / Whatsapp baru", "number"],
 			["email", "Masukkan email baru", "email"],
 			["website", "Masukkan website baru", "text"],
 			["jenis", "Masukkan jenis usaha baru", "text"]
-		]
+		]);
 		const pr = this.profil[0] ?? {};
-		this.entries = pembuatEntry(wadah, ents);
-		for (const [key, value] of Object.entries(this.entries)) {
-			value.value= pr[key] ?? "";
-		}
-
-		for (const btn of btns) {
-			const [kelas, teks, command] = btn;
-			const button = makeButton(kelas, teks, command);
-			wadah.appendChild(button);
-		}
+		for (const [k,v] of Object.entries(this.entries))
+			v.value = pr[k] ?? "";
+		makeButton("btn", "Simpan", () => this.simpanEdit(), null, wadah);
+		addListener(this.entries.jenis, "keydown", ["Enter"], this.simpanEdit);
 	}
+
 	async hapusProfil() {
 		if (await modalShow(confirm, "Anda yakin ingin menghapus profil toko?")) {
 			const hapus = await postDataKedua("clear_all_rows", {tabel: "profil"});
@@ -4098,12 +4093,10 @@ class OpsiTransaksi {
 				tabel.appendChild(tr);
 			}
 			bawah.appendChild(tabel);
-			const frameBawah = document.createElement("div");
-			frameBawah.style.display = "flex";
-			frame.appendChild(frameBawah);
+			const frameBawah = makeParent("container-horizontal", frame);
 			pembuatButtonGambar(frameBawah, [
-					["btns", "Selesaikan", () => this.selesaikanTransaksi(item.no), "Pictures/checkout.png"],
-					["btns", "Hapus", () => this.hapusTrx(item.no), "Pictures/hapus.png"]
+				["btns", "Selesaikan", () => { window.location.href = url + "transaksi"; }, "Pictures/checkout.png"],
+				["btns", "Hapus", () => this.hapusTrx(item.no), "Pictures/hapus.png"]
 			])
 		}
 	}
@@ -4119,17 +4112,7 @@ class OpsiTransaksi {
 			await message(hasil)
 		}
 	}
-
-	async selesaikanTransaksi(no) {
-		const data = this.cadang.find(p => p.no === no) ?? null;
-		if (data.status.toLowerCase() !== "belum lunas") {
-			await modalShow("Gagal", "Transaksi ini telah dilunasi");
-			return;
-		}
-		infoCadangan = data;
-		transaksi.setup();
-	}
-
+	
 	setTengah() {
 		this.tengah.innerHTML = "";
 		const btnFr = makeParent("container-horizontal");
@@ -4164,72 +4147,29 @@ class Riwayat {
 		resetJudul("Riwayat Login");
 		this.infoAdmin = await getData("info_admin");
 		this.riwayatLog = await getData("riwayat_login");
+		this.tengah.innerHTML = "";
 		
+		const atas = makeParent("container-horizontal", this.tengah);
+		this.bawahLog = makeParent("container", this.tengah);
+		
+		pembuatButtonGambar(atas, [
+			["invisible-btn", "Info device", () => this.lihatDev(), "Pictures/kelola_pendaftar.png"],
+			["invisible-btn", "Riwayat login", () => this.lihatRiwayat(), "Pictures/tentang_app.png"],
+			["invisible-btn", "Hapus riwayat", () => this.bersihkanRiwayatLogin(), "Pictures/hapus.png"]
+		]);
+		this.lihatDev();
+	}
+	
+	lihatRiwayat() {
+		let dataTampil = this.riwayatLog;
 		this.loginTampil = 0;
 		this.loginPerTampil = 100;
-		
-		const atas = makeParent("frame");
-		atas.style.paddingBottom = "20px";
-		this.bawahLogin = makeParent("container");
-		const btnFr = makeParent("container-horizontal");
-		
-		const btn = makeButton("btn", "Lainnya", () => this.tampilkanRiwayatLogin());
-		const btnHapus = makeButton("btn btn-cancel", "Hapus", () => this.bersihkanRiwayatLogin(), "Pictures/hapus.png");
-		for (const i of [btnHapus, btn]) btnFr.appendChild(i);
-		
-		this.tengah.innerHTML = "";
-		for (const item of [
-			atas,
-			this.bawahLogin,
-			btnFr
-		]) this.tengah.appendChild(item);
-		
-		const infoAktif = pembuatField(atas, "Operator aktif");
-		const p = makeParent("container");
-		p.style.display = "grid";
-		p.style.gridTemplateColumns = "repeat(3, 1fr)";
-		infoAktif.appendChild(p);
-		
-		const info = {
-			nama: user,
-			"inisial code": inisialCode
-		}
-		Object.entries(info).forEach(([key, value]) => {
-			for (const item of [
-				makeLabel(capitalize(key), "biasa"),
-				makeLabel(":", "biasa"),
-				makeLabel(value, "biasa")
-			]) p.appendChild(item);
-		});
-		
-		const dev = localStorage.getItem("id_device");
-		const idevFrame = pembuatField(atas, "Id device");
-		const pr = makeParent("container");
-		idevFrame.appendChild(pr);
-		pr.appendChild(makeLabel(dev, "jdl"));
-		for (const item of [infoAktif, idevFrame]) {
-			item.style.width = "100%";
-			item.style.height = "100%";
-		}
-		this.tampilkanRiwayatLogin();
-	}
-	
-	async bersihkanRiwayatLogin() {
-		if (await modalShow(confirm, "Bersihkan seluruh riwayat login?")) {
-			const hasil = await postDataKedua("clear_all_rows", {tabel: "riwayat_login"});
-			await message(hasil);
-			this.riwayatLogin();
-		}
-	}
-	
-	tampilkanRiwayatLogin() {
-		if (this.loginTampil >= this.riwayatLog.length) return;
-		this.bawahLogin.innerHTML = "";
-		if (!this.riwayatLog.length) this.bawahLogin.appendChild(
-			makeLabel("Riwayat login kosong", "teks")
-		);
-		const forTampil = this.riwayatLog.slice(this.loginTampil, this.loginTampil + this.loginPerTampil);
-		
+		const j = pembuatJendela();
+		const atas = makeParent("container-horizontal", j);
+		const cariLog = entryMaker("Masukkan nama atau id device...", "text", "Pictures/cari.png", atas);
+		const comboPers = pembuatCombo(atas, "- Pilih nama -", [...new Set(this.riwayatLog.map(p => p.nama))]);
+		const rentang = makeEntry("", "date", atas);
+		const bawah = makeParent("container", j);
 		const tabel = makeTable(`
 			<tr>
 				<th>Nama</th>
@@ -4241,8 +4181,45 @@ class Riwayat {
 				<th>Waktu logout</th>
 			</tr>
 		`);
-		this.bawahLogin.appendChild(tabel);
-		
+		bawah.appendChild(tabel);
+		makeButton("btn", "Lainnya", () => this.tampilkanRiwayatLogin(tabel, dataTampil), null, j);
+		this.tampilkanRiwayatLogin(tabel, dataTampil);
+		cariLog.oninput = () => {
+			this.loginTampil = 0;
+			this.loginPerTampil = 10;
+			const c = cariLog.value.trim().toLowerCase();
+			dataTampil = this.riwayatLog.filter(
+				p => 
+				p.nama.toLowerCase().includes(c) ||
+				p.device.toLowerCase().includes(c)
+			);
+			this.tampilkanRiwayatLogin(tabel, dataTampil);
+		}
+		comboPers.onchange = async () => {
+			const person = comboPers.value.toLowerCase();
+			this.loginTampil = 0;
+			this.loginPerTampil = 100;
+			dataTampil = this.riwayatLog.filter(p => p.nama.toLowerCase() === person);
+			if (dataTampil) this.tampilkanRiwayatLogin(tabel, dataTampil);
+		}
+		rentang.onchange = () => {
+			const tgl = new Date(rentang.value);
+			const waktuStr = `${tgl.getDate()}/${tgl.getMonth() + 1}/${tgl.getFullYear()}`;
+			dataTampil = [];
+			for (const item of this.riwayatLog) {
+				const waktu = item.waktu.split(" ");
+				if (waktu[0] === waktuStr) dataTampil.push(item);
+			}
+			this.loginTampil = 0;
+			this.loginPerTampil = 100;
+			this.tampilkanRiwayatLogin(tabel, dataTampil);
+		}
+	}
+	
+	tampilkanRiwayatLogin(tabel, data) {
+		if (this.loginTampil >= data.length) return;
+		const forTampil = data.slice(this.loginTampil, this.loginTampil + this.loginPerTampil);
+		tabel.tBodies[0].innerHTML = "";
 		for (const item of forTampil) {
 			const tr = document.createElement("tr");
 			tr.innerHTML = `
@@ -4259,6 +4236,32 @@ class Riwayat {
 		this.loginTampil += forTampil.length;
 	}
 	
+	async lihatDev() {
+		this.bawahLog.innerHTML = "";
+		const fr = makeParent("container", this.bawahLog);
+		doGrid(fr);
+		const id = localStorage.getItem("id_device");
+		for (const [k,v] of [
+			["Id device", id], ["Operator aktif", user], ["Inisial code", inisialCode]
+		]) { for (const i of [k, ":", v]) makeLabel(i, "teks", fr); }
+		const data = await getDt("get_last_login");
+		const ft = makeParent("container", this.bawahLog);
+		const tabel = pembuatTabel(ft,
+			["Nama", "Login terakhir", "Logout terakhir", "Device"],
+			["nama", "login", "logout", "device"],
+			data
+		);
+			
+	}
+
+	async bersihkanRiwayatLogin() {
+		if (await modalShow(confirm, "Bersihkan seluruh riwayat login?")) {
+			const hasil = await postDataKedua("clear_all_rows", {tabel: "riwayat_login"});
+			await message(hasil);
+			this.riwayatLogin();
+		}
+	}
+
 	lihatDetailKeuangan(item) {
 		makeWindow();
 		const prt = document.querySelector(".lc-content");

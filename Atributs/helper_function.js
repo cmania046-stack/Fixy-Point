@@ -105,6 +105,19 @@ const html = (strs, ...vals) =>
 //map
 
 //helper functions
+function doGrid(fr) {
+	fr.style.display = "grid";
+	fr.style.gridTemplateColumns = "repeat(3,1fr)";
+}
+
+function addListener(obj, key, btn, func) {
+	obj.addEventListener(key, (e) => {
+		if (btn.includes(e.key)) {
+			func();
+		}
+	});
+}
+
 async function uploadFile(endpoint, file) {
 	showPopupLoading();
 	try {
@@ -648,6 +661,7 @@ function makeEntry(placeholder, tipe, parent=null) {
 	ent.type = tipe;
 	ent.className = "entry";
 	ent.placeholder = placeholder;
+	if (tipe.toLowerCase() === "date") ent.value = new Date().toISOString().split("T")[0];
 	if (parent) parent.appendChild(ent);
 	return ent;
 }
