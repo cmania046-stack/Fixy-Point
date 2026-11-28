@@ -874,6 +874,16 @@ app.post("/periksa_prediksi", async (req,res) => {
 		sumber.push(last + 1);
 		cari.push(hasil);
 	}
+	const now = new Date();
+	const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+	if (sumber.includes(lastDay)) {
+		const idx = sumber.indexOf(lastDay);
+		const sisa = sumber.length - (idx + 1);
+		for (let i=0;i<sisa;i++) {
+			const angka = sumber[idx+1+i];
+			sumber[idx+1+i] = angka - lastDay;
+		}
+	}
 	res.status(200).json([sumber, cari]);
 });
 
@@ -1563,6 +1573,10 @@ app.post("/tambahkan_second_keranjang", async (req, res) => {
 	} finally { await catatLog(req.path, res.statusCode); }
 });
 
+let penyimpananInfo = {};
+app.get("/get_notif_penjualan", async (req,res) => {
+	res.status(200).json(penyimpananInfo);
+});
 
 app.post("/penjualan_campuran", async (req,res) => {
 	const client = await pool.connect();
@@ -1587,7 +1601,8 @@ app.post("/penjualan_campuran", async (req,res) => {
 		const operator = data.operator ?? "";
 		const waktu = data.waktu ?? await nowStr();
 		const pembeli = data.pembeli ?? "";
-
+		
+		let teksPesan = "";
 		const { rows: [pjk] } = await client.query("SELECT persen, aktif FROM pajak");
 		let pjkAktif = 0;
 		let pjkPersen = 0;
@@ -1639,6 +1654,7 @@ app.post("/penjualan_campuran", async (req,res) => {
 			} else { harga = subtotal; }
 			masuk += harga;
 			untung += k.laba ?? 0;
+			teksPesan += `• ${k.nama}: ${k.qty_asli} unit\n`;
 		}
 		if (bayar < total) {
 			await client.query("ROLLBACK");
@@ -1775,6 +1791,17 @@ app.post("/penjualan_campuran", async (req,res) => {
 			keuangan.voucher = (keuangan.voucher ?? 0) + potonganVoucher;
 			simpanSemua(fileKeuangan, keuangan);
 		} catch (e) { console.error("Gagal menulis Keuangan.json:", e); }
+		
+		const { rows: [profil] } = await client.query("SELECT nama FROM profil LIMIT 1");
+		penyimpananInfo["pesan"] =
+			`TRANSAKSI BARU\n
+			Toko: ${profil?.nama ?? "-"}
+			Kasir: ${operator}
+			Total: ${prettyMoney(total)}
+			
+			${teksPesan.trimEnd()}`;
+			
+		penyimpananInfo["id"] = (penyimpananInfo.id ?? 0) + 1;
 		return res.status(200).json({
 			stat:"Berhasil",
 			pesan: "Transaksi berhasil. Cetak struk penjualan?"

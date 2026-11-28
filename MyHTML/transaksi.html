@@ -1536,6 +1536,27 @@ class SetupKiri {
 	}
 }
 
+const idInfo = [];
+async function notifikasiPenjualan() {
+	const info = await getDt("get_notif_penjualan");
+	if (idInfo.includes(info.id)) return;
+	idInfo.push(info.id);
+	if (kosong(info)) return;
+	const j = makeParent("dropdown-overlay");
+	j.style.background = `linear-gradient(150deg, ${primary}, #263958)`;
+	j.style.right = "20px";
+	j.style.top = "20px";
+	j.style.display = "flex";
+	j.style.flexDirection = "column";
+	document.body.appendChild(j);
+	const label = makeLabel(info.pesan, "biasa", j);
+	label.style.color = "white";
+	
+	setTimeout(() => { document.querySelectorAll(".dropdown-overlay").forEach(item => { item.style.display = "none"; })}, 10000);
+}
+
+setInterval(notifikasiPenjualan, 1000);
+
 const trx = new Transaksi();
 const login = new Login();
 const kalk = new Kalkulator();
@@ -1549,6 +1570,7 @@ window.onload = async function() {
 	//trx.setup();
 	login.setup();
 };
+
 </script>
 </div>
 </body>
