@@ -105,6 +105,28 @@ const html = (strs, ...vals) =>
 //map
 
 //helper functions
+const idInfo = [];
+async function notifikasiPenjualan() {
+	const info = await getDt("get_notif_penjualan");
+	if (idInfo.includes(info.id)) return;
+	idInfo.push(info.id);
+	if (kosong(info)) return;
+	const j = makeParent("dropdown-overlay");
+	j.style.background = primary;
+	j.style.right = "20px";
+	j.style.top = "20px";
+	j.style.padding = "20px";
+	j.style.display = "flex";
+	j.style.flexDirection = "column";
+	document.body.appendChild(j);
+	const label = makeLabel(info.pesan, "biasa", j);
+	label.style.color = "white";
+	label.style.fontFamily = "monospace";
+	setTimeout(() => { document.querySelectorAll(".dropdown-overlay").forEach(item => { item.style.display = "none"; })}, 10000);
+}
+
+setInterval(notifikasiPenjualan, 1000);
+
 function doGrid(fr) {
 	fr.style.display = "grid";
 	fr.style.gridTemplateColumns = "repeat(3,1fr)";

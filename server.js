@@ -5274,6 +5274,26 @@ function getLANIP() {
   return '127.0.0.1';
 }
 
+async function cekStokProduk() {
+	const { rows: produk } = await pool.query(`
+		SELECT nama, jumlah, satuan_jual FROM produk WHERE
+		jumlah <= stok_minimum OR jumlah <= $1`, [0]
+	);
+	if (kosong(produk)) return;
+	let teks = "";
+	for (const item of produk) {
+		teks += item.jumlah <= 0 ?
+			`• ${item.nama} telah habis.\n` :
+			`• ${item.nama} tersisa ${item.jumlah} ${item.satuan_jual}.\n`
+		;
+	}
+	penyimpananInfo.id = (penyimpananInfo.id ?? 0) + 1;
+	penyimpananInfo.pesan = `INFORMASI STOK PRODUK KILAT:\n
+		${teks.trimEnd()}`;	
+}
+
+setInterval(cekStokProduk, 120000);
+
 app.listen(3000, "0.0.0.0", async () => {
 	await init.setupDatabase();
 	await init.createTables();
